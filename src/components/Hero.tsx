@@ -147,8 +147,9 @@ export default function Hero() {
                   ...heroStageSx(1),
                 }}
               >
-                Run the same permission tests before and after a change, using isolated instances
-                of supported apps or your native policy engine. See what became allowed or denied.
+                See what your change does to access. Counterbranch runs the same permission checks
+                against your before-and-after authorization logic and shows what became allowed or
+                denied.
               </Typography>
             </Stack>
             <Stack spacing={2.5} sx={{ alignItems: 'flex-start', width: { xs: '100%', sm: 'auto' } }}>

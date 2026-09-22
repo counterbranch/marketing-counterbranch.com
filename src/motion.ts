@@ -154,6 +154,49 @@ export const stampIn = keyframes`
 `
 
 /**
+ * A line arriving from just to its left, as if written into the window it
+ * sits in. Ends on the element's own styles, so removing the animation after
+ * it finishes changes nothing.
+ */
+export const slideIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+`
+
+type Keyframes = typeof slideIn
+
+/**
+ * Where a scripted run is.
+ * idle: finished and still. What the server renders and what every run
+ *   settles back to.
+ * armed: every part that arrives during a run is hidden, ready to play. Only
+ *   ever set while those parts are off screen, so nobody sees them empty out.
+ * playing: each part arrives on its own delay.
+ */
+export type RunPhase = 'idle' | 'armed' | 'playing'
+
+/**
+ * A part of a scripted run arriving `delay` ms into it. Hidden while armed;
+ * during a run, `both` fill keeps it hidden until its delay. With reduced
+ * motion it is at rest in every phase.
+ */
+export function arrivalSx(phase: RunPhase, frames: Keyframes, delay: number) {
+  return {
+    ...(phase === 'armed' && { opacity: 0 }),
+    ...(phase === 'playing' && {
+      animation: `${frames} ${motionDuration.base}ms ${motionEasing.decel} ${delay}ms both`,
+    }),
+    [reduceMotion]: { animation: 'none', opacity: 1, transform: 'none' },
+  }
+}
+
+/**
  * Staged entrance for hero content. `index` selects the stagger delay
  * (headline = 0, description = 1, buttons = 2, footnote = 3).
  * Animates opacity + transform only.
