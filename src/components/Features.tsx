@@ -31,7 +31,7 @@ export default function Features() {
   const { ref, inView } = useInView<HTMLDivElement>()
 
   return (
-    <Section>
+    <Section id="features">
       <Container ref={ref} maxWidth="md" sx={revealSx(inView)}>
         <Typography
           variant="h4"
@@ -44,7 +44,7 @@ export default function Features() {
           {features.map(({ icon: Icon, title, description }) => (
             <Grid key={title} size={{ xs: 12, md: 4 }}>
               <Stack spacing={1.5} sx={{ alignItems: 'flex-start' }}>
-                <Icon color="primary" fontSize="large" />
+                <Icon color="primary" fontSize="large" aria-hidden />
                 <Typography variant="h6" component="h3" sx={{ fontWeight: 700 }}>
                   {title}
                 </Typography>

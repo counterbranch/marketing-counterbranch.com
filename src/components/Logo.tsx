@@ -23,6 +23,7 @@ export default function Logo({ size = 28 }: LogoProps) {
         }}
       >
         <AccountTreeOutlinedIcon
+          aria-hidden
           sx={{ color: 'primary.contrastText', fontSize: size * 0.6 }}
         />
       </Box>

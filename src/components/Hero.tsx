@@ -5,6 +5,7 @@ import Button from '@mui/material/Button'
 import Paper from '@mui/material/Paper'
 import Section from './Section.tsx'
 import { heroStageSx } from '../motion.ts'
+import { links } from '../links.ts'
 
 export default function Hero() {
   return (
@@ -14,7 +15,11 @@ export default function Hero() {
           <Typography
             variant="h2"
             component="h1"
-            sx={{ fontWeight: 700, ...heroStageSx(0) }}
+            sx={{
+              fontWeight: 700,
+              fontSize: { xs: '2.25rem', sm: '3rem', md: '3.75rem' },
+              ...heroStageSx(0),
+            }}
           >
             One-line value proposition goes here.
           </Typography>
@@ -25,11 +30,27 @@ export default function Hero() {
           >
             Short supporting sentence about the product goes here as placeholder copy.
           </Typography>
-          <Stack direction="row" spacing={2} sx={heroStageSx(2)}>
-            <Button variant="contained" size="large">
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={2}
+            sx={{ width: { xs: '100%', sm: 'auto' }, ...heroStageSx(2) }}
+          >
+            <Button
+              variant="contained"
+              size="large"
+              component="a"
+              href={links.getStarted}
+              sx={{ width: { xs: '100%', sm: 'auto' } }}
+            >
               Get started
             </Button>
-            <Button variant="text" size="large">
+            <Button
+              variant="text"
+              size="large"
+              component="a"
+              href={links.howItWorks}
+              sx={{ width: { xs: '100%', sm: 'auto' } }}
+            >
               See how it works
             </Button>
           </Stack>

@@ -5,6 +5,7 @@ import Button from '@mui/material/Button'
 import Section from './Section.tsx'
 import { useInView } from '../hooks/useInView.ts'
 import { revealSx } from '../motion.ts'
+import { links } from '../links.ts'
 
 export default function Cta() {
   const { ref, inView } = useInView<HTMLDivElement>()
@@ -19,7 +20,7 @@ export default function Cta() {
           <Typography variant="body1" color="text.secondary">
             One short line inviting the visitor to take the next step.
           </Typography>
-          <Button variant="contained" size="large">
+          <Button variant="contained" size="large" component="a" href={links.getStarted}>
             Get started
           </Button>
         </Stack>
