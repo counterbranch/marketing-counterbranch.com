@@ -20,7 +20,7 @@ export default function Footer() {
       <Divider />
       <Container maxWidth="md">
         <Stack spacing={2} sx={{ alignItems: 'center', textAlign: 'center', py: 6 }}>
-          <Logo size={20} />
+          <Logo size={24} />
           <Typography variant="body2" color="text.secondary">
             © 2026 Counterbranch
           </Typography>

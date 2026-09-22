@@ -1,35 +1,21 @@
 import Box from '@mui/material/Box'
-import Stack from '@mui/material/Stack'
-import Typography from '@mui/material/Typography'
-import AccountTreeOutlinedIcon from '@mui/icons-material/AccountTreeOutlined'
+import logo from '../assets/logo.webp'
 
 interface LogoProps {
+  /** Rendered height in px; width follows the image's 2000×406 aspect. */
   size?: number
 }
 
-export default function Logo({ size = 28 }: LogoProps) {
+// Same asset for light and dark until a dark-scheme variant is supplied.
+export default function Logo({ size = 32 }: LogoProps) {
   return (
-    <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-      <Box
-        sx={{
-          width: size,
-          height: size,
-          borderRadius: 1,
-          bgcolor: 'primary.main',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0,
-        }}
-      >
-        <AccountTreeOutlinedIcon
-          aria-hidden
-          sx={{ color: 'primary.contrastText', fontSize: size * 0.6 }}
-        />
-      </Box>
-      <Typography variant="h6" component="span" sx={{ fontWeight: 700 }}>
-        Counterbranch
-      </Typography>
-    </Stack>
+    <Box
+      component="img"
+      src={logo}
+      alt="Counterbranch"
+      width={Math.round(size * (2000 / 406))}
+      height={size}
+      sx={{ display: 'block', height: size, width: 'auto', flexShrink: 0 }}
+    />
   )
 }
