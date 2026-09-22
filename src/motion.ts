@@ -14,13 +14,13 @@ export const motionDuration = {
   /** Deliberately authored focal entrance: hero stages. */
   entrance: 420,
   /** One roll of the headline's word reel. */
-  reel: 560,
+  reel: 420,
   /**
    * The reel window resizing to the next word. Shorter than the roll so a
    * growing window is at full width before the word lands, and a shrinking
    * one waits until the word has landed before closing in.
    */
-  reelWindow: 300,
+  reelWindow: 220,
   /** One full breath of a live status marker: dim and back. */
   pulse: 1600,
 } as const
@@ -31,7 +31,7 @@ export const motionEasing = {
 } as const
 
 /** How long each word rests in the headline reel before it rolls, in ms. */
-export const reelDwell = 2400
+export const reelDwell = 1500
 
 /** Delay between successive hero entrance stages, in ms. */
 export const motionStagger = 80
@@ -66,6 +66,35 @@ export const statusPulse = keyframes`
   }
   50% {
     opacity: 0.35;
+  }
+`
+
+/**
+ * A verdict landing: from just under its size and unseen to its resting
+ * state. Ends on the element's own styles, so removing the animation after it
+ * finishes changes nothing on screen.
+ */
+export const stampIn = keyframes`
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+`
+
+/**
+ * A band drawn open from its top edge down. Clips rather than moves, so the
+ * band holds its place in the layout the whole time.
+ */
+export const wipeDown = keyframes`
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0);
   }
 `
 
