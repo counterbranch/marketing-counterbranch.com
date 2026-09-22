@@ -155,8 +155,17 @@ export default function SlotWord({
 
   const widest = measured ? Math.max(...metrics.words) + 2 * metrics.pad : 0
   const current = measured ? metrics.words[index % count] + 2 * metrics.pad : 0
-  const glide = (property: string, easing: string) =>
-    animated ? `${property} ${motionDuration.reel}ms ${easing}` : 'none'
+  const previous = measured ? metrics.words[(index + count - 1) % count] + 2 * metrics.pad : 0
+  // The window never clips an arriving word: when the next word is wider,
+  // the window opens first and the word rolls into a space already made;
+  // when it is narrower, the window waits for the word to land, then closes
+  // in around it.
+  const windowDelay = current >= previous ? 0 : motionDuration.reel - motionDuration.reelWindow
+  const roll = animated ? `transform ${motionDuration.reel}ms ${motionEasing.decel}` : 'none'
+  const resize = (property: string) =>
+    animated
+      ? `${property} ${motionDuration.reelWindow}ms ${motionEasing.decel} ${windowDelay}ms`
+      : 'none'
 
   return (
     <Box
@@ -226,7 +235,7 @@ export default function SlotWord({
                 left: 0,
                 width: `${widest}px`,
                 clipPath: `inset(0 ${widest - current}px 0 0)`,
-                transition: glide('clip-path', motionEasing.decel),
+                transition: resize('clip-path'),
                 [reduceMotion]: { transition: 'none' },
               }
             : { px: `${PAD}em` },
@@ -241,7 +250,7 @@ export default function SlotWord({
               top: 0,
               left: `${metrics.pad}px`,
               transform: `translateY(${-index * ROW}em)`,
-              transition: glide('transform', motionEasing.reelSettle),
+              transition: roll,
               [reduceMotion]: { transition: 'none' },
             },
           ]}
@@ -273,7 +282,7 @@ export default function SlotWord({
               top: 0,
               left: 0,
               transform: `translateX(${current}px)`,
-              transition: glide('transform', motionEasing.decel),
+              transition: resize('transform'),
               [reduceMotion]: { transition: 'none' },
             },
           ]}

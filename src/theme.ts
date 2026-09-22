@@ -117,9 +117,10 @@ const theme = createTheme({
           inkSubtle: alpha(heroInk, 0.72),
           line: alpha(heroInk, 0.55),
           hover: alpha(heroInk, 0.08),
-          // The reel window is the secondary pink in both schemes.
-          plate: brandPink,
-          plateInk: brandPinkInk,
+          // The reel window is ink, like the filled action: black with white
+          // text here, inverted on the dark hero.
+          plate: heroInk,
+          plateInk: '#FFFFFF',
           action: heroInk,
           actionInk: '#FFFFFF',
           actionHover: '#242424',
@@ -149,8 +150,8 @@ const theme = createTheme({
           secondary: alpha('#FFFFFF', 0.72),
         },
         divider: alpha('#FFFFFF', 0.12),
-        // The hero goes dark with the rest of the page. Its only colour is
-        // the pink reel window; the wash is a neutral lift, not a tint.
+        // The hero goes dark with the rest of the page; the wash is a neutral
+        // lift, not a tint.
         hero: {
           background: darkBase,
           // A soft lift behind the headline's corner of the screen.
@@ -160,8 +161,8 @@ const theme = createTheme({
           inkSubtle: alpha(heroInkDark, 0.66),
           line: alpha(heroInkDark, 0.5),
           hover: alpha(heroInkDark, 0.08),
-          plate: brandPink,
-          plateInk: brandPinkInk,
+          plate: '#FFFFFF',
+          plateInk: '#000000',
           action: '#FFFFFF',
           actionInk: '#000000',
           actionHover: '#DCDCDC',

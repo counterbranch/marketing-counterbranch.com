@@ -15,17 +15,19 @@ export const motionDuration = {
   entrance: 420,
   /** One roll of the headline's word reel. */
   reel: 560,
+  /**
+   * The reel window resizing to the next word. Shorter than the roll so a
+   * growing window is at full width before the word lands, and a shrinking
+   * one waits until the word has landed before closing in.
+   */
+  reelWindow: 300,
+  /** One full breath of a live status marker: dim and back. */
+  pulse: 1600,
 } as const
 
 export const motionEasing = {
   /** Confident, natural deceleration for arrivals. */
   decel: 'cubic-bezier(0.16, 1, 0.3, 1)',
-  /**
-   * A small overshoot and settle, like a reel clicking into place. The
-   * overshoot shows a sliver of the next word for a moment, which is the
-   * slot-machine read; it is kept small enough not to feel like a bounce.
-   */
-  reelSettle: 'cubic-bezier(0.3, 1.3, 0.5, 1)',
 } as const
 
 /** How long each word rests in the headline reel before it rolls, in ms. */
@@ -50,6 +52,20 @@ export const settleIn = keyframes`
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+`
+
+/**
+ * A status marker breathing while work is in progress. Starts and ends fully
+ * on, so it rests at full strength whenever the animation is removed.
+ */
+export const statusPulse = keyframes`
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
   }
 `
 

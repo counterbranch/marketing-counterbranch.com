@@ -4,7 +4,7 @@ export const links = {
   pricing: '/pricing',
   login: '/login',
   getStarted: '/signup',
-  howItWorks: '#features',
+  howItWorks: '#how-it-works',
   github: 'https://github.com/counterbranch',
   contact: 'mailto:hello@counterbranch.com',
   home: '/',
