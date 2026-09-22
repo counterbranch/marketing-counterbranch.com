@@ -23,6 +23,13 @@ export const motionDuration = {
   reelWindow: 240,
   /** One full breath of a live status marker: dim and back. */
   pulse: 1600,
+  /**
+   * A signal crossing a connector in a diagram and fading where it lands.
+   * The crossing takes the first five sixths; see `signalTravel`.
+   */
+  signal: 720,
+  /** The same over a shorter connector: crossing 500 ms, fading 100 ms. */
+  signalShort: 600,
 } as const
 
 export const motionEasing = {
@@ -95,6 +102,30 @@ export const wipeDown = keyframes`
   }
   to {
     clip-path: inset(0);
+  }
+`
+
+/**
+ * A signal travelling the element's `offset-path`: it appears at the start,
+ * crosses in the first five sixths of the run, then fades out at the far
+ * end. It starts and ends unseen, so with `both` fill it is hidden before its
+ * delay and after it lands.
+ */
+export const signalTravel = keyframes`
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  4% {
+    opacity: 1;
+  }
+  83.333% {
+    offset-distance: 100%;
+    opacity: 1;
+  }
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
   }
 `
 
