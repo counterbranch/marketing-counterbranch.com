@@ -2,73 +2,45 @@ import Box from '@mui/material/Box'
 import logoLight from '../assets/logo-light.webp'
 import logoDark from '../assets/logo-dark.webp'
 
+// Width-to-height ratios of the two lockups (960×195 and 960×193).
+const LIGHT_ASPECT = 960 / 195
+const DARK_ASPECT = 960 / 193
+
 interface LogoProps {
-  /** Rendered height in px; width follows the image's ~2000×420 aspect. */
+  /** Rendered height in px; width follows the active lockup's aspect. */
   size?: number
-  /**
-   * Pin the mark instead of letting it follow the colour scheme. Needed
-   * wherever a surface looks the same in both schemes — the header sits on
-   * the cyan hero, so it always wants the light-background mark, whose own
-   * cyan band matches the hero exactly.
-   */
-  variant?: 'auto' | 'light' | 'dark'
 }
 
-// Both marks render at all times; CSS toggles which is visible based on the
-// `data-mui-color-scheme` attribute the theme manages. This swaps instantly
-// with the no-flash init script in index.html, with no JS/hook involved.
-export default function Logo({ size = 32, variant = 'auto' }: LogoProps) {
-  const width = Math.round(size * (2000 / 406))
-
-  if (variant !== 'auto') {
-    return (
-      <Box
-        component="img"
-        src={variant === 'dark' ? logoDark : logoLight}
-        alt="Counterbranch"
-        width={width}
-        height={size}
-        sx={{ display: 'block', height: size, width: 'auto', flexShrink: 0 }}
-      />
-    )
-  }
-
+/**
+ * The Counterbranch lockup for the active colour scheme: the cyan band on
+ * light surfaces, the pink band with the white shield on dark ones.
+ *
+ * Drawn as a CSS background keyed to the scheme attribute rather than as two
+ * <img> elements. The browser only downloads a background that actually
+ * applies, so each visit fetches one lockup instead of both; the swap is
+ * instant with the toggle; and nothing is lazy-loaded, since the logo sits
+ * above the fold.
+ */
+export default function Logo({ size = 32 }: LogoProps) {
   return (
-    <Box sx={{ position: 'relative', display: 'block', height: size, width, flexShrink: 0 }}>
-      <Box
-        component="img"
-        src={logoLight}
-        alt="Counterbranch"
-        width={width}
-        height={size}
-        sx={{
-          display: 'block',
-          height: size,
-          width: 'auto',
-          '[data-mui-color-scheme="dark"] &': {
-            display: 'none',
-          },
-        }}
-      />
-      <Box
-        component="img"
-        src={logoDark}
-        alt=""
-        width={width}
-        height={size}
-        aria-hidden
-        sx={{
-          display: 'none',
-          height: size,
-          width: 'auto',
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          '[data-mui-color-scheme="dark"] &': {
-            display: 'block',
-          },
-        }}
-      />
-    </Box>
+    <Box
+      component="span"
+      role="img"
+      aria-label="Counterbranch"
+      sx={{
+        display: 'block',
+        flexShrink: 0,
+        height: size,
+        width: Math.round(size * LIGHT_ASPECT),
+        backgroundImage: `url(${logoLight})`,
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'left center',
+        backgroundSize: 'contain',
+        '[data-mui-color-scheme="dark"] &': {
+          width: Math.round(size * DARK_ASPECT),
+          backgroundImage: `url(${logoDark})`,
+        },
+      }}
+    />
   )
 }

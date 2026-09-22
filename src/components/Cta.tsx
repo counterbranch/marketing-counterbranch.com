@@ -13,13 +13,30 @@ export default function Cta() {
   return (
     <Section tone="contrast">
       <Container ref={ref} maxWidth="md" sx={revealSx(inView)}>
-        <Stack spacing={3} sx={{ alignItems: 'center', textAlign: 'center' }}>
-          <Typography variant="h4" component="h2" sx={{ fontWeight: 800 }}>
-            Placeholder closing call-to-action.
-          </Typography>
-          <Typography variant="body1" sx={{ color: 'inherit', opacity: 0.8 }}>
-            One short line inviting the visitor to take the next step.
-          </Typography>
+        {/* Heading and line are one thought, so they sit tight; the action
+            stands apart. The heading is the page's closing statement, one
+            clear step below the hero headline rather than card-title size. */}
+        <Stack spacing={{ xs: 4, md: 5 }} sx={{ alignItems: 'center', textAlign: 'center' }}>
+          <Stack spacing={2} sx={{ alignItems: 'center' }}>
+            <Typography
+              variant="h2"
+              sx={{ fontSize: 'clamp(2rem, 1.3rem + 2.6vw, 3.25rem)' }}
+            >
+              Placeholder closing call-to-action.
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{
+                maxWidth: 520,
+                fontSize: { xs: '1rem', md: '1.125rem' },
+                color: 'inherit',
+                opacity: 0.8,
+                textWrap: 'pretty',
+              }}
+            >
+              One short line inviting the visitor to take the next step.
+            </Typography>
+          </Stack>
           <Button
             variant="contained"
             color="inherit"

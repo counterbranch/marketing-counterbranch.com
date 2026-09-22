@@ -12,7 +12,7 @@ import KitchenSink from './pages/KitchenSink.tsx'
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider theme={theme}>
-      <CssBaseline />
+      <CssBaseline enableColorScheme />
       <KitchenSink />
     </ThemeProvider>
   </StrictMode>,

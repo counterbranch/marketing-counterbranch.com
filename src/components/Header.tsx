@@ -17,17 +17,12 @@ import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined'
 import Logo from './Logo.tsx'
 import ColorModeToggle from './ColorModeToggle.tsx'
 import { links } from '../links.ts'
-
-// The header sits over the full-screen cyan hero, which looks the same in
-// both colour schemes, so its controls use fixed dark values rather than
-// scheme tokens. It scrolls away with the page and never appears over
-// anything else.
-const HEADER_INK = '#0B1220'
+import { displayFont } from '../theme.ts'
 
 // The drawer mirrors the toolbar nav, so its labels are set the same way the
 // buttons are: display face, caps, open tracking.
 const drawerLabelSx = {
-  fontFamily: "'Oswald Variable', 'Anton', sans-serif",
+  fontFamily: displayFont,
   fontWeight: 600,
   textTransform: 'uppercase',
   letterSpacing: '0.12em',
@@ -43,25 +38,27 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
+    // The header overlays the hero and scrolls away with it, so it takes the
+    // hero's tokens: dark ink on the cyan flood, light ink on the dark hero.
     <AppBar
       position="absolute"
       color="transparent"
       elevation={0}
-      sx={{
+      sx={(theme) => ({
         top: 0,
-        color: HEADER_INK,
+        color: theme.vars.palette.hero.ink,
         backgroundImage: 'none',
-        // The theme's focus rings are tuned for the page background; on cyan
-        // only a dark ring reads. Scoped to the unfilled controls so the
-        // filled button keeps its own inset ring.
+        // The theme's focus rings are tuned for the page background; over
+        // the hero only its own ink reads. Scoped to the unfilled controls so
+        // the filled button keeps its inset ring.
         '& .MuiButton-text, & .MuiIconButton-root': {
-          color: HEADER_INK,
+          color: theme.vars.palette.hero.ink,
           '&.Mui-focusVisible, &:focus-visible': {
-            outline: `2px solid ${HEADER_INK}`,
+            outline: `2px solid ${theme.vars.palette.hero.ink}`,
             outlineOffset: 2,
           },
         },
-      }}
+      })}
     >
       <Container maxWidth="md">
         <Toolbar disableGutters sx={{ gap: 1 }}>
@@ -72,7 +69,7 @@ export default function Header() {
             color="inherit"
             sx={{ display: 'inline-flex' }}
           >
-            <Logo variant="light" />
+            <Logo />
           </Link>
           <Box sx={{ flexGrow: 1 }} />
           <Box component="nav" aria-label="Primary" sx={{ display: { xs: 'none', md: 'block' } }}>
@@ -90,18 +87,18 @@ export default function Header() {
             color="inherit"
             component="a"
             href={links.getStarted}
-            sx={{
+            sx={(theme) => ({
               ml: { xs: 0, md: 1 },
               display: { xs: 'none', sm: 'inline-flex' },
-              backgroundColor: HEADER_INK,
-              color: '#FFFFFF',
-              '&:hover': { backgroundColor: '#242424' },
+              backgroundColor: theme.vars.palette.hero.action,
+              color: theme.vars.palette.hero.actionInk,
+              '&:hover': { backgroundColor: theme.vars.palette.hero.actionHover },
               '&.Mui-focusVisible, &:focus-visible': {
-                outline: '2px solid #FFFFFF',
+                outline: `2px solid ${theme.vars.palette.hero.actionInk}`,
                 outlineOffset: -4,
-                boxShadow: `0 0 0 2px ${HEADER_INK}`,
+                boxShadow: `0 0 0 2px ${theme.vars.palette.hero.ink}`,
               },
-            }}
+            })}
           >
             Get started
           </Button>

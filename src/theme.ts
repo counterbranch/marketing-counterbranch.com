@@ -16,7 +16,7 @@ import { motionDuration, motionEasing } from './motion.ts'
 // Heading face. Swap this single constant to change the display type across
 // the whole site: 'Oswald Variable' (a weight range) or 'Anton' (one very
 // heavy weight). Both are imported in the entry files.
-const displayFont = "'Oswald Variable', 'Anton', sans-serif"
+export const displayFont = "'Oswald Variable', 'Anton', sans-serif"
 const bodyFont = "'Inter Variable', sans-serif"
 
 const brandNavy = '#14203C'
@@ -27,6 +27,51 @@ const brandNavy = '#14203C'
 // step, so the step can stay this quiet.
 const darkBase = '#0A0A0C'
 const darkSurface = '#1A1A1E'
+
+const heroInk = '#0B1220'
+const heroInkDark = '#F7F7F8'
+
+// Secondary pink and the near-black that reads on it (5.5:1). White on this
+// pink is only 3.8:1, so it is never the pairing.
+const brandPink = '#FF0074'
+const brandPinkInk = '#14061A'
+
+/**
+ * The full-screen hero and the header that overlays it. A flood of brand cyan
+ * with dark ink in the light scheme; near-black with light ink in the dark
+ * one. Both components read these tokens, so they switch together through CSS
+ * variables with no JavaScript mode checks and no flash.
+ */
+export interface HeroPalette {
+  background: string
+  /** A gradient layered over the background for depth. */
+  wash: string
+  ink: string
+  /** Supporting copy. */
+  inkMuted: string
+  /** Footnotes and the scroll cue. */
+  inkSubtle: string
+  /** Outlined control borders. */
+  line: string
+  /** Outlined control hover fill. */
+  hover: string
+  /** The headline reel's window, and text selection inside the hero. */
+  plate: string
+  plateInk: string
+  /** The filled primary action. */
+  action: string
+  actionInk: string
+  actionHover: string
+}
+
+declare module '@mui/material/styles' {
+  interface Palette {
+    hero: HeroPalette
+  }
+  interface PaletteOptions {
+    hero?: HeroPalette
+  }
+}
 
 const theme = createTheme({
   cssVariables: {
@@ -45,12 +90,12 @@ const theme = createTheme({
           contrastText: '#0B1220',
         },
         secondary: {
-          main: '#FF0074',
+          main: brandPink,
           // Like brand cyan, full-strength pink is a border/accent colour:
           // it reads 3.7:1 as text on the light background. `dark` is the
           // readable member of the family (5.8:1) used for labels here.
           dark: '#C4005A',
-          contrastText: '#14061A',
+          contrastText: brandPinkInk,
         },
         background: {
           default: '#F6FAFB',
@@ -61,6 +106,23 @@ const theme = createTheme({
           secondary: alpha(brandNavy, 0.7),
         },
         divider: alpha(brandNavy, 0.12),
+        // Ink contrast on the cyan flood: 12.4:1 for ink, 7.8:1 muted,
+        // 6.2:1 subtle, 3.7:1 for outlined borders.
+        hero: {
+          background: '#00E8FC',
+          wash: `radial-gradient(90% 70% at 50% 120%, ${alpha(heroInk, 0.22)} 0%, transparent 60%)`,
+          ink: heroInk,
+          inkMuted: alpha(heroInk, 0.8),
+          inkSubtle: alpha(heroInk, 0.72),
+          line: alpha(heroInk, 0.55),
+          hover: alpha(heroInk, 0.08),
+          // The reel window is the secondary pink in both schemes.
+          plate: brandPink,
+          plateInk: brandPinkInk,
+          action: heroInk,
+          actionInk: '#FFFFFF',
+          actionHover: '#242424',
+        },
       },
     },
     dark: {
@@ -73,9 +135,9 @@ const theme = createTheme({
           contrastText: '#0B1220',
         },
         secondary: {
-          main: '#FF0074',
+          main: brandPink,
           dark: '#C4005A',
-          contrastText: '#14061A',
+          contrastText: brandPinkInk,
         },
         background: {
           default: darkBase,
@@ -86,6 +148,22 @@ const theme = createTheme({
           secondary: alpha('#FFFFFF', 0.72),
         },
         divider: alpha('#FFFFFF', 0.12),
+        // The hero goes dark with the rest of the page. Its only colour is
+        // the pink reel window; the wash is a neutral lift, not a tint.
+        hero: {
+          background: darkBase,
+          wash: `radial-gradient(70% 60% at 50% 0%, ${alpha('#FFFFFF', 0.05)} 0%, transparent 70%)`,
+          ink: heroInkDark,
+          inkMuted: alpha(heroInkDark, 0.78),
+          inkSubtle: alpha(heroInkDark, 0.66),
+          line: alpha(heroInkDark, 0.5),
+          hover: alpha(heroInkDark, 0.08),
+          plate: brandPink,
+          plateInk: brandPinkInk,
+          action: '#FFFFFF',
+          actionInk: '#000000',
+          actionHover: '#DCDCDC',
+        },
       },
     },
   },
@@ -94,10 +172,12 @@ const theme = createTheme({
     // Headings are a condensed poster gothic set in caps with open tracking:
     // narrow letterforms let a long line stay large, and the wide spacing
     // stops the caps from packing into a solid block. Body copy stays Inter.
+    // Balanced wrapping keeps multi-line headings from ending on a stub.
     h1: {
       fontFamily: displayFont,
       fontWeight: 700,
       textTransform: 'uppercase',
+      textWrap: 'balance',
       letterSpacing: '0.07em',
       lineHeight: 0.98,
     },
@@ -105,6 +185,7 @@ const theme = createTheme({
       fontFamily: displayFont,
       fontWeight: 700,
       textTransform: 'uppercase',
+      textWrap: 'balance',
       letterSpacing: '0.07em',
       lineHeight: 1,
     },
@@ -112,6 +193,7 @@ const theme = createTheme({
       fontFamily: displayFont,
       fontWeight: 700,
       textTransform: 'uppercase',
+      textWrap: 'balance',
       letterSpacing: '0.07em',
       lineHeight: 1,
     },
@@ -119,6 +201,7 @@ const theme = createTheme({
       fontFamily: displayFont,
       fontWeight: 700,
       textTransform: 'uppercase',
+      textWrap: 'balance',
       letterSpacing: '0.07em',
       lineHeight: 1.08,
     },
@@ -126,6 +209,7 @@ const theme = createTheme({
       fontFamily: displayFont,
       fontWeight: 700,
       textTransform: 'uppercase',
+      textWrap: 'balance',
       letterSpacing: '0.06em',
       lineHeight: 1.1,
     },
@@ -133,6 +217,7 @@ const theme = createTheme({
       fontFamily: displayFont,
       fontWeight: 700,
       textTransform: 'uppercase',
+      textWrap: 'balance',
       letterSpacing: '0.08em',
       lineHeight: 1.2,
     },
@@ -163,6 +248,17 @@ const theme = createTheme({
     },
   },
   components: {
+    // Text selection is a browser surface the page still owns: brand cyan
+    // with dark ink reads on every background here. The hero overrides it
+    // with its own plate colours, since cyan on the cyan flood would vanish.
+    MuiCssBaseline: {
+      styleOverrides: {
+        '::selection': {
+          backgroundColor: '#00E8FC',
+          color: heroInk,
+        },
+      },
+    },
     MuiButton: {
       defaultProps: {
         disableElevation: true,
