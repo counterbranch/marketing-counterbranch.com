@@ -28,7 +28,12 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <AppBar position="static" color="transparent" elevation={0}>
+    <AppBar
+      position="static"
+      color="transparent"
+      elevation={0}
+      sx={{ borderBottom: '1px solid', borderColor: 'divider' }}
+    >
       <Container maxWidth="md">
         <Toolbar disableGutters sx={{ gap: 1 }}>
           <Link
