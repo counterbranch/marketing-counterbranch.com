@@ -32,8 +32,12 @@ const theme = createTheme({
           contrastText: '#0B1220',
         },
         secondary: {
-          main: '#FC3C98',
-          contrastText: '#14061A',
+          main: '#FF0074',
+          // Like brand cyan, full-strength pink is a border/accent colour:
+          // it reads 3.7:1 as text on the light background. `dark` is the
+          // readable member of the family (5.8:1) used for labels here.
+          dark: '#C4005A',
+          contrastText: '#FFFFFF',
         },
         background: {
           default: '#F6FAFB',
@@ -56,8 +60,9 @@ const theme = createTheme({
           contrastText: '#0B1220',
         },
         secondary: {
-          main: '#FC3C98',
-          contrastText: '#14061A',
+          main: '#FF0074',
+          dark: '#C4005A',
+          contrastText: '#FFFFFF',
         },
         background: {
           default: '#0B1220',
@@ -98,7 +103,9 @@ const theme = createTheme({
     },
   },
   shape: {
-    borderRadius: 12,
+    // Squared corners throughout: no rounding on buttons, cards, inputs,
+    // drawers or dialogs.
+    borderRadius: 0,
   },
   transitions: {
     duration: {
@@ -158,56 +165,82 @@ const theme = createTheme({
             },
           },
         }),
-        // Contained buttons are filled with primary (cyan) or secondary
-        // (pink), so a same-color outline would disappear against them. Pick
-        // the inner ring color per-color so it stays visible against both:
-        // navy against cyan (light fill), white against pink (mid fill).
-        // The outer ring always matches the button's own color, read against
-        // the page background.
-        // The unfilled variants put primary on the page background, where
-        // brand cyan is unreadable in the light scheme. Both fall back to the
-        // accessible shade there and keep full-brightness cyan on dark.
-        text: ({ theme, ownerState }) =>
-          ownerState.color === 'primary'
-            ? {
-                color: theme.vars.palette.primary.dark,
-                ...theme.applyStyles('dark', {
-                  color: theme.vars.palette.primary.main,
-                }),
-              }
-            : {},
-        outlined: ({ theme, ownerState }) =>
-          ownerState.color === 'primary'
-            ? {
-                color: theme.vars.palette.primary.dark,
-                borderColor: alpha('#00707D', 0.5),
-                ...theme.applyStyles('dark', {
-                  color: theme.vars.palette.primary.main,
-                  borderColor: alpha('#00E8FC', 0.5),
-                }),
-              }
-            : {},
-        contained: ({ theme, ownerState }) => {
-          const isSecondary = ownerState.color === 'secondary'
-          const ringColor = isSecondary
-            ? theme.vars.palette.secondary.main
-            : theme.vars.palette.primary.main
-          const innerRing = isSecondary
-            ? theme.vars.palette.common.white
-            : theme.vars.palette.primary.contrastText
+        // Unfilled variants sit directly on the page background, where brand
+        // cyan and pink are both too light to read in the light scheme. Each
+        // falls back to the accessible member of its own family there and
+        // keeps the full-strength brand colour on dark.
+        text: ({ theme, ownerState }) => {
+          if (ownerState.color === 'secondary') {
+            return {
+              color: theme.vars.palette.secondary.dark,
+              ...theme.applyStyles('dark', {
+                color: theme.vars.palette.secondary.main,
+              }),
+            }
+          }
+          if (ownerState.color === 'primary') {
+            return {
+              color: theme.vars.palette.primary.dark,
+              ...theme.applyStyles('dark', {
+                color: theme.vars.palette.primary.main,
+              }),
+            }
+          }
+          return {}
+        },
+        // Secondary actions are outlined and fully transparent: a hairline
+        // border and a label, with no fill at rest and only a faint tint on
+        // hover so the shape never turns into a second filled button.
+        outlined: ({ theme, ownerState }) => {
+          const family =
+            ownerState.color === 'secondary'
+              ? { light: '#C4005A', dark: '#FF0074' }
+              : { light: '#00707D', dark: '#00E8FC' }
           return {
-            ...(ownerState.color === 'primary' && {
+            backgroundColor: 'transparent',
+            color: family.light,
+            borderColor: alpha(family.light, 0.45),
+            '&:hover': {
+              backgroundColor: alpha(family.light, 0.06),
+              borderColor: family.light,
+            },
+            ...theme.applyStyles('dark', {
+              backgroundColor: 'transparent',
+              color: family.dark,
+              borderColor: alpha(family.dark, 0.45),
               '&:hover': {
-                backgroundColor: theme.vars.palette.primary.dark,
+                backgroundColor: alpha(family.dark, 0.1),
+                borderColor: family.dark,
               },
             }),
-            '&.Mui-focusVisible, &:focus-visible': {
-              outline: `2px solid ${innerRing}`,
-              outlineOffset: 2,
-              boxShadow: `0 0 0 4px ${ringColor}`,
-            },
           }
         },
+        // The filled action is ink, never brand colour: black on light
+        // surfaces, inverted to white on dark ones so it stays readable
+        // against the near-black background. The focus ring inverts with it.
+        contained: ({ theme }) => ({
+          backgroundColor: '#000000',
+          color: '#FFFFFF',
+          '&:hover': {
+            backgroundColor: '#242424',
+          },
+          '&.Mui-focusVisible, &:focus-visible': {
+            outline: '2px solid #FFFFFF',
+            outlineOffset: -4,
+            boxShadow: `0 0 0 2px ${theme.vars.palette.text.primary}`,
+          },
+          ...theme.applyStyles('dark', {
+            backgroundColor: '#FFFFFF',
+            color: '#000000',
+            '&:hover': {
+              backgroundColor: '#DCDCDC',
+            },
+            '&.Mui-focusVisible, &:focus-visible': {
+              outline: '2px solid #000000',
+              boxShadow: `0 0 0 2px ${theme.vars.palette.text.primary}`,
+            },
+          }),
+        }),
       },
     },
     MuiLink: {
@@ -223,17 +256,13 @@ const theme = createTheme({
           '&.Mui-focusVisible, &:focus-visible': {
             outline: `2px solid ${theme.vars.palette.primary.dark}`,
             outlineOffset: 2,
-            borderRadius: 2,
           },
           ...theme.applyStyles('dark', {
             '&:hover': {
               color: theme.vars.palette.primary.main,
             },
             '&.Mui-focusVisible, &:focus-visible': {
-              outline: `2px solid ${theme.vars.palette.primary.dark}`,
-            ...theme.applyStyles('dark', {
               outline: `2px solid ${theme.vars.palette.primary.main}`,
-            }),
             },
           }),
         }),
@@ -242,9 +271,23 @@ const theme = createTheme({
     // ButtonBase resets outline to 0 for every component built on it, so the
     // icon-only controls (dark mode toggle, mobile menu trigger) and the
     // drawer's nav items need the same explicit focus ring as MuiButton.
+    // MUI hard-codes a pill or circle on these four rather than reading
+    // shape.borderRadius, so they need squaring explicitly. Controls that are
+    // circular to be understood at all (radio, switch, progress, rating) keep
+    // their own shape.
+    MuiChip: {
+      styleOverrides: { root: { borderRadius: 0 } },
+    },
+    MuiAvatar: {
+      styleOverrides: { root: { borderRadius: 0 } },
+    },
+    MuiFab: {
+      styleOverrides: { root: { borderRadius: 0 } },
+    },
     MuiIconButton: {
       styleOverrides: {
         root: ({ theme }) => ({
+          borderRadius: 0,
           '&.Mui-focusVisible, &:focus-visible': {
             outline: `2px solid ${theme.vars.palette.primary.dark}`,
             ...theme.applyStyles('dark', {

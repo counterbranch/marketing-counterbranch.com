@@ -65,7 +65,8 @@ export default function Hero() {
                 Get started
               </Button>
               <Button
-                variant="text"
+                variant="outlined"
+                color="secondary"
                 size="large"
                 component="a"
                 href={links.howItWorks}
@@ -102,7 +103,7 @@ export default function Hero() {
                 {[0, 1, 2].map((dot) => (
                   <Box
                     key={dot}
-                    sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'text.disabled' }}
+                    sx={{ width: 8, height: 8, bgcolor: 'text.disabled' }}
                   />
                 ))}
               </Stack>

@@ -22,10 +22,21 @@ export default function Cta() {
           </Typography>
           <Button
             variant="contained"
-            color="secondary"
             size="large"
             component="a"
             href={links.getStarted}
+            sx={{
+              // This band is dark in both schemes, so the ink button is
+              // always the inverted one; the focus ring inverts with it.
+              backgroundColor: '#FFFFFF',
+              color: '#000000',
+              '&:hover': { backgroundColor: '#DCDCDC' },
+              '&.Mui-focusVisible, &:focus-visible': {
+                outline: '2px solid #000000',
+                outlineOffset: -4,
+                boxShadow: '0 0 0 2px #FFFFFF',
+              },
+            }}
           >
             Get started
           </Button>

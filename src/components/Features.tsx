@@ -62,7 +62,7 @@ export default function Features() {
                     sx={(theme) => ({
                       width: 44,
                       height: 44,
-                      borderRadius: 2,
+                      borderRadius: 0,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
