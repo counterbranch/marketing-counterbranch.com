@@ -110,7 +110,8 @@ const theme = createTheme({
         // 6.2:1 subtle, 3.7:1 for outlined borders.
         hero: {
           background: '#00E8FC',
-          wash: `radial-gradient(90% 70% at 50% 120%, ${alpha(heroInk, 0.22)} 0%, transparent 60%)`,
+          // Depth sits low and to the right, balancing the type mass on the left.
+          wash: `radial-gradient(85% 75% at 85% 120%, ${alpha(heroInk, 0.22)} 0%, transparent 60%)`,
           ink: heroInk,
           inkMuted: alpha(heroInk, 0.8),
           inkSubtle: alpha(heroInk, 0.72),
@@ -152,7 +153,8 @@ const theme = createTheme({
         // the pink reel window; the wash is a neutral lift, not a tint.
         hero: {
           background: darkBase,
-          wash: `radial-gradient(70% 60% at 50% 0%, ${alpha('#FFFFFF', 0.05)} 0%, transparent 70%)`,
+          // A soft lift behind the headline's corner of the screen.
+          wash: `radial-gradient(70% 60% at 25% 0%, ${alpha('#FFFFFF', 0.05)} 0%, transparent 70%)`,
           ink: heroInkDark,
           inkMuted: alpha(heroInkDark, 0.78),
           inkSubtle: alpha(heroInkDark, 0.66),

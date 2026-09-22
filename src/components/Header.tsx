@@ -58,9 +58,16 @@ export default function Header() {
             outlineOffset: 2,
           },
         },
+        // Icon-only controls get a full 44px touch target.
+        '& .MuiIconButton-root': {
+          width: 44,
+          height: 44,
+        },
       })}
     >
-      <Container maxWidth="md">
+      {/* Same grid as the hero, so the logo and the headline share a left
+          edge at every width. */}
+      <Container maxWidth="lg">
         <Toolbar disableGutters sx={{ gap: 1 }}>
           <Link
             href={links.home}

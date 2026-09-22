@@ -1,9 +1,13 @@
+import { useState } from 'react'
 import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
+import IconButton from '@mui/material/IconButton'
 import Paper from '@mui/material/Paper'
+import PauseOutlinedIcon from '@mui/icons-material/PauseOutlined'
+import PlayArrowOutlinedIcon from '@mui/icons-material/PlayArrowOutlined'
 import { alpha, useTheme } from '@mui/material/styles'
 import Section from './Section.tsx'
 import SlotWord from './SlotWord.tsx'
@@ -43,12 +47,20 @@ const srOnly = {
   border: 0,
 } as const
 
+/**
+ * Full-screen hero, set flush left on the same wide grid as the header so the
+ * headline starts on the logo's edge. A left-aligned block reads as one
+ * poster: the headline keeps a straight left edge however it wraps, and the
+ * reel window grows to the right from a fixed start instead of re-centring
+ * on every roll.
+ */
 export default function Hero() {
   const theme = useTheme()
   // Cyan with dark ink in the light scheme, near-black with light ink in the
   // dark one. Every colour below is a CSS variable, so the switch is instant.
   const hero = theme.vars.palette.hero
   const headlineTracking = theme.typography.h1.letterSpacing
+  const [reelPaused, setReelPaused] = useState(false)
   const screenshotBorderColor = alpha(theme.palette.primary.main, 0.3)
   const screenshotShadow = `0 32px 64px -32px ${alpha(theme.palette.primary.main, 0.35)}`
 
@@ -67,10 +79,10 @@ export default function Hero() {
           overflow: 'hidden',
           bgcolor: hero.background,
           color: hero.ink,
-          // Clears the overlaid header, and keeps the headline off the very
-          // top and bottom edges on short screens.
+          // Clears the overlaid header above, and the scroll cue and pause
+          // control below.
           pt: { xs: 14, md: 16 },
-          pb: { xs: 10, md: 12 },
+          pb: { xs: 14, md: 16 },
           '&::selection, & ::selection': {
             backgroundColor: hero.plate,
             color: hero.plateInk,
@@ -87,13 +99,16 @@ export default function Hero() {
             background: hero.wash,
           }}
         />
-        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
-          <Stack spacing={5} sx={{ alignItems: 'center', textAlign: 'center' }}>
-            <Stack spacing={{ xs: 3, md: 3.5 }} sx={{ alignItems: 'center' }}>
+        <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+          <Stack spacing={{ xs: 5, md: 6 }} sx={{ alignItems: 'flex-start' }}>
+            <Stack spacing={{ xs: 3, md: 4 }} sx={{ alignItems: 'flex-start' }}>
               <Typography
                 variant="h1"
                 sx={{
-                  fontSize: 'clamp(2.5rem, 1.5rem + 3.4vw, 4.5rem)',
+                  // Capped where "Access changes in your" still fits the
+                  // 1152px column on one line, so wide screens get two lines
+                  // plus the reel instead of stranding "in your" on its own.
+                  fontSize: 'clamp(2.5rem, 1.2rem + 4.8vw, 5.5rem)',
                   ...heroStageSx(0),
                 }}
               >
@@ -107,18 +122,14 @@ export default function Hero() {
                       scales down so the longest word still fits. */}
                   <Box
                     component="span"
-                    sx={{
-                      display: 'flex',
-                      justifyContent: 'center',
-                      mt: '0.16em',
-                      fontSize: 'min(1em, 7.5vw)',
-                    }}
+                    sx={{ display: 'flex', mt: '0.16em', fontSize: 'min(1em, 7.5vw)' }}
                   >
                     <SlotWord
                       words={REEL_WORDS}
                       plate={hero.plate}
                       ink={hero.plateInk}
                       suffix="."
+                      paused={reelPaused}
                       tracking={
                         typeof headlineTracking === 'number'
                           ? `${headlineTracking}px`
@@ -131,8 +142,9 @@ export default function Hero() {
               <Typography
                 variant="body1"
                 sx={{
-                  maxWidth: 600,
-                  fontSize: { xs: '1rem', md: '1.125rem' },
+                  // Roughly 65 to 70 characters a line at every size.
+                  maxWidth: '40rem',
+                  fontSize: { xs: '1rem', md: '1.125rem', lg: '1.25rem' },
                   color: hero.inkMuted,
                   textWrap: 'pretty',
                   ...heroStageSx(1),
@@ -142,7 +154,7 @@ export default function Hero() {
                 of supported apps or your native policy engine. See what became allowed or denied.
               </Typography>
             </Stack>
-            <Stack spacing={2.5} sx={{ alignItems: 'center', width: { xs: '100%', sm: 'auto' } }}>
+            <Stack spacing={2.5} sx={{ alignItems: 'flex-start', width: { xs: '100%', sm: 'auto' } }}>
               <Stack
                 direction={{ xs: 'column', sm: 'row' }}
                 spacing={2}
@@ -155,6 +167,7 @@ export default function Hero() {
                   component="a"
                   href={links.getStarted}
                   sx={{
+                    minHeight: 48,
                     width: { xs: '100%', sm: 'auto' },
                     backgroundColor: hero.action,
                     color: hero.actionInk,
@@ -175,6 +188,7 @@ export default function Hero() {
                   component="a"
                   href={links.howItWorks}
                   sx={{
+                    minHeight: 48,
                     width: { xs: '100%', sm: 'auto' },
                     color: hero.ink,
                     borderColor: hero.line,
@@ -212,29 +226,75 @@ export default function Hero() {
             </Stack>
           </Stack>
         </Container>
-        <Box
-          aria-hidden
+
+        {/* The hero's lower edge, on the same grid: the scroll cue sits on the
+            text's left edge and the reel's pause control opposite it, where
+            motion controls conventionally live. */}
+        <Container
+          maxWidth="lg"
           sx={{
             position: 'absolute',
-            bottom: 28,
-            left: '50%',
+            left: 0,
+            right: 0,
+            bottom: { xs: 20, md: 28 },
             zIndex: 1,
-            width: '1px',
-            height: 56,
-            transform: 'translateX(-50%)',
-            transformOrigin: 'bottom',
-            background: `linear-gradient(180deg, transparent, ${hero.inkSubtle})`,
-            animation: `heroScrollCue ${motionDuration.entrance * 4}ms ${motionEasing.decel} infinite`,
-            '@keyframes heroScrollCue': {
-              '0%, 100%': { opacity: 0.25, transform: 'translateX(-50%) scaleY(0.6)' },
-              '50%': { opacity: 1, transform: 'translateX(-50%) scaleY(1)' },
-            },
-            '@media (prefers-reduced-motion: reduce)': {
-              animation: 'none',
-              opacity: 0.6,
-            },
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'space-between',
+            pointerEvents: 'none',
           }}
-        />
+        >
+          <Box
+            aria-hidden
+            sx={{
+              width: '1px',
+              height: 56,
+              transformOrigin: 'bottom',
+              background: `linear-gradient(180deg, transparent, ${hero.inkSubtle})`,
+              animation: `heroScrollCue ${motionDuration.entrance * 4}ms ${motionEasing.decel} infinite`,
+              '@keyframes heroScrollCue': {
+                '0%, 100%': { opacity: 0.25, transform: 'scaleY(0.6)' },
+                '50%': { opacity: 1, transform: 'scaleY(1)' },
+              },
+              '@media (prefers-reduced-motion: reduce)': {
+                animation: 'none',
+                opacity: 0.6,
+              },
+            }}
+          />
+          {/* The rotating word updates indefinitely, so it needs a way to
+              stop it (WCAG 2.2.2). Hover already pauses it for a pointer;
+              this covers touch and keyboard. Hidden when the visitor prefers
+              reduced motion, since the reel does not move at all then. */}
+          <IconButton
+            onClick={() => setReelPaused((paused) => !paused)}
+            aria-label={reelPaused ? 'Play the rotating headline' : 'Pause the rotating headline'}
+            sx={{
+              pointerEvents: 'auto',
+              width: 44,
+              height: 44,
+              color: hero.inkSubtle,
+              border: '1px solid',
+              borderColor: hero.line,
+              '&:hover': {
+                color: hero.ink,
+                borderColor: hero.ink,
+                backgroundColor: hero.hover,
+              },
+              '&.Mui-focusVisible, &:focus-visible': {
+                outline: `2px solid ${hero.ink}`,
+                outlineOffset: 2,
+              },
+              '@media (prefers-reduced-motion: reduce)': { display: 'none' },
+            }}
+          >
+            {reelPaused ? (
+              <PlayArrowOutlinedIcon aria-hidden fontSize="small" />
+            ) : (
+              <PauseOutlinedIcon aria-hidden fontSize="small" />
+            )}
+          </IconButton>
+        </Container>
       </Box>
       <Section>
         <Container maxWidth="md">

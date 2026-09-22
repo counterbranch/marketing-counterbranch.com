@@ -32,21 +32,24 @@ interface SlotWordProps {
   /**
    * Letter-spacing of the surrounding text. Tracking adds space after a
    * word's last letter, so the same amount goes before its first letter to
-   * keep every word optically centred in the window.
+   * keep the window's padding optically even on both sides.
    */
   tracking?: string
+  /** Stops the reel on its current word, for an explicit pause control. */
+  paused?: boolean
 }
 
 /**
  * One word that rolls vertically through `words`, like a slot-machine reel.
  *
+ * The window is anchored at its left edge, in line with the sentence above.
  * Two states share one DOM. Before measurement (the prerendered HTML, and the
  * first client render that hydrates it) the window is ordinary inline layout
  * around the first word, so the page reads correctly before any script runs.
  * Once widths are measured, the window takes the width of the longest word
- * and only clip-path and transforms change from then on: the window is
- * clipped to the current word, the reel translates vertically, and the suffix
- * translates to follow the window's edge. Nothing about the line's layout
+ * and only clip-path and transforms change from then on: the window's right
+ * edge is clipped to the current word, the reel translates vertically, and
+ * the suffix translates to follow that edge. Nothing about the line's layout
  * changes during a roll. Both states put every glyph in the same place, so
  * the hand-over is invisible.
  *
@@ -57,7 +60,8 @@ interface SlotWordProps {
  * Purely visual and aria-hidden: the surrounding heading must carry an
  * accessible version of the sentence. It rests on the first word for visitors
  * who prefer reduced motion, and pauses while hovered, while scrolled out of
- * view, and while the tab is hidden.
+ * view, while the tab is hidden, and whenever `paused` is set, which is how
+ * the page's own pause control stops it.
  */
 export default function SlotWord({
   words,
@@ -65,6 +69,7 @@ export default function SlotWord({
   ink,
   suffix = '',
   tracking = '0',
+  paused = false,
 }: SlotWordProps) {
   const prefersReducedMotion = usePrefersReducedMotion()
   const rootRef = useRef<HTMLSpanElement>(null)
@@ -118,7 +123,13 @@ export default function SlotWord({
 
   const measured = metrics !== null
   const running =
-    measured && count > 1 && !prefersReducedMotion && !hovered && onScreen && tabVisible
+    measured &&
+    count > 1 &&
+    !paused &&
+    !prefersReducedMotion &&
+    !hovered &&
+    onScreen &&
+    tabVisible
 
   // Rest, then roll one word.
   useEffect(() => {
@@ -214,7 +225,7 @@ export default function SlotWord({
                 top: 0,
                 left: 0,
                 width: `${widest}px`,
-                clipPath: `inset(0 ${(widest - current) / 2}px)`,
+                clipPath: `inset(0 ${widest - current}px 0 0)`,
                 transition: glide('clip-path', motionEasing.decel),
                 [reduceMotion]: { transition: 'none' },
               }
@@ -228,8 +239,8 @@ export default function SlotWord({
             measured && {
               position: 'absolute',
               top: 0,
-              left: '50%',
-              transform: `translate(-50%, ${-index * ROW}em)`,
+              left: `${metrics.pad}px`,
+              transform: `translateY(${-index * ROW}em)`,
               transition: glide('transform', motionEasing.reelSettle),
               [reduceMotion]: { transition: 'none' },
             },
@@ -242,7 +253,7 @@ export default function SlotWord({
               sx={{
                 display: measured || i === 0 ? 'block' : 'none',
                 height: `${ROW}em`,
-                textAlign: 'center',
+                textAlign: 'left',
                 pl: tracking,
               }}
             >
@@ -261,7 +272,7 @@ export default function SlotWord({
               position: 'absolute',
               top: 0,
               left: 0,
-              transform: `translateX(${(widest + current) / 2}px)`,
+              transform: `translateX(${current}px)`,
               transition: glide('transform', motionEasing.decel),
               [reduceMotion]: { transition: 'none' },
             },
