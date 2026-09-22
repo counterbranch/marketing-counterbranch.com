@@ -6,6 +6,8 @@ import BoltOutlinedIcon from '@mui/icons-material/BoltOutlined'
 import SecurityOutlinedIcon from '@mui/icons-material/SecurityOutlined'
 import InsightsOutlinedIcon from '@mui/icons-material/InsightsOutlined'
 import Section from './Section.tsx'
+import { useInView } from '../hooks/useInView.ts'
+import { revealSx } from '../motion.ts'
 
 const features = [
   {
@@ -26,9 +28,11 @@ const features = [
 ]
 
 export default function Features() {
+  const { ref, inView } = useInView<HTMLDivElement>()
+
   return (
     <Section>
-      <Container maxWidth="md">
+      <Container ref={ref} maxWidth="md" sx={revealSx(inView)}>
         <Typography
           variant="h4"
           component="h2"

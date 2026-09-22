@@ -4,23 +4,28 @@ import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import Paper from '@mui/material/Paper'
 import Section from './Section.tsx'
+import { heroStageSx } from '../motion.ts'
 
 export default function Hero() {
   return (
     <Section>
       <Container maxWidth="md">
         <Stack spacing={3} sx={{ alignItems: 'center', textAlign: 'center' }}>
-          <Typography variant="h2" component="h1" sx={{ fontWeight: 700 }}>
+          <Typography
+            variant="h2"
+            component="h1"
+            sx={{ fontWeight: 700, ...heroStageSx(0) }}
+          >
             One-line value proposition goes here.
           </Typography>
           <Typography
             variant="body1"
             color="text.secondary"
-            sx={{ maxWidth: 560 }}
+            sx={{ maxWidth: 560, ...heroStageSx(1) }}
           >
             Short supporting sentence about the product goes here as placeholder copy.
           </Typography>
-          <Stack direction="row" spacing={2}>
+          <Stack direction="row" spacing={2} sx={heroStageSx(2)}>
             <Button variant="contained" size="large">
               Get started
             </Button>
@@ -37,6 +42,7 @@ export default function Hero() {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              ...heroStageSx(3),
             }}
           >
             <Typography color="text.secondary">
