@@ -9,7 +9,7 @@ import { motionDuration, motionEasing } from './motion.ts'
 
 function App() {
   return (
-    <Box>
+    <Box sx={{ position: 'relative' }}>
       <Link
         href="#main"
         sx={(theme) => ({
@@ -22,7 +22,6 @@ function App() {
           color: 'text.primary',
           px: 2,
           py: 1,
-          borderRadius: 1,
           boxShadow: theme.shadows[4],
           transition: theme.transitions.create('transform', {
             duration: motionDuration.fast,

@@ -22,6 +22,7 @@ export default function Cta() {
           </Typography>
           <Button
             variant="contained"
+            color="inherit"
             size="large"
             component="a"
             href={links.getStarted}

@@ -18,6 +18,11 @@ import Logo from './Logo.tsx'
 import ColorModeToggle from './ColorModeToggle.tsx'
 import { links } from '../links.ts'
 
+// The header sits over the full-screen video hero, which is dark in both
+// colour schemes, so its controls use fixed light values rather than scheme
+// tokens. It scrolls away with the page and never appears over anything else.
+const HEADER_INK = '#FFFFFF'
+
 const navItems = [
   { label: 'Docs', href: links.docs },
   { label: 'Pricing', href: links.pricing },
@@ -29,10 +34,24 @@ export default function Header() {
 
   return (
     <AppBar
-      position="static"
+      position="absolute"
       color="transparent"
       elevation={0}
-      sx={{ borderBottom: '1px solid', borderColor: 'divider' }}
+      sx={{
+        top: 0,
+        color: HEADER_INK,
+        backgroundImage: 'none',
+        // The theme's focus rings are tuned for the page background; over the
+        // video only a white ring reads. Scoped to the unfilled controls so
+        // the filled button keeps its own inset ring.
+        '& .MuiButton-text, & .MuiIconButton-root': {
+          color: HEADER_INK,
+          '&.Mui-focusVisible, &:focus-visible': {
+            outline: `2px solid ${HEADER_INK}`,
+            outlineOffset: 2,
+          },
+        },
+      }}
     >
       <Container maxWidth="md">
         <Toolbar disableGutters sx={{ gap: 1 }}>
@@ -43,7 +62,7 @@ export default function Header() {
             color="inherit"
             sx={{ display: 'inline-flex' }}
           >
-            <Logo />
+            <Logo onDark />
           </Link>
           <Box sx={{ flexGrow: 1 }} />
           <Box component="nav" aria-label="Primary" sx={{ display: { xs: 'none', md: 'block' } }}>
@@ -58,9 +77,21 @@ export default function Header() {
           <ColorModeToggle />
           <Button
             variant="contained"
+            color="inherit"
             component="a"
             href={links.getStarted}
-            sx={{ ml: { xs: 0, md: 1 }, display: { xs: 'none', sm: 'inline-flex' } }}
+            sx={{
+              ml: { xs: 0, md: 1 },
+              display: { xs: 'none', sm: 'inline-flex' },
+              backgroundColor: HEADER_INK,
+              color: '#000000',
+              '&:hover': { backgroundColor: '#DCDCDC' },
+              '&.Mui-focusVisible, &:focus-visible': {
+                outline: '2px solid #000000',
+                outlineOffset: -4,
+                boxShadow: `0 0 0 2px ${HEADER_INK}`,
+              },
+            }}
           >
             Get started
           </Button>

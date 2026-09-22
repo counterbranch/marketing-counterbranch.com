@@ -219,6 +219,10 @@ const theme = createTheme({
         // border and a label, with no fill at rest and only a faint tint on
         // hover so the shape never turns into a second filled button.
         outlined: ({ theme, ownerState }) => {
+          // `inherit` means "this surface styles its own button" — used where
+          // the backdrop is dark in both schemes (the video hero, the CTA
+          // band), which the scheme-driven colours below cannot know about.
+          if (ownerState.color === 'inherit') return {}
           const family =
             ownerState.color === 'secondary'
               ? { light: '#C4005A', dark: '#FF0074' }
@@ -245,29 +249,32 @@ const theme = createTheme({
         // The filled action is ink, never brand colour: black on light
         // surfaces, inverted to white on dark ones so it stays readable
         // against the near-black background. The focus ring inverts with it.
-        contained: ({ theme }) => ({
-          backgroundColor: '#000000',
-          color: '#FFFFFF',
-          '&:hover': {
-            backgroundColor: '#242424',
-          },
-          '&.Mui-focusVisible, &:focus-visible': {
-            outline: '2px solid #FFFFFF',
-            outlineOffset: -4,
-            boxShadow: `0 0 0 2px ${theme.vars.palette.text.primary}`,
-          },
-          ...theme.applyStyles('dark', {
-            backgroundColor: '#FFFFFF',
-            color: '#000000',
+        contained: ({ theme, ownerState }) => {
+          if (ownerState.color === 'inherit') return {}
+          return {
+            backgroundColor: '#000000',
+            color: '#FFFFFF',
             '&:hover': {
-              backgroundColor: '#DCDCDC',
+              backgroundColor: '#242424',
             },
             '&.Mui-focusVisible, &:focus-visible': {
-              outline: '2px solid #000000',
+              outline: '2px solid #FFFFFF',
+              outlineOffset: -4,
               boxShadow: `0 0 0 2px ${theme.vars.palette.text.primary}`,
             },
-          }),
-        }),
+            ...theme.applyStyles('dark', {
+              backgroundColor: '#FFFFFF',
+              color: '#000000',
+              '&:hover': {
+                backgroundColor: '#DCDCDC',
+              },
+              '&.Mui-focusVisible, &:focus-visible': {
+                outline: '2px solid #000000',
+                boxShadow: `0 0 0 2px ${theme.vars.palette.text.primary}`,
+              },
+            }),
+          }
+        },
       },
     },
     MuiLink: {
