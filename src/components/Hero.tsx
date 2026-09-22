@@ -5,11 +5,10 @@ import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
-import Paper from '@mui/material/Paper'
 import PauseOutlinedIcon from '@mui/icons-material/PauseOutlined'
 import PlayArrowOutlinedIcon from '@mui/icons-material/PlayArrowOutlined'
-import { alpha, useTheme } from '@mui/material/styles'
-import Section from './Section.tsx'
+import { useTheme } from '@mui/material/styles'
+import CompareTerminal from './CompareTerminal.tsx'
 import SlotWord from './SlotWord.tsx'
 import { heroStageSx, motionDuration, motionEasing } from '../motion.ts'
 import { links } from '../links.ts'
@@ -61,8 +60,6 @@ export default function Hero() {
   const hero = theme.vars.palette.hero
   const headlineTracking = theme.typography.h1.letterSpacing
   const [reelPaused, setReelPaused] = useState(false)
-  const screenshotBorderColor = alpha(theme.palette.primary.main, 0.3)
-  const screenshotShadow = `0 32px 64px -32px ${alpha(theme.palette.primary.main, 0.35)}`
 
   return (
     <>
@@ -296,48 +293,7 @@ export default function Hero() {
           </IconButton>
         </Container>
       </Box>
-      <Section>
-        <Container maxWidth="md">
-          <Paper
-            variant="outlined"
-            sx={{
-              width: '100%',
-              aspectRatio: '16 / 9',
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-              borderColor: screenshotBorderColor,
-              boxShadow: screenshotShadow,
-            }}
-          >
-            <Stack
-              direction="row"
-              spacing={0.75}
-              sx={{
-                px: 2,
-                py: 1.25,
-                borderBottom: '1px solid',
-                borderColor: 'divider',
-                flexShrink: 0,
-              }}
-            >
-              {[0, 1, 2].map((dot) => (
-                <Box key={dot} sx={{ width: 8, height: 8, bgcolor: 'text.disabled' }} />
-              ))}
-            </Stack>
-            <Box
-              sx={{
-                flexGrow: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <Typography color="text.secondary">Product screenshot placeholder</Typography>
-            </Box>
-          </Paper>
-        </Container>
-      </Section>
+      <CompareTerminal />
     </>
   )
 }

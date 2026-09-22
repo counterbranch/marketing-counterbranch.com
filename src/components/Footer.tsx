@@ -22,7 +22,7 @@ export default function Footer() {
         <Stack spacing={2} sx={{ alignItems: 'center', textAlign: 'center', py: 6 }}>
           <Logo size={24} />
           <Typography variant="body2" color="text.secondary">
-            © 2026 Counterbranch
+            © 2026 DUVATL, Inc. Counterbranch™ is a trademark of DUVATL, Inc.
           </Typography>
           <Stack direction="row" spacing={3}>
             {footerLinks.map(({ label, href, external }) => (
