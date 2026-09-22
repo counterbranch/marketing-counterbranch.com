@@ -18,10 +18,20 @@ import Logo from './Logo.tsx'
 import ColorModeToggle from './ColorModeToggle.tsx'
 import { links } from '../links.ts'
 
-// The header sits over the full-screen video hero, which is dark in both
-// colour schemes, so its controls use fixed light values rather than scheme
-// tokens. It scrolls away with the page and never appears over anything else.
-const HEADER_INK = '#FFFFFF'
+// The header sits over the full-screen cyan hero, which looks the same in
+// both colour schemes, so its controls use fixed dark values rather than
+// scheme tokens. It scrolls away with the page and never appears over
+// anything else.
+const HEADER_INK = '#0B1220'
+
+// The drawer mirrors the toolbar nav, so its labels are set the same way the
+// buttons are: display face, caps, open tracking.
+const drawerLabelSx = {
+  fontFamily: "'Oswald Variable', 'Anton', sans-serif",
+  fontWeight: 600,
+  textTransform: 'uppercase',
+  letterSpacing: '0.12em',
+} as const
 
 const navItems = [
   { label: 'Docs', href: links.docs },
@@ -41,9 +51,9 @@ export default function Header() {
         top: 0,
         color: HEADER_INK,
         backgroundImage: 'none',
-        // The theme's focus rings are tuned for the page background; over the
-        // video only a white ring reads. Scoped to the unfilled controls so
-        // the filled button keeps its own inset ring.
+        // The theme's focus rings are tuned for the page background; on cyan
+        // only a dark ring reads. Scoped to the unfilled controls so the
+        // filled button keeps its own inset ring.
         '& .MuiButton-text, & .MuiIconButton-root': {
           color: HEADER_INK,
           '&.Mui-focusVisible, &:focus-visible': {
@@ -62,7 +72,7 @@ export default function Header() {
             color="inherit"
             sx={{ display: 'inline-flex' }}
           >
-            <Logo onDark />
+            <Logo variant="light" />
           </Link>
           <Box sx={{ flexGrow: 1 }} />
           <Box component="nav" aria-label="Primary" sx={{ display: { xs: 'none', md: 'block' } }}>
@@ -84,10 +94,10 @@ export default function Header() {
               ml: { xs: 0, md: 1 },
               display: { xs: 'none', sm: 'inline-flex' },
               backgroundColor: HEADER_INK,
-              color: '#000000',
-              '&:hover': { backgroundColor: '#DCDCDC' },
+              color: '#FFFFFF',
+              '&:hover': { backgroundColor: '#242424' },
               '&.Mui-focusVisible, &:focus-visible': {
-                outline: '2px solid #000000',
+                outline: '2px solid #FFFFFF',
                 outlineOffset: -4,
                 boxShadow: `0 0 0 2px ${HEADER_INK}`,
               },
@@ -117,7 +127,7 @@ export default function Header() {
             {navItems.map((item) => (
               <ListItem key={item.label} disablePadding>
                 <ListItemButton component="a" href={item.href} onClick={() => setMenuOpen(false)}>
-                  <ListItemText primary={item.label} />
+                  <ListItemText primary={item.label} slotProps={{ primary: { sx: drawerLabelSx } }} />
                 </ListItemButton>
               </ListItem>
             ))}
@@ -130,7 +140,21 @@ export default function Header() {
               >
                 <ListItemText
                   primary="Get started"
-                  slotProps={{ primary: { sx: { fontWeight: 700, color: 'primary.main' } } }}
+                  slotProps={{
+                    primary: {
+                      sx: [
+                        drawerLabelSx,
+                        // Brand cyan on the light drawer surface is 1.5:1, so
+                        // the accessible shade of the family carries it there.
+                        (theme) => ({
+                          color: theme.vars.palette.primary.dark,
+                          ...theme.applyStyles('dark', {
+                            color: theme.vars.palette.primary.main,
+                          }),
+                        }),
+                      ],
+                    },
+                  }}
                 />
               </ListItemButton>
             </ListItem>

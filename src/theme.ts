@@ -42,7 +42,7 @@ const theme = createTheme({
           // it reads 3.7:1 as text on the light background. `dark` is the
           // readable member of the family (5.8:1) used for labels here.
           dark: '#C4005A',
-          contrastText: '#FFFFFF',
+          contrastText: '#14061A',
         },
         background: {
           default: '#F6FAFB',
@@ -67,7 +67,7 @@ const theme = createTheme({
         secondary: {
           main: '#FF0074',
           dark: '#C4005A',
-          contrastText: '#FFFFFF',
+          contrastText: '#14061A',
         },
         background: {
           default: '#0B1220',
@@ -161,7 +161,15 @@ const theme = createTheme({
       },
       styleOverrides: {
         root: ({ theme }) => ({
-          textTransform: 'none',
+          // Buttons are set like small headings: the condensed display face,
+          // caps, and open tracking. Extra horizontal padding keeps the
+          // condensed letterforms from crowding the button's edges.
+          fontFamily: displayFont,
+          fontWeight: 600,
+          textTransform: 'uppercase',
+          letterSpacing: '0.12em',
+          paddingLeft: '1.5em',
+          paddingRight: '1.5em',
           transition: theme.transitions.create(['transform', 'background-color'], {
             duration: motionDuration.fast,
             easing: motionEasing.decel,

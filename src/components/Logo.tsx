@@ -6,24 +6,25 @@ interface LogoProps {
   /** Rendered height in px; width follows the image's ~2000×420 aspect. */
   size?: number
   /**
-   * Force the mark drawn for dark backgrounds, for places that are dark in
-   * both colour schemes (the header over the video hero). Without this the
-   * light-scheme mark's black wordmark would sit on a dark backdrop.
+   * Pin the mark instead of letting it follow the colour scheme. Needed
+   * wherever a surface looks the same in both schemes — the header sits on
+   * the cyan hero, so it always wants the light-background mark, whose own
+   * cyan band matches the hero exactly.
    */
-  onDark?: boolean
+  variant?: 'auto' | 'light' | 'dark'
 }
 
 // Both marks render at all times; CSS toggles which is visible based on the
 // `data-mui-color-scheme` attribute the theme manages. This swaps instantly
 // with the no-flash init script in index.html, with no JS/hook involved.
-export default function Logo({ size = 32, onDark = false }: LogoProps) {
+export default function Logo({ size = 32, variant = 'auto' }: LogoProps) {
   const width = Math.round(size * (2000 / 406))
 
-  if (onDark) {
+  if (variant !== 'auto') {
     return (
       <Box
         component="img"
-        src={logoDark}
+        src={variant === 'dark' ? logoDark : logoLight}
         alt="Counterbranch"
         width={width}
         height={size}

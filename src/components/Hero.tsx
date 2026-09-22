@@ -8,28 +8,14 @@ import { alpha, useTheme } from '@mui/material/styles'
 import Section from './Section.tsx'
 import { heroStageSx, motionDuration, motionEasing } from '../motion.ts'
 import { links } from '../links.ts'
-import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion.ts'
 
-// The hero is a dark surface in both colour schemes, because the video behind
-// it is dark. Its text and controls are therefore fixed light values rather
-// than scheme tokens.
-const HERO_INK = '#FFFFFF'
-const HERO_BACKDROP = '#0B1220'
-
-/**
- * Scrim over the video. The lightest point is 0.62 alpha, which still puts
- * white text at ~6:1 even if that frame of the video is pure white, so the
- * headline is readable whatever is playing underneath. It deepens at the top
- * behind the header and at the bottom so the hero blends into the next band.
- */
-const SCRIM = `linear-gradient(180deg, ${alpha(HERO_BACKDROP, 0.88)} 0%, ${alpha(
-  HERO_BACKDROP,
-  0.62,
-)} 38%, ${alpha(HERO_BACKDROP, 0.74)} 72%, ${HERO_BACKDROP} 100%)`
+// The hero is a flood of brand cyan in both colour schemes. Cyan is a very
+// light surface, so everything on it is dark ink rather than a scheme token.
+const HERO_BACKDROP = '#00E8FC'
+const HERO_INK = '#0B1220'
 
 export default function Hero() {
   const theme = useTheme()
-  const prefersReducedMotion = usePrefersReducedMotion()
   const screenshotBorderColor = alpha(theme.palette.primary.main, 0.3)
   const screenshotShadow = `0 32px 64px -32px ${alpha(theme.palette.primary.main, 0.35)}`
 
@@ -51,49 +37,24 @@ export default function Hero() {
           pb: { xs: 10, md: 12 },
         }}
       >
+        {/* A single deeper-cyan wash keeps the flood from reading as flat
+            fill, without introducing a second hue. */}
         <Box
-          component="video"
-          // Decorative: the headline carries the meaning, so it is hidden from
-          // assistive tech and needs no captions.
           aria-hidden
-          src="/vice-city-bg.mp4"
-          // Autoplay only works muted and inline, and is suppressed entirely
-          // when the visitor asks for reduced motion — they get the first
-          // frame under the same scrim instead.
-          autoPlay={!prefersReducedMotion}
-          loop={!prefersReducedMotion}
-          muted
-          playsInline
-          preload="metadata"
-          tabIndex={-1}
           sx={{
             position: 'absolute',
             inset: 0,
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
             zIndex: 0,
-            bgcolor: HERO_BACKDROP,
             pointerEvents: 'none',
+            background: `radial-gradient(90% 70% at 50% 120%, ${alpha(HERO_INK, 0.22)} 0%, transparent 60%)`,
           }}
         />
-        <Box
-          aria-hidden
-          sx={{
-            position: 'absolute',
-            inset: 0,
-            zIndex: 1,
-            pointerEvents: 'none',
-            background: SCRIM,
-          }}
-        />
-        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 2 }}>
+        <Container maxWidth="md" sx={{ position: 'relative', zIndex: 1 }}>
           <Stack spacing={4} sx={{ alignItems: 'center', textAlign: 'center' }}>
             <Typography
               variant="h1"
               sx={{
                 fontSize: 'clamp(2.5rem, 1.6rem + 3.8vw, 5rem)',
-                textShadow: `0 2px 32px ${alpha(HERO_BACKDROP, 0.6)}`,
                 ...heroStageSx(0),
               }}
             >
@@ -101,7 +62,7 @@ export default function Hero() {
             </Typography>
             <Typography
               variant="body1"
-              sx={{ maxWidth: 560, color: alpha(HERO_INK, 0.82), ...heroStageSx(1) }}
+              sx={{ maxWidth: 560, color: alpha(HERO_INK, 0.8), ...heroStageSx(1) }}
             >
               Short supporting sentence about the product goes here as placeholder copy.
             </Typography>
@@ -118,13 +79,11 @@ export default function Hero() {
                 href={links.getStarted}
                 sx={{
                   width: { xs: '100%', sm: 'auto' },
-                  // The hero is dark in both schemes, so the ink button is
-                  // always the inverted one.
                   backgroundColor: HERO_INK,
-                  color: '#000000',
-                  '&:hover': { backgroundColor: '#DCDCDC' },
+                  color: '#FFFFFF',
+                  '&:hover': { backgroundColor: '#242424' },
                   '&.Mui-focusVisible, &:focus-visible': {
-                    outline: '2px solid #000000',
+                    outline: '2px solid #FFFFFF',
                     outlineOffset: -4,
                     boxShadow: `0 0 0 2px ${HERO_INK}`,
                   },
@@ -141,11 +100,15 @@ export default function Hero() {
                 sx={{
                   width: { xs: '100%', sm: 'auto' },
                   color: HERO_INK,
-                  borderColor: alpha(theme.palette.secondary.main, 0.85),
-                  backgroundColor: alpha(HERO_BACKDROP, 0.35),
+                  borderColor: alpha(HERO_INK, 0.55),
+                  backgroundColor: 'transparent',
                   '&:hover': {
-                    borderColor: theme.palette.secondary.main,
-                    backgroundColor: alpha(theme.palette.secondary.main, 0.22),
+                    borderColor: HERO_INK,
+                    backgroundColor: alpha(HERO_INK, 0.08),
+                  },
+                  '&.Mui-focusVisible, &:focus-visible': {
+                    outline: `2px solid ${HERO_INK}`,
+                    outlineOffset: 2,
                   },
                 }}
               >
@@ -160,17 +123,17 @@ export default function Hero() {
             position: 'absolute',
             bottom: 28,
             left: '50%',
-            zIndex: 2,
+            zIndex: 1,
             width: '1px',
             height: 56,
             transform: 'translateX(-50%)',
+            transformOrigin: 'bottom',
             background: `linear-gradient(180deg, transparent, ${alpha(HERO_INK, 0.7)})`,
             animation: `heroScrollCue ${motionDuration.entrance * 4}ms ${motionEasing.decel} infinite`,
             '@keyframes heroScrollCue': {
               '0%, 100%': { opacity: 0.25, transform: 'translateX(-50%) scaleY(0.6)' },
               '50%': { opacity: 1, transform: 'translateX(-50%) scaleY(1)' },
             },
-            transformOrigin: 'bottom',
             '@media (prefers-reduced-motion: reduce)': {
               animation: 'none',
               opacity: 0.6,
