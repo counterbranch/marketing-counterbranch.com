@@ -6,13 +6,18 @@ import { motionDuration, motionEasing } from './motion.ts'
 // Brand
 // - primary: cyan #00E8FC, taken from the logo mark. Very light, so it needs
 //   an explicit dark contrastText rather than relying on the computed one.
-// - secondary: pink #FC3C98, taken from the dark-scheme logo mark. White text
-//   on it is only ~3.2:1, so contrastText is set explicitly to a near-black
-//   that clears 4.5:1 (verified ~5.8:1).
+// - secondary: pink #FF0074. As text on the light background it reads only
+//   3.7:1, so a darker member of the family carries secondary labels there.
 // - navy #14203C: the shield outline in the light logo. Used as light-scheme
 //   text.primary and as the dark-scheme paper surface.
 // Everything else (tints, borders, secondary text) is derived from these
 // three colors via `alpha()` — no other hues are introduced.
+// Heading face. Swap this single constant to change the display type across
+// the whole site: 'Oswald Variable' (a weight range) or 'Anton' (one very
+// heavy weight). Both are imported in the entry files.
+const displayFont = "'Oswald Variable', 'Anton', sans-serif"
+const bodyFont = "'Inter Variable', sans-serif"
+
 const brandNavy = '#14203C'
 
 const theme = createTheme({
@@ -77,26 +82,51 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: "'Inter Variable', sans-serif",
+    fontFamily: bodyFont,
+    // Headings are a condensed poster gothic set in caps with open tracking:
+    // narrow letterforms let a long line stay large, and the wide spacing
+    // stops the caps from packing into a solid block. Body copy stays Inter.
     h1: {
-      fontWeight: 800,
-      letterSpacing: '-0.02em',
-      lineHeight: 1.05,
+      fontFamily: displayFont,
+      fontWeight: 700,
+      textTransform: 'uppercase',
+      letterSpacing: '0.07em',
+      lineHeight: 0.98,
     },
     h2: {
-      fontWeight: 800,
-      letterSpacing: '-0.02em',
-      lineHeight: 1.08,
+      fontFamily: displayFont,
+      fontWeight: 700,
+      textTransform: 'uppercase',
+      letterSpacing: '0.07em',
+      lineHeight: 1,
     },
     h3: {
-      fontWeight: 800,
-      letterSpacing: '-0.02em',
-      lineHeight: 1.1,
+      fontFamily: displayFont,
+      fontWeight: 700,
+      textTransform: 'uppercase',
+      letterSpacing: '0.07em',
+      lineHeight: 1,
     },
     h4: {
+      fontFamily: displayFont,
       fontWeight: 700,
-      letterSpacing: '-0.01em',
-      lineHeight: 1.15,
+      textTransform: 'uppercase',
+      letterSpacing: '0.07em',
+      lineHeight: 1.08,
+    },
+    h5: {
+      fontFamily: displayFont,
+      fontWeight: 700,
+      textTransform: 'uppercase',
+      letterSpacing: '0.06em',
+      lineHeight: 1.1,
+    },
+    h6: {
+      fontFamily: displayFont,
+      fontWeight: 700,
+      textTransform: 'uppercase',
+      letterSpacing: '0.08em',
+      lineHeight: 1.2,
     },
     body1: {
       lineHeight: 1.6,
@@ -146,10 +176,7 @@ const theme = createTheme({
             outline: `2px solid ${theme.vars.palette.primary.dark}`,
             outlineOffset: 2,
             ...theme.applyStyles('dark', {
-              outline: `2px solid ${theme.vars.palette.primary.dark}`,
-            ...theme.applyStyles('dark', {
               outline: `2px solid ${theme.vars.palette.primary.main}`,
-            }),
             }),
           },
           '@media (prefers-reduced-motion: reduce)': {
