@@ -21,15 +21,10 @@ export const motionDuration = {
    * one waits until the word has landed before closing in.
    */
   reelWindow: 240,
-  /** One full breath of a live status marker: dim and back. */
-  pulse: 1600,
-  /**
-   * A signal crossing a connector in a diagram and fading where it lands.
-   * The crossing takes the first five sixths; see `signalTravel`.
-   */
-  signal: 720,
-  /** The same over a shorter connector: crossing 500 ms, fading 100 ms. */
-  signalShort: 600,
+  /** A command typed out at a terminal prompt, a character per step. */
+  typing: 900,
+  /** One on-and-off cycle of a resting terminal cursor. */
+  blink: 1100,
 } as const
 
 export const motionEasing = {
@@ -63,16 +58,82 @@ export const settleIn = keyframes`
 `
 
 /**
- * A status marker breathing while work is in progress. Starts and ends fully
- * on, so it rests at full strength whenever the animation is removed.
+ * A typed line revealed from its left edge. Run with `steps()` timing so it
+ * advances a character at a time instead of wiping smoothly. Clips rather
+ * than moves, so the line holds its place in the layout the whole time.
  */
-export const statusPulse = keyframes`
-  0%,
-  100% {
+export const typeOn = keyframes`
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0);
+  }
+`
+
+/**
+ * A caret keeping pace with `typeOn`. It rides a track laid exactly over the
+ * typed line, so crossing the track's full width follows the reveal's edge.
+ * Run with the same duration and steps.
+ */
+export const caretTravel = keyframes`
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+`
+
+/**
+ * Takes a caret away once its line is entered. Run with `forwards` fill, so
+ * it stays in place until its delay and is gone after.
+ */
+export const caretOut = keyframes`
+  to {
+    opacity: 0;
+  }
+`
+
+/**
+ * A resting terminal cursor. Run with `steps(2, jump-none)` so each end holds
+ * for half the cycle: on, then off. Without `both` fill, the cursor rests on
+ * when the last cycle ends.
+ */
+export const caretBlink = keyframes`
+  from {
     opacity: 1;
   }
-  50% {
-    opacity: 0.35;
+  to {
+    opacity: 0;
+  }
+`
+
+/**
+ * A line of output arriving from just below. Ends on the element's own
+ * styles, so removing the animation after it finishes changes nothing.
+ */
+export const lineIn = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+`
+
+/**
+ * A mark appearing in place within a line that is already showing, so the
+ * text around it never moves.
+ */
+export const glyphIn = keyframes`
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 `
 
@@ -84,48 +145,11 @@ export const statusPulse = keyframes`
 export const stampIn = keyframes`
   from {
     opacity: 0;
-    transform: scale(0.9);
+    transform: scale(0.94);
   }
   to {
     opacity: 1;
     transform: scale(1);
-  }
-`
-
-/**
- * A band drawn open from its top edge down. Clips rather than moves, so the
- * band holds its place in the layout the whole time.
- */
-export const wipeDown = keyframes`
-  from {
-    clip-path: inset(0 0 100% 0);
-  }
-  to {
-    clip-path: inset(0);
-  }
-`
-
-/**
- * A signal travelling the element's `offset-path`: it appears at the start,
- * crosses in the first five sixths of the run, then fades out at the far
- * end. It starts and ends unseen, so with `both` fill it is hidden before its
- * delay and after it lands.
- */
-export const signalTravel = keyframes`
-  0% {
-    offset-distance: 0%;
-    opacity: 0;
-  }
-  4% {
-    opacity: 1;
-  }
-  83.333% {
-    offset-distance: 100%;
-    opacity: 1;
-  }
-  100% {
-    offset-distance: 100%;
-    opacity: 0;
   }
 `
 

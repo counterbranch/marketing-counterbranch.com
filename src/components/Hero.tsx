@@ -8,7 +8,7 @@ import IconButton from '@mui/material/IconButton'
 import PauseOutlinedIcon from '@mui/icons-material/PauseOutlined'
 import PlayArrowOutlinedIcon from '@mui/icons-material/PlayArrowOutlined'
 import { useTheme } from '@mui/material/styles'
-import AccessComparison from './AccessComparison.tsx'
+import CompareTerminal from './CompareTerminal.tsx'
 import SlotWord from './SlotWord.tsx'
 import { heroStageSx, motionDuration, motionEasing } from '../motion.ts'
 import { links } from '../links.ts'
@@ -293,7 +293,7 @@ export default function Hero() {
           </IconButton>
         </Container>
       </Box>
-      <AccessComparison />
+      <CompareTerminal />
     </>
   )
 }
