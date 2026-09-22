@@ -9,7 +9,8 @@ import { motionDuration, motionEasing } from './motion.ts'
 // - secondary: pink #FF0074. As text on the light background it reads only
 //   3.7:1, so a darker member of the family carries secondary labels there.
 // - navy #14203C: the shield outline in the light logo. Used as light-scheme
-//   text.primary and as the dark-scheme paper surface.
+//   text.primary. The dark scheme is neutral near-black rather than navy, so
+//   the only colour in it comes from the brand itself.
 // Everything else (tints, borders, secondary text) is derived from these
 // three colors via `alpha()` — no other hues are introduced.
 // Heading face. Swap this single constant to change the display type across
@@ -19,6 +20,13 @@ const displayFont = "'Oswald Variable', 'Anton', sans-serif"
 const bodyFont = "'Inter Variable', sans-serif"
 
 const brandNavy = '#14203C'
+
+// Dark-scheme surfaces. Near-black and neutral: `paper` is one subtle step
+// above `default` (1.13:1) so raised surfaces separate without a visible
+// colour cast. Outlined cards carry their edge with the divider, not this
+// step, so the step can stay this quiet.
+const darkBase = '#0A0A0C'
+const darkSurface = '#1A1A1E'
 
 const theme = createTheme({
   cssVariables: {
@@ -70,11 +78,11 @@ const theme = createTheme({
           contrastText: '#14061A',
         },
         background: {
-          default: '#0B1220',
-          paper: brandNavy,
+          default: darkBase,
+          paper: darkSurface,
         },
         text: {
-          primary: '#F5F9FA',
+          primary: '#F7F7F8',
           secondary: alpha('#FFFFFF', 0.72),
         },
         divider: alpha('#FFFFFF', 0.12),

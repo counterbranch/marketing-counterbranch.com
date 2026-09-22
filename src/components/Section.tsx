@@ -32,13 +32,15 @@ export default function Section({ children, id, tone = 'default' }: SectionProps
           ((theme) => ({
             backgroundColor: alpha(theme.palette.primary.main, 0.06),
             ...theme.applyStyles('dark', {
-              backgroundColor: alpha(theme.palette.primary.main, 0.08),
+              // Kept quieter than the light scheme's tint: on near-black even
+              // a small amount of cyan reads as a colour cast.
+              backgroundColor: alpha(theme.palette.primary.main, 0.045),
             }),
           })),
         tone === 'contrast' &&
           ((theme) => ({
             backgroundColor: '#14203C',
-            color: '#F5F9FA',
+            color: '#F7F7F8',
             ...theme.applyStyles('dark', {
               backgroundColor: theme.vars.palette.background.paper,
               color: theme.vars.palette.text.primary,
