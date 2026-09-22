@@ -14,13 +14,13 @@ export const motionDuration = {
   /** Deliberately authored focal entrance: hero stages. */
   entrance: 420,
   /** One roll of the headline's word reel. */
-  reel: 420,
+  reel: 460,
   /**
    * The reel window resizing to the next word. Shorter than the roll so a
    * growing window is at full width before the word lands, and a shrinking
    * one waits until the word has landed before closing in.
    */
-  reelWindow: 220,
+  reelWindow: 240,
   /** One full breath of a live status marker: dim and back. */
   pulse: 1600,
 } as const
@@ -31,7 +31,7 @@ export const motionEasing = {
 } as const
 
 /** How long each word rests in the headline reel before it rolls, in ms. */
-export const reelDwell = 1500
+export const reelDwell = 2000
 
 /** Delay between successive hero entrance stages, in ms. */
 export const motionStagger = 80
