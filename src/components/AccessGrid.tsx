@@ -484,8 +484,8 @@ export function AccessGrid() {
       <Word x={c.wordX} y={bottomY + 16} fill={cyan} size={WORD}>
         ALLOW
       </Word>
-      {/* The check's name and the verdict are left out on phones, where the
-          run window beneath carries both. */}
+      {/* The check's name and the verdict are left out on phones, where
+          Counterbranch's comment in the exhibit beneath carries both. */}
       <Mono x={c.left} y={topY - c.badge / 2 - 58} fill={band.ink} size={LABEL} bold sx={PHONE_HIDDEN}>
         viewer → read
       </Mono>

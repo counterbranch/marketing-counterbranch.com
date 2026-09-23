@@ -34,28 +34,20 @@ const WINDOW_INK = 'var(--mac-window-ink)'
  * real object. Ink with white text in the light scheme, like the hero's reel
  * window; the raised surface inside a divider in the dark one. Both grounds
  * are dark, so the brand cyan and pink read on either. The title bar is
- * decoration; `label` names the window for assistive technology. `fill`
- * makes it take its grid cell's full height, with its content in a column,
- * so windows side by side end on one line. `onDark` is for a window on a
- * dark band, where the ink ground would merge into the band: it takes a
- * light hairline and a black shadow instead, and in the dark scheme sits
- * recessed on the page's near-black. `glow` tints the window's shadow with a
- * colour, easing between colours as it changes.
+ * decoration; `label` names the window for assistive technology. `glow`
+ * tints the window's shadow with a colour, easing between colours as it
+ * changes.
  */
 export function MacWindow({
   title,
   label,
   ref,
-  fill = false,
-  onDark = false,
   glow,
   children,
 }: {
   title: string
   label: string
   ref?: Ref<HTMLElement>
-  fill?: boolean
-  onDark?: boolean
   glow?: string
   children: ReactNode
 }) {
@@ -71,7 +63,6 @@ export function MacWindow({
         '--mac-window-ground': palette.hero.plate,
         '--mac-window-ink': palette.hero.plateInk,
         m: 0,
-        ...(fill && { height: '100%', display: 'flex', flexDirection: 'column' }),
         // A string: sx multiplies a bare number by the theme's square
         // radius, which would leave the corners at 0.
         borderRadius: '10px',
@@ -81,10 +72,6 @@ export function MacWindow({
         backgroundColor: WINDOW_GROUND,
         color: WINDOW_INK,
         boxShadow: `0 24px 48px -28px color-mix(in srgb, ${palette.hero.plate} 55%, transparent)`,
-        ...(onDark && {
-          borderColor: palette.bands.navy.line,
-          boxShadow: `0 28px 56px -30px color-mix(in srgb, ${palette.common.black} 85%, transparent)`,
-        }),
         ...(glowShadow && {
           boxShadow: glowShadow,
           transition: `box-shadow ${motionDuration.base}ms ${motionEasing.decel}`,
@@ -92,7 +79,7 @@ export function MacWindow({
         // One dark-scheme block: applyStyles returns the same selector key each
         // time, so a second spread would replace the first rather than add to it.
         ...theme.applyStyles('dark', {
-          '--mac-window-ground': onDark ? palette.background.default : palette.background.paper,
+          '--mac-window-ground': palette.background.paper,
           '--mac-window-ink': palette.text.primary,
           borderColor: palette.divider,
           boxShadow:

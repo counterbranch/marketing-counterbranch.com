@@ -56,8 +56,6 @@ export interface HeroPalette {
   ink: string
   /** Supporting copy. */
   inkMuted: string
-  /** Footnotes and the scroll cue. */
-  inkSubtle: string
   /** Outlined control borders. */
   line: string
   /** Outlined control hover fill. */
@@ -101,15 +99,14 @@ declare module '@mui/material/styles' {
   }
 }
 
-// Ink contrast on the cyan flood: 12.4:1 for ink, 7.8:1 muted, 6.2:1 subtle,
-// 3.7:1 for outlined borders.
+// Ink contrast on the cyan flood: 12.4:1 for ink, 7.8:1 muted, 3.7:1 for
+// outlined borders.
 const cyanFlood: HeroPalette = {
   background: '#00E8FC',
   // Depth sits low and to the right, balancing the type mass on the left.
   wash: `radial-gradient(85% 75% at 85% 120%, ${alpha(heroInk, 0.22)} 0%, transparent 60%)`,
   ink: heroInk,
   inkMuted: alpha(heroInk, 0.8),
-  inkSubtle: alpha(heroInk, 0.72),
   line: alpha(heroInk, 0.55),
   hover: alpha(heroInk, 0.08),
   // The reel window is ink, like the filled action: black with white text
@@ -240,7 +237,6 @@ const theme = createTheme({
           wash: `radial-gradient(70% 60% at 25% 0%, ${alpha('#FFFFFF', 0.05)} 0%, transparent 70%)`,
           ink: heroInkDark,
           inkMuted: alpha(heroInkDark, 0.78),
-          inkSubtle: alpha(heroInkDark, 0.66),
           line: alpha(heroInkDark, 0.5),
           hover: alpha(heroInkDark, 0.08),
           plate: '#FFFFFF',

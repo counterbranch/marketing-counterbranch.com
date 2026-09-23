@@ -9,7 +9,7 @@ import type { SxProps, Theme } from '@mui/material/styles'
 export const motionDuration = {
   /** Immediate feedback: hover/press states. */
   fast: 150,
-  /** Routine state change: scroll-in reveals. */
+  /** Routine state change: a scripted run's parts arriving. */
   base: 240,
   /** Deliberately authored focal entrance: hero stages. */
   entrance: 420,
@@ -25,7 +25,7 @@ export const motionDuration = {
   /**
    * The window resizing to the next entry of a phrase reel (the install
    * heading's chores), whose entries differ in width by up to about 240px
-   * at 1440: half the speed of the headline's, still inside the roll so a
+   * at 1440: half again as long as the headline's, still inside the roll so a
    * growing window is fully open before the phrase lands.
    */
   reelWindowPhrase: 360,
@@ -173,22 +173,6 @@ export const stampIn = keyframes`
 `
 
 /**
- * A line arriving from just to its left, as if written into the window it
- * sits in. Ends on the element's own styles, so removing the animation after
- * it finishes changes nothing.
- */
-export const slideIn = keyframes`
-  from {
-    opacity: 0;
-    transform: translateX(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-`
-
-/**
  * A line drawn from its start. For an SVG path with `pathLength="1"` and a
  * stroke-dasharray of 1, so every line draws in the same time whatever its
  * real length. Ends on the path's own (undashed-looking) state.
@@ -255,7 +239,7 @@ export const sweepAcross = keyframes`
   }
 `
 
-type Keyframes = typeof slideIn
+type Keyframes = ReturnType<typeof keyframes>
 
 /**
  * Where a scripted run is.
@@ -284,7 +268,7 @@ export function arrivalSx(phase: RunPhase, frames: Keyframes, delay: number) {
 
 /**
  * Staged entrance for hero content. `index` selects the stagger delay
- * (headline = 0, description = 1, buttons = 2, footnote = 3).
+ * (headline = 0, description = 1, buttons = 2, footnote = 3, aside = 4).
  * Animates opacity + transform only.
  */
 export function heroStageSx(index: number): SxProps<Theme> {
@@ -297,4 +281,3 @@ export function heroStageSx(index: number): SxProps<Theme> {
     },
   }
 }
-
