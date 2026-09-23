@@ -189,7 +189,7 @@ export default function Hero() {
                 ...heroStageSx(3),
               }}
             >
-              Free core. Runs in your existing workflow. No AI token charges for routine checks.
+              Free alpha release. Runs on your laptop or CI runner, with no account, no telemetry and no AI in the check.
             </Typography>
           </Stack>
         </Stack>

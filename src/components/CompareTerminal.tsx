@@ -36,8 +36,8 @@ type Phase = RunPhase
 /** Share of the terminal that must be on screen before the first run plays. */
 const START_THRESHOLD = 0.35
 
-/** About one step per character of the 71-character command. */
-const TYPE_STEPS = 72
+/** One step per character of the typed line: the 58-character command and its `$ ` prompt. */
+const TYPE_STEPS = 60
 
 /** How far apart the lines of output arrive, in ms. */
 const LINE_STEP = 350
@@ -132,7 +132,7 @@ const EXAMPLE_RUNS: ExampleRun[] = [
         <Pad n={3} />
         {'viewer → read private-document'}
         <Pad n={3} />
-        {verdict('unexpected')}
+        {verdict('VIOLATION')}
       </>
     ),
     meaning: 'One decision changed: a viewer can now read a private document.',
@@ -152,7 +152,7 @@ const EXAMPLE_RUNS: ExampleRun[] = [
         <Pad n={3} />
         {'128 of 128 decisions match main'}
         <Pad n={3} />
-        {verdict('clean')}
+        {verdict('CLEAN')}
       </>
     ),
     meaning: 'No decision changed across the 128 prepared checks.',
@@ -172,7 +172,7 @@ const EXAMPLE_RUNS: ExampleRun[] = [
         <Pad n={3} />
         {'export-report timed out on pr-144'}
         <Pad n={3} />
-        {verdict('not a pass')}
+        {verdict('INCOMPLETE')}
       </>
     ),
     meaning: '127 checks match; 1 check could not finish on pr-144.',
@@ -350,9 +350,9 @@ function Command({ phase, head }: { phase: Phase; head: string }) {
           $
         </Box>{' '}
         <Box component="span" sx={strong}>
-          counterbranch compare
+          counterbranch run
         </Box>
-        {` --base main --head ${head} --tests ./authz-tests`}
+        {` --repository . --base main --head ${head}`}
       </Box>
       {phase === 'playing' && (
         <Box
@@ -418,11 +418,7 @@ function Transcript({
       {'\n'}
       <Line phase={phase} delay={LOAD_DELAY}>
         <Step />
-        {' Loading 128 prepared permission checks'}
-        <Pad n={9} />
-        <Box component="span" sx={muted}>
-          ./authz-tests
-        </Box>
+        {' Loading 128 prepared permission checks from the repository'}
       </Line>
       {'\n'}
       <Line phase={phase} delay={MAIN_RUN_DELAY}>

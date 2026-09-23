@@ -57,7 +57,7 @@ export default function Cta() {
               textWrap: 'pretty',
             }}
           >
-            Free core. Runs in your existing workflow. No AI token charges for routine checks.
+            Free alpha release. Runs on your laptop or CI runner, with no account, no telemetry and no AI in the check.
           </Typography>
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
@@ -79,10 +79,10 @@ export default function Cta() {
               color="inherit"
               size="large"
               component="a"
-              href={links.docs}
+              href={links.faq}
               sx={floodOutlineSx(flood)}
             >
-              Read the docs
+              Read the FAQ
             </Button>
           </Stack>
         </Box>

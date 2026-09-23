@@ -343,7 +343,7 @@ export function AccessGrid() {
         viewer → read private-document
       </Mono>
       <Mono x={lx + ls} y={512} fill={palette.secondary.light} size={LABEL} anchor="end">
-        unexpected
+        VIOLATION
       </Mono>
     </Figure>
   )

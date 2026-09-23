@@ -6,6 +6,8 @@ import CompareTerminal from './components/CompareTerminal.tsx'
 import DiffVersusRun from './components/DiffVersusRun.tsx'
 import Features from './components/Features.tsx'
 import Cta from './components/Cta.tsx'
+import GetStarted from './components/GetStarted.tsx'
+import Faq from './components/Faq.tsx'
 import Footer from './components/Footer.tsx'
 import { motionDuration, motionEasing } from './motion.ts'
 
@@ -46,6 +48,8 @@ function App() {
         <DiffVersusRun />
         <Features />
         <Cta />
+        <GetStarted />
+        <Faq />
       </Box>
       <Footer />
     </Box>

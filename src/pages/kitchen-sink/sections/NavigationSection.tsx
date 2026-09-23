@@ -40,7 +40,7 @@ export default function NavigationSection() {
           <Link underline="hover" color="inherit" href="#navigation">
             Roadmap
           </Link>
-          <Typography color="text.primary">Q3 review</Typography>
+          <Typography color="textPrimary">Q3 review</Typography>
         </Breadcrumbs>
       </Stack>
 

@@ -8,10 +8,10 @@ import Logo from './Logo.tsx'
 import { links } from '../links.ts'
 
 const footerLinks = [
-  { label: 'Docs', href: links.docs },
-  { label: 'Pricing', href: links.pricing },
+  { label: 'How it works', href: links.howItWorks },
+  { label: 'Install', href: links.getStarted },
+  { label: 'FAQ', href: links.faq },
   { label: 'GitHub', href: links.github, external: true },
-  { label: 'Contact', href: links.contact },
 ]
 
 export default function Footer() {
@@ -21,7 +21,7 @@ export default function Footer() {
       <Container maxWidth="md">
         <Stack spacing={2} sx={{ alignItems: 'center', textAlign: 'center', py: { xs: 6, md: 8 } }}>
           <Logo size={24} />
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="textSecondary">
             © 2026 DUVATL, Inc. Counterbranch™ is a trademark of DUVATL, Inc.
           </Typography>
           <Stack direction="row" spacing={3}>
@@ -30,7 +30,7 @@ export default function Footer() {
                 key={label}
                 href={href}
                 underline="hover"
-                color="text.secondary"
+                color="textSecondary"
                 variant="body2"
                 {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
               >

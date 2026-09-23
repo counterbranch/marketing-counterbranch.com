@@ -1,8 +1,8 @@
 import { renderToString } from 'react-dom/server'
-import createCache from '@emotion/cache'
 import { CacheProvider } from '@emotion/react'
 import createEmotionServer from '@emotion/server/create-instance'
 import AppRoot from './AppRoot.tsx'
+import { createEmotionCache } from './emotionCache.ts'
 
 /**
  * Renders the landing page to static HTML at build time, along with the
@@ -10,9 +10,7 @@ import AppRoot from './AppRoot.tsx'
  * into dist/index.html, so the hero paints before any JavaScript arrives.
  */
 export function render() {
-  // The same key as the browser's default emotion cache, which adopts these
-  // style tags on load instead of inserting duplicates.
-  const cache = createCache({ key: 'css' })
+  const cache = createEmotionCache()
   const { extractCriticalToChunks, constructStyleTagsFromChunks } = createEmotionServer(cache)
   const html = renderToString(
     <CacheProvider value={cache}>

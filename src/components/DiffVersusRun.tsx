@@ -503,7 +503,7 @@ export default function DiffVersusRun() {
                   </Box>
                   {'   '}
                   <Box component="span" sx={verdictSx}>
-                    unexpected
+                    VIOLATION
                   </Box>
                 </Box>
               </ImpactBar>

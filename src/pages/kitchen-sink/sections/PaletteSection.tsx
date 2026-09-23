@@ -42,7 +42,7 @@ function ColorRamp({ label, color }: { label: string; color: PaletteColor }) {
                 </Typography>
               </Box>
               <Box sx={{ px: 1.5, py: 1 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace', display: 'block' }}>
+                <Typography variant="caption" color="textSecondary" sx={{ fontFamily: 'monospace', display: 'block' }}>
                   {shade.hex}
                 </Typography>
               </Box>
@@ -146,7 +146,7 @@ export default function PaletteSection() {
                   <Typography variant="caption" sx={{ display: 'block' }}>
                     {tint.label}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
+                  <Typography variant="caption" color="textSecondary" sx={{ fontFamily: 'monospace' }}>
                     {tint.hex}
                   </Typography>
                 </Box>

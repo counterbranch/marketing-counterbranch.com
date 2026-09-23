@@ -36,7 +36,7 @@ export default function LayoutSection() {
     <SectionBlock id="layout" title="Layout" description="The structural primitives every other section is built from.">
       <Stack spacing={1.5}>
         <GroupLabel>Grid — responsive size prop</GroupLabel>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" color="textSecondary">
           Each tile uses size=&#123;&#123; xs: 6, sm: 4, md: 3, lg: 2 &#125;&#125; — resize the window to see it reflow.
         </Typography>
         <Grid container spacing={1.5}>
@@ -53,7 +53,7 @@ export default function LayoutSection() {
         <Stack spacing={3}>
           {stackSpacings.map((spacing) => (
             <Box key={`row-${spacing}`}>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+              <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mb: 0.5 }}>
                 {`direction="row" spacing={${spacing}}`}
               </Typography>
               <Stack direction="row" spacing={spacing}>
@@ -64,7 +64,7 @@ export default function LayoutSection() {
             </Box>
           ))}
           <Box>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+            <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mb: 0.5 }}>
               direction=&quot;column&quot; spacing=&#123;2&#125;
             </Typography>
             <Stack direction="column" spacing={2} sx={{ maxWidth: 200 }}>
@@ -81,7 +81,7 @@ export default function LayoutSection() {
         <Stack spacing={2}>
           {containerSizes.map((size) => (
             <Box key={size}>
-              <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+              <Typography variant="caption" color="textSecondary" sx={{ display: 'block', mb: 0.5 }}>
                 {`maxWidth="${size}" (${theme.breakpoints.values[size]}px breakpoint)`}
               </Typography>
               <Container maxWidth={size} disableGutters>
@@ -96,7 +96,7 @@ export default function LayoutSection() {
                     justifyContent: 'center',
                   }}
                 >
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" color="textSecondary">
                     {size}
                   </Typography>
                 </Box>

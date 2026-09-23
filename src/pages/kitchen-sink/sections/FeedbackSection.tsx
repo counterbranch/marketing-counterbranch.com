@@ -98,7 +98,7 @@ export default function FeedbackSection() {
             <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
               Item details
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="textSecondary">
               A drawer is used for secondary context that doesn't need a full page — filters, details panels, quick edits.
             </Typography>
           </Box>

@@ -5,7 +5,7 @@ export default function GroupLabel({ children }: { children: string }) {
   return (
     <Typography
       variant="overline"
-      color="text.secondary"
+      color="textSecondary"
       component="p"
       sx={{ fontWeight: 700, letterSpacing: '0.08em', lineHeight: 1.5 }}
     >

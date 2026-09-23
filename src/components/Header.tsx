@@ -31,9 +31,9 @@ const drawerLabelSx = {
 } as const
 
 const navItems = [
-  { label: 'Docs', href: links.docs },
-  { label: 'Pricing', href: links.pricing },
-  { label: 'Login', href: links.login },
+  { label: 'How it works', href: links.howItWorks },
+  { label: 'Install', href: links.getStarted },
+  { label: 'FAQ', href: links.faq },
 ]
 
 export default function Header() {
@@ -80,6 +80,28 @@ export default function Header() {
           >
             <Logo />
           </Link>
+          {/* The release status, beside the name it qualifies. Left out on
+              the narrowest phones, where it would push the menu off screen;
+              the hero's free line says it too. */}
+          <Box
+            component="span"
+            sx={(theme) => ({
+              '@media (max-width: 359.95px)': { display: 'none' },
+              ml: 1.5,
+              px: 0.75,
+              py: 0.25,
+              border: '1px solid',
+              borderColor: theme.vars.palette.hero.line,
+              fontFamily: displayFont,
+              fontWeight: 600,
+              fontSize: '0.75rem',
+              lineHeight: 1.4,
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+            })}
+          >
+            Alpha
+          </Box>
           <Box sx={{ flexGrow: 1 }} />
           <Box component="nav" aria-label="Primary" sx={{ display: { xs: 'none', md: 'block' } }}>
             <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
