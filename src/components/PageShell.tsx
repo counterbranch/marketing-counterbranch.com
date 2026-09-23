@@ -7,16 +7,9 @@ import { motionDuration, motionEasing } from '../motion.ts'
 
 /**
  * The frame every page shares: the skip link, the header, the main landmark
- * (the skip link's target) and the footer. `overlay` renders after the
- * footer, for page-level extras that sit outside the landmarks.
+ * (the skip link's target) and the footer.
  */
-export default function PageShell({
-  children,
-  overlay,
-}: {
-  children: ReactNode
-  overlay?: ReactNode
-}) {
+export default function PageShell({ children }: { children: ReactNode }) {
   return (
     <Box sx={{ position: 'relative' }}>
       <Link
@@ -51,7 +44,6 @@ export default function PageShell({
         {children}
       </Box>
       <Footer />
-      {overlay}
     </Box>
   )
 }

@@ -64,8 +64,6 @@ export default defineConfig(({ isSsrBuild }) => ({
           input: {
             main: resolve(import.meta.dirname, 'index.html'),
             kitchenSink: resolve(import.meta.dirname, 'kitchen-sink.html'),
-            // A second opening, for comparing with the page as shipped.
-            variant: resolve(import.meta.dirname, 'variant.html'),
           },
         },
       },
