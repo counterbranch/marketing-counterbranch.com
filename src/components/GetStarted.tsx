@@ -15,31 +15,30 @@ import { MacWindow, MONO_FONT, MUTED } from './DiffVersusRun.tsx'
 import { srOnly } from '../a11y.ts'
 import { links } from '../links.ts'
 import { displayFont } from '../theme.ts'
-import { lineIn, motionDuration, motionEasing } from '../motion.ts'
+import { lineIn, motionDuration, motionEasing, reelDwellPhrase } from '../motion.ts'
 import { pageColumn, rhythm } from '../rhythm.ts'
 
 const REDUCED_MOTION = '@media (prefers-reduced-motion: reduce)'
 
-/** The everyday chores the reel compares setup with, all shorter than a sentence. */
+/**
+ * The everyday chores the reel compares setup with, all shorter than a
+ * sentence. Ordered so their widths rise and then fall, with the first (the
+ * prerendered one) short, so the plate's edge never jumps more than about a
+ * quarter of the window between two chores.
+ */
 const CHORES = [
   'ordering Chipotle',
-  'brewing your WFH coffee',
-  'dressing for a Slack call',
-  'booking a meeting room',
-  'writing your OKRs',
-  'picking a reaction emoji',
   'expensing a $12 app',
+  'booking a meeting room',
+  'brewing your WFH coffee',
   'finding the unmute button',
+  'dressing for a Slack call',
+  'picking a reaction emoji',
+  'writing your OKRs',
 ] as const
 
-/**
- * How long each chore rests before the reel rolls on. The hero's reel shows
- * one word; these are phrases of three or four, so they get the time to read.
- */
-const CHORE_DWELL = 3600
-
-/** The reel is aria-hidden, so the heading carries the whole list once. */
-const HEADING_FOR_SCREEN_READERS = `Less effort than ${CHORES.join(', ')}.`
+/** The reel is aria-hidden, so the heading carries the sentence once, with its first chore. */
+const HEADING_FOR_SCREEN_READERS = `Less effort than ${CHORES[0]}.`
 
 /** How long "Copied" stays on a copy button, in ms. */
 const COPIED_MS = 2000
@@ -366,18 +365,21 @@ function InstallPanel({
       id={id}
       role="tabpanel"
       aria-labelledby={labelledBy}
-      hidden={!selected}
+      aria-hidden={!selected}
+      inert={!selected}
       sx={{
-        mt: { xs: 4, md: 5 },
-        display: selected ? 'grid' : 'none',
+        mt: { xs: 4, md: 5, xl: 6 },
+        gridArea: { lg: '1 / 1' },
+        display: { xs: selected ? 'grid' : 'none', lg: 'grid' },
+        visibility: { lg: selected ? 'visible' : 'hidden' },
         gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'minmax(0, 5fr) minmax(0, 7fr)' },
         columnGap: 8,
         rowGap: 4,
         alignItems: 'start',
-        ...(arrives && {
-          animation: `${lineIn} ${motionDuration.base}ms ${motionEasing.decel} both`,
-          [REDUCED_MOTION]: { animation: 'none' },
-        }),
+        // Adding the animation restarts it, so it plays on each switch.
+        animation:
+          selected && arrives ? `${lineIn} ${motionDuration.base}ms ${motionEasing.decel} both` : 'none',
+        [REDUCED_MOTION]: { animation: 'none' },
       }}
     >
       <Box sx={{ minWidth: 0 }}>
@@ -456,7 +458,7 @@ export default function GetStarted() {
         {/* The column is a size container so the chore's line can scale to
             it: the longest chore, full stop included, is about 16.3em wide. */}
         <Box sx={{ containerType: 'inline-size' }}>
-          <Typography variant="h2" component="h2" sx={{ fontSize: 'clamp(2.25rem, 1.2rem + 4vw, 5.5rem)' }}>
+          <Typography variant="h2" component="h2">
             <Box component="span" sx={srOnly}>
               {HEADING_FOR_SCREEN_READERS}
             </Box>
@@ -479,7 +481,8 @@ export default function GetStarted() {
                   ink={palette.hero.plateInk}
                   suffix="."
                   paused={reelPaused}
-                  dwell={CHORE_DWELL}
+                  dwell={reelDwellPhrase}
+                  windowMs={motionDuration.reelWindowPhrase}
                   tracking={typeof headingTracking === 'number' ? `${headingTracking}px` : headingTracking}
                 />
               </Box>
@@ -612,16 +615,20 @@ export default function GetStarted() {
           })}
         </Box>
 
-        {paths.map((path, index) => (
-          <InstallPanel
-            key={path.key}
-            path={path}
-            id={panelId(index)}
-            labelledBy={tabId(index)}
-            selected={index === selected}
-            arrives={switched}
-          />
-        ))}
+        {/* From lg the panels share one cell, so switching tabs never moves
+            the FAQ below; on phones only the chosen one takes space. */}
+        <Box sx={{ display: 'grid' }}>
+          {paths.map((path, index) => (
+            <InstallPanel
+              key={path.key}
+              path={path}
+              id={panelId(index)}
+              labelledBy={tabId(index)}
+              selected={index === selected}
+              arrives={switched}
+            />
+          ))}
+        </Box>
       </Container>
     </Section>
   )

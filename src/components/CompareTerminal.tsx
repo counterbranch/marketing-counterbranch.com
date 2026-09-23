@@ -728,17 +728,6 @@ export default function CompareTerminal() {
 
   // The action is outlined in the section's own ink rather than a brand
   // colour, so it never reads as the page's primary action.
-  const outlinedButtonSx = {
-    minHeight: 44,
-    color: palette.text.primary,
-    borderColor: palette.divider,
-    transition: theme.transitions.create(['transform', 'background-color', 'border-color'], {
-      duration: motionDuration.fast,
-      easing: motionEasing.decel,
-    }),
-    '&:hover': { borderColor: palette.text.primary },
-  }
-
   // Which transcript shows follows the checked radio. The React-rendered
   // `data-chosen` is the fallback where `:has()` is not supported.
   const shownRun = Object.fromEntries(
@@ -759,7 +748,6 @@ export default function CompareTerminal() {
         <Typography
           variant="h2"
           component="h2"
-          sx={{ fontSize: 'clamp(2rem, 1.2rem + 2.8vw, 4.5rem)' }}
         >
           See what access changed.
         </Typography>
@@ -853,16 +841,15 @@ export default function CompareTerminal() {
               sx={{ mt: 2, maxWidth: '64ch', ...secondaryText, textWrap: 'pretty' }}
             >
               Demonstration only. This output is simulated to show the shape of a run and does not
-              come from a live system. Command names and counts are illustrative. Counterbranch
-              compares only the prepared authorization tests you run; it does not certify an
-              application as secure.
+              come from a live system. Counterbranch compares only the prepared authorization tests
+              you run; it does not certify an application as secure.
             </Typography>
           </Box>
 
           {/* Replaying does nothing visible without motion, so the control
               goes with it, margin and all. */}
           <Box sx={{ gridArea: 'aside', mt: 3, [REDUCED_MOTION]: { display: 'none' } }}>
-            <Button variant="outlined" color="inherit" onClick={play} sx={outlinedButtonSx}>
+            <Button variant="outlined" onClick={play} sx={{ minHeight: 44 }}>
               Replay run
             </Button>
           </Box>

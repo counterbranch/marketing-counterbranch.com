@@ -6,7 +6,7 @@ import { useTheme } from '@mui/material/styles'
 import Section from './Section.tsx'
 import { MONO_FONT, MUTED } from './DiffVersusRun.tsx'
 import { useArrivalPhase } from '../hooks/useArrivalPhase.ts'
-import { arrivalSx, motionDuration, stampIn, type RunPhase } from '../motion.ts'
+import { arrivalSx, motionDuration, lineIn, type RunPhase } from '../motion.ts'
 import { pageColumn, rhythm } from '../rhythm.ts'
 
 /** Share of a specimen that must be on screen before its key line stamps in. */
@@ -95,11 +95,10 @@ function KeyLine({
         mx: -SPECIMEN_PAD,
         px: SPECIMEN_PAD,
         backgroundColor: `color-mix(in srgb, ${tint} 16%, transparent)`,
-        transformOrigin: '0 50%',
         ...theme.applyStyles('dark', {
           backgroundColor: `color-mix(in srgb, ${tint} 20%, transparent)`,
         }),
-        ...arrivalSx(phase, stampIn, delay),
+        ...arrivalSx(phase, lineIn, delay),
       })}
     >
       {children}
@@ -267,9 +266,6 @@ function FeatureRow({ feature }: { feature: Feature }) {
             textWrap: 'pretty',
           }}
         >
-          <Box component="strong" sx={strong}>
-            Why it matters:
-          </Box>{' '}
           {why}
         </Typography>
       </Box>
@@ -332,12 +328,7 @@ export default function Features() {
           <Typography
             variant="h2"
             component="h2"
-            // The band's statement, a size up from the other section heads:
-            // on the pink flood it answers the hero's scale.
-            sx={{
-              maxWidth: { xs: '18ch', lg: '20ch' },
-              fontSize: 'clamp(2.25rem, 1.2rem + 4vw, 5.5rem)',
-            }}
+            sx={{ maxWidth: { xs: '18ch', lg: '20ch' } }}
           >
             Know what changed about access.
           </Typography>

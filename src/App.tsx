@@ -47,9 +47,9 @@ function App() {
         <CompareTerminal />
         <DiffVersusRun />
         <Features />
-        <Cta />
         <GetStarted />
         <Faq />
+        <Cta />
       </Box>
       <Footer />
     </Box>

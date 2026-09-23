@@ -9,11 +9,13 @@ export const rhythm = {
   /** A band's padding above and below its content. */
   section: { xs: 14, md: 20, xl: 26 },
   /** From a heading and its line to the content they introduce. */
-  intro: { xs: 6, md: 9 },
+  intro: { xs: 6, md: 9, xl: 12 },
   /** Above and below each row of a list, inside its rules. */
-  row: { xs: 4, md: 5 },
+  row: { xs: 4, md: 5, xl: 6 },
+  /** Between two exhibits in one band: a step above intro. */
+  exhibit: { xs: 8, md: 12, xl: 14 },
   /** From a heading to its own line of copy. */
-  heading: 2.5,
+  heading: { xs: 2.5, xl: 3 },
   /**
    * The same, under a display heading at the hero's scale (the hero and the
    * closing band), whose size needs a wider gap to read as one step.

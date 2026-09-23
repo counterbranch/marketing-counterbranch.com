@@ -15,7 +15,6 @@ import {
   glyphIn,
   motionDuration,
   motionEasing,
-  slideIn,
   stampIn,
   type RunPhase,
 } from '../motion.ts'
@@ -46,8 +45,6 @@ const WINDOW_INK = 'var(--mac-window-ink)'
 const START_THRESHOLD = 0.3
 
 /** When each part of the run starts, in ms. */
-const MAIN_CHECK_DELAY = 0
-const HEAD_CHECK_DELAY = 150
 const DENY_DELAY = 600
 const ALLOW_DELAY = 850
 const SUMMARY_DELAY = 1200
@@ -178,8 +175,20 @@ const windowTextSx = {
   overflowWrap: 'anywhere',
 } as const
 
-/** One line of the diff, run edge to edge so its tint reads as a row. */
-function DiffRow({ tint, children }: { tint?: string; children: string }) {
+/**
+ * One line of the diff, run edge to edge so its tint reads as a row. The
+ * diff is monochrome: removed rows fade, the added row is lifted, and only
+ * the run window beside it speaks in the access colours.
+ */
+function DiffRow({
+  tint,
+  muted = false,
+  children,
+}: {
+  tint?: string
+  muted?: boolean
+  children: string
+}) {
   return (
     <Box
       component="span"
@@ -187,6 +196,7 @@ function DiffRow({ tint, children }: { tint?: string; children: string }) {
         display: 'inline-block',
         width: '100%',
         px: 3,
+        ...(muted && { color: MUTED }),
         ...(tint && { backgroundColor: `color-mix(in srgb, ${tint}, transparent)` }),
       }}
     >
@@ -230,7 +240,7 @@ function Caption({ children }: { children: ReactNode }) {
   return (
     <Typography
       variant="body2"
-      sx={{ mb: 1.5, fontSize: { xl: '1rem' }, color: band.inkMuted }}
+      sx={{ mb: 2, fontSize: { xl: '1rem' }, color: band.inkMuted }}
     >
       {children}
     </Typography>
@@ -238,8 +248,8 @@ function Caption({ children }: { children: ReactNode }) {
 }
 
 /**
- * One version's half of the run window: the check slides in, then its
- * decision stamps in under it at display size, in the decision's colour with
+ * One version's half of the run window: the same check on both sides, then
+ * its decision stamps in under it at display size, in the decision's colour with
  * its mark beside it: the same colour and mark pairing as the access grid's
  * callout. A rule in that colour runs down the pane to the badge.
  */
@@ -247,7 +257,6 @@ function VersionPane({
   phase,
   side,
   version,
-  checkDelay,
   decision,
   decisionDelay,
   allowed,
@@ -255,7 +264,6 @@ function VersionPane({
   phase: RunPhase
   side: string
   version: string
-  checkDelay: number
   decision: string
   decisionDelay: number
   allowed: boolean
@@ -305,12 +313,7 @@ function VersionPane({
         </Box>
         <Box
           component="p"
-          sx={{
-            ...windowTextSx,
-            mt: 1,
-            fontSize: { xs: '0.8125rem', xl: '0.9375rem' },
-            ...arrivalSx(phase, slideIn, checkDelay),
-          }}
+          sx={{ ...windowTextSx, mt: 1, fontSize: { xs: '0.8125rem', xl: '0.9375rem' } }}
         >
           check viewer → read private-document
         </Box>
@@ -400,22 +403,20 @@ export default function DiffVersusRun() {
   return (
     <Section id="more-than-a-diff" tone="navy">
       <Container maxWidth={false} sx={pageColumn} data-strip="diff-vs-run">
-        {/* The claim and the graph that draws it, side by side from lg. */}
+        {/* The claim and the figure that draws it, side by side from lg, on
+            the same columns as the two windows below so the grid's left edge
+            is the run window's. */}
         <Box
           sx={{
             display: 'grid',
-            gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'minmax(0, 5fr) minmax(0, 7fr)' },
-            columnGap: 8,
+            gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'minmax(0, 2fr) minmax(0, 3fr)' },
+            columnGap: 4,
             rowGap: rhythm.intro,
             alignItems: 'center',
           }}
         >
           <Box>
-            <Typography
-              variant="h2"
-              component="h2"
-              sx={{ fontSize: 'clamp(2rem, 1.2rem + 2.8vw, 4.5rem)' }}
-            >
+            <Typography variant="h2" component="h2">
               More than a diff.
             </Typography>
             <Typography
@@ -428,12 +429,11 @@ export default function DiffVersusRun() {
                 textWrap: 'pretty',
               }}
             >
-              Counterbranch runs the same permission checks against your before-and-after
-              authorization logic and shows what became allowed or denied. A diff shows what changed
-              in the rules. An executed comparison shows what changed in access.
+              A diff shows what changed in the rules. An executed comparison shows what changed in
+              access.
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: { lg: 'flex-end' } }}>
+          <Box sx={{ minWidth: 0 }}>
             <AccessGrid />
           </Box>
         </Box>
@@ -449,7 +449,7 @@ export default function DiffVersusRun() {
             gridTemplateRows: { lg: 'auto 1fr' },
             gridAutoFlow: { lg: 'column' },
             columnGap: 4,
-            mt: rhythm.intro,
+            mt: rhythm.exhibit,
           }}
         >
           <Caption>What a code review tool sees</Caption>
@@ -466,15 +466,15 @@ export default function DiffVersusRun() {
               >
                 <DiffRow>{'  allow {'}</DiffRow>
                 {'\n'}
-                <DiffRow tint={`${palette.secondary.main} 18%`}>
+                <DiffRow tint="currentColor 6%" muted>
                   {'-   input.user.role == "viewer"'}
                 </DiffRow>
                 {'\n'}
-                <DiffRow tint={`${palette.secondary.main} 18%`}>{'-   input.document.public'}</DiffRow>
-                {'\n'}
-                <DiffRow tint={`${palette.primary.main} 14%`}>
-                  {'+   input.user.role == "viewer"'}
+                <DiffRow tint="currentColor 6%" muted>
+                  {'-   input.document.public'}
                 </DiffRow>
+                {'\n'}
+                <DiffRow tint="currentColor 12%">{'+   input.user.role == "viewer"'}</DiffRow>
                 {'\n'}
                 <DiffRow>{'  }'}</DiffRow>
               </Box>
@@ -482,7 +482,7 @@ export default function DiffVersusRun() {
             </MacWindow>
           </Box>
 
-          <Box sx={{ mt: { xs: 5, lg: 0 } }}>
+          <Box sx={{ mt: { xs: 6, lg: 0 } }}>
             <Caption>What Counterbranch runs</Caption>
           </Box>
           <Box ref={runPane} sx={{ minWidth: 0 }}>
@@ -508,7 +508,6 @@ export default function DiffVersusRun() {
                   phase={phase}
                   side="Before"
                   version="main"
-                  checkDelay={MAIN_CHECK_DELAY}
                   decision="DENY"
                   decisionDelay={DENY_DELAY}
                   allowed={false}
@@ -517,26 +516,35 @@ export default function DiffVersusRun() {
                   phase={phase}
                   side="After"
                   version="pr-142"
-                  checkDelay={HEAD_CHECK_DELAY}
                   decision="ALLOW"
                   decisionDelay={ALLOW_DELAY}
                   allowed
                 />
               </Box>
               <ImpactBar>
+                {/* Three facts that wrap whole on a narrow window. */}
                 <Box
                   key={runKey}
                   component="span"
-                  sx={{ display: 'inline-block', ...arrivalSx(phase, glyphIn, SUMMARY_DELAY) }}
+                  sx={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    columnGap: '3ch',
+                    ...arrivalSx(phase, glyphIn, SUMMARY_DELAY),
+                  }}
                 >
-                  <Box component="span" sx={{ color: MUTED }}>
-                    {'Access impact: '}
+                  <Box component="span">
+                    <Box component="span" sx={{ color: MUTED }}>
+                      {'Access impact: '}
+                    </Box>
+                    1 decision changed
                   </Box>
-                  {'1 decision changed   DENY → '}
-                  <Box component="span" sx={verdictSx}>
-                    ALLOW
+                  <Box component="span">
+                    {'DENY → '}
+                    <Box component="span" sx={verdictSx}>
+                      ALLOW
+                    </Box>
                   </Box>
-                  {'   '}
                   <Box component="span" sx={verdictSx}>
                     VIOLATION
                   </Box>

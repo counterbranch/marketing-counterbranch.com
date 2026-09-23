@@ -39,6 +39,13 @@ interface SlotWordProps {
   paused?: boolean
   /** How long each word rests before the reel rolls on, in ms. */
   dwell?: number
+  /**
+   * How long the window takes to resize to the next word, in ms. Must not
+   * exceed motionDuration.reel: a growing window has to be open before the
+   * word lands, and a shrinking one closes in with a delay of reel minus
+   * this.
+   */
+  windowMs?: number
 }
 
 /**
@@ -73,6 +80,7 @@ export default function SlotWord({
   tracking = '0',
   paused = false,
   dwell = reelDwell,
+  windowMs = motionDuration.reelWindow,
 }: SlotWordProps) {
   const prefersReducedMotion = usePrefersReducedMotion()
   const rootRef = useRef<HTMLSpanElement>(null)
@@ -163,11 +171,11 @@ export default function SlotWord({
   // the window opens first and the word rolls into a space already made;
   // when it is narrower, the window waits for the word to land, then closes
   // in around it.
-  const windowDelay = current >= previous ? 0 : motionDuration.reel - motionDuration.reelWindow
+  const windowDelay = current >= previous ? 0 : motionDuration.reel - windowMs
   const roll = animated ? `transform ${motionDuration.reel}ms ${motionEasing.decel}` : 'none'
   const resize = (property: string) =>
     animated
-      ? `${property} ${motionDuration.reelWindow}ms ${motionEasing.decel} ${windowDelay}ms`
+      ? `${property} ${windowMs}ms ${motionEasing.decel} ${windowDelay}ms`
       : 'none'
 
   return (

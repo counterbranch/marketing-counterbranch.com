@@ -1,5 +1,6 @@
 import Box from '@mui/material/Box'
 import { useTheme } from '@mui/material/styles'
+import type { SxProps, Theme } from '@mui/material/styles'
 import type { CSSProperties, ReactNode } from 'react'
 import { MONO_FONT } from './DiffVersusRun.tsx'
 import { displayFont } from '../theme.ts'
@@ -22,9 +23,9 @@ import {
  * prepared checks are squares, one per check, in rows from the most
  * privileged role down to viewer: allowed checks are filled cyan, denied
  * ones are open outlines, so what is allowed steps down from the top left.
- * The one check that changed is split, cyan and pink, and ringed. A callout
- * leads from it to the two decisions, DENY on main and ALLOW on pr-142, and
- * the verdict.
+ * The one check that changed is filled pink and ringed. A callout leads
+ * from it to the two decisions, DENY on main and ALLOW on pr-142, and the
+ * verdict.
  *
  * Each figure draws once, the first time it is on screen, then settles. The
  * first render is the finished figure, so the prerendered page, visitors
@@ -72,6 +73,9 @@ const CELLS = Array.from({ length: COLS * ROWS }, (_, i) => ({
 /** Stroke of an open square, a ring and the callout's lines. */
 const STROKE = 3
 
+/** Parts left out on phones, where the figure is too small to read them. */
+const PHONE_HIDDEN = { display: { xs: 'none', sm: 'inline' } } as const
+
 /** A label in the terminal's face, sized per breakpoint in viewBox units. */
 function Mono({
   x,
@@ -80,6 +84,7 @@ function Mono({
   size,
   anchor = 'start',
   bold = false,
+  sx,
   children,
 }: {
   x: number
@@ -88,6 +93,8 @@ function Mono({
   size: Record<string, number>
   anchor?: 'start' | 'end'
   bold?: boolean
+  /** Further styles, such as hiding the label at a breakpoint. */
+  sx?: SxProps<Theme>
   children: ReactNode
 }) {
   return (
@@ -98,7 +105,7 @@ function Mono({
       y={y}
       textAnchor={anchor}
       fill={fill}
-      sx={{ fontFamily: MONO_FONT, fontSize: size, ...(bold && { fontWeight: 700 }) }}
+      sx={[{ fontFamily: MONO_FONT, fontSize: size, ...(bold && { fontWeight: 700 }) }, ...(Array.isArray(sx) ? sx : [sx])]}
     >
       {children}
     </Box>
@@ -187,7 +194,7 @@ function Figure({
 }: {
   label: string
   viewBox: string
-  maxWidth: number | Record<string, number>
+  maxWidth: number | Record<string, number | string>
   playMs: number
   /** The figure's styles per phase: what is hidden while armed, what plays. */
   motion: (phase: RunPhase) => object
@@ -195,7 +202,8 @@ function Figure({
 }) {
   const { ref, phase } = useArrivalPhase<HTMLElement>(THRESHOLD, playMs)
   return (
-    <Box ref={ref} component="figure" sx={{ m: 0, width: '100%', maxWidth }}>
+    // A plain box: the svg below carries the figure's name.
+    <Box ref={ref} sx={{ width: '100%', maxWidth }}>
       <Box
         component="svg"
         viewBox={viewBox}
@@ -229,8 +237,8 @@ function Figure({
 }
 
 /** One part's entrance: `delay` in ms, or a CSS value such as a variable. */
-const play = (frames: string, ms: number, delay: number | string) =>
-  `${frames} ${ms}ms ${motionEasing.decel} ${typeof delay === 'number' ? `${delay}ms` : delay} both`
+const play = (frames: string, ms: number, delay: number | string, easing: string = motionEasing.decel) =>
+  `${frames} ${ms}ms ${easing} ${typeof delay === 'number' ? `${delay}ms` : delay} both`
 
 /** A per-element delay, read by a part's animation as `var(--d)`. */
 const delayVar = (ms: number) => ({ '--d': `${ms}ms` }) as CSSProperties
@@ -243,10 +251,6 @@ const openSquare = (cell: number) => (x: number, y: number) => {
   const side = cell - STROKE
   return `M${x + inset} ${y + inset}h${side}v${side}h${-side}z`
 }
-/** The top-left half of a cell: main's decision. */
-const mainHalf = (cell: number) => (x: number, y: number) => `M${x} ${y}h${cell}L${x} ${y + cell}z`
-/** The bottom-right half of a cell: pr-142's decision. */
-const headHalf = (cell: number) => (x: number, y: number) => `M${x + cell} ${y}v${cell}H${x}z`
 
 /**
  * Many cells as one path, so the grid costs a few elements rather than one
@@ -260,8 +264,9 @@ const cellsPath = (
 ) => cells.map(({ col, row }) => shape(x(col), y(row))).join('')
 
 /**
- * The one check that changed, drawn over its open square: main's half in
- * pink, pr-142's in cyan, and a ring in the band's ink so it is found first.
+ * The one check that changed, drawn over its open square: filled pink, the
+ * page's colour for a decision that changed, and ringed in the band's ink so
+ * it is found first. The two decisions themselves live in the callout.
  */
 function ChangedCell({
   x,
@@ -269,20 +274,17 @@ function ChangedCell({
   cell,
   band,
   pink,
-  cyan,
 }: {
   x: number
   y: number
   cell: number
   band: BandPalette
   pink: string
-  cyan: string
 }) {
   const gap = cell * 0.16
   return (
     <Box component="g" data-part="flip">
-      <path d={mainHalf(cell)(x, y)} fill={pink} />
-      <path d={headHalf(cell)(x, y)} fill={cyan} />
+      <path d={solid(cell)(x, y)} fill={pink} />
       <rect
         x={x - gap}
         y={y - gap}
@@ -303,9 +305,16 @@ const GRID_X = 28
 const GRID_Y = 100
 const GRID_WIDTH = (COLS - 1) * PITCH + CELL
 const GRID_HEIGHT = (ROWS - 1) * PITCH + CELL
-const LABEL = { xs: 30, sm: 24 }
-const WORD = { xs: 52, sm: 44 }
-const PLATE_WORD = { xs: 26 }
+const LABEL = { xs: 34, sm: 24 }
+const WORD = { xs: 56, sm: 44 }
+const PLATE_WORD = { xs: 28 }
+
+/**
+ * The figure's frame: the grid's left edge, the label cap-tops, the right
+ * edge the counter label sits on, and just under the plate. The viewBox is
+ * cut to it, so the figure has no dead margin against its column.
+ */
+const FRAME = { left: GRID_X, top: 32, right: 1190, bottom: 550 }
 
 const cellX = (col: number) => GRID_X + col * PITCH
 const cellY = (row: number) => GRID_Y + row * PITCH
@@ -316,14 +325,18 @@ const cellY = (row: number) => GRID_Y + row * PITCH
  * to pr-142's. The check's name sits over the rows and the verdict under.
  */
 const CALLOUT = {
-  node: 830,
+  node: 800,
   nodeSize: 12,
   rowGap: 70,
   badge: 34,
-  badgeX: 879,
-  textX: 914,
-  wordX: 1034,
-  plate: { width: 210, height: 44 },
+  badgeX: 849,
+  /** The callout's one left edge: the badges', the check name's and the plate's. */
+  left: 832,
+  textX: 882,
+  wordX: 1016,
+  /** The frame's right edge, which the plate runs to. */
+  right: FRAME.right,
+  plate: { width: FRAME.right - 832, height: 44 },
 }
 
 /** When the navy band's figure's parts arrive, in ms. */
@@ -331,9 +344,9 @@ const GRID_TIMING = {
   column: 15,
   scan: 400,
   scanMs: 650,
-  flip: 1000,
-  leader: 1100,
-  node: 1300,
+  flip: 1040,
+  leader: 1140,
+  node: 1320,
   branches: 1350,
   badges: 1600,
   labels: 1650,
@@ -345,7 +358,8 @@ const GRID_TIMING = {
  * The navy band's figure: the 128 checks and the callout on the one that
  * changed. It plays in the order the product works: main's decisions land a
  * column at a time, pr-142's run scans across them, the one check that
- * changed splits and is ringed, and the callout draws out to its decisions.
+ * changed fills pink and is ringed, and the callout draws out to its
+ * decisions.
  */
 export function AccessGrid() {
   const palette = useTheme().vars.palette
@@ -368,7 +382,8 @@ export function AccessGrid() {
     ...(phase === 'armed' && { '& [data-part]': { opacity: 0 } }),
     ...(phase === 'playing' && {
       '& [data-part="main"]': { animation: play(glyphIn, 160, 'var(--d)') },
-      '& [data-scan]': { animation: play(sweepAcross, t.scanMs, t.scan) },
+      // The scan crosses the grid at one speed, so the flip lands as it passes.
+      '& [data-scan]': { animation: play(sweepAcross, t.scanMs, t.scan, 'linear') },
       '& [data-part="flip"]': { animation: play(nodeIn, 200, t.flip) },
       '& [data-part="leader"]': { animation: play(drawLine, 220, t.leader) },
       '& [data-part="node"]': { animation: play(nodeIn, 160, t.node) },
@@ -381,9 +396,9 @@ export function AccessGrid() {
 
   return (
     <Figure
-      label="All 128 prepared permission checks drawn as a grid: allowed checks filled, denied ones open. The one check that changed, viewer read private-document, is split and ringed, and a callout leads from it to its two decisions: denied on main, allowed on pr-142. Verdict: violation."
-      viewBox="0 0 1200 560"
-      maxWidth={{ xs: 720, xl: 900 }}
+      label="All 128 prepared permission checks drawn as a grid: allowed checks filled, denied ones open. The one check that changed, viewer read private-document, is filled pink and ringed, and a callout leads from it to its two decisions: denied on main, allowed on pr-142. Verdict: violation."
+      viewBox={`${FRAME.left} ${FRAME.top} ${FRAME.right - FRAME.left} ${FRAME.bottom - FRAME.top}`}
+      maxWidth={{ xs: 720, lg: 'none' }}
       playMs={t.done + 60}
       motion={motion}
     >
@@ -407,7 +422,7 @@ export function AccessGrid() {
       })}
 
       {/* pr-142's run: a scan line across the grid, then the one check that
-          changed splits where it passed. */}
+          changed fills pink where it passed. */}
       <Box
         component="rect"
         data-scan
@@ -419,7 +434,7 @@ export function AccessGrid() {
         style={{ '--sweep': `${GRID_WIDTH - STROKE}px` } as CSSProperties}
         sx={{ opacity: 0 }}
       />
-      <ChangedCell x={cx} y={cellY(CHANGED.row)} cell={CELL} band={band} pink={pink} cyan={cyan} />
+      <ChangedCell x={cx} y={cellY(CHANGED.row)} cell={CELL} band={band} pink={pink} />
 
       {/* The callout. */}
       <Box
@@ -469,16 +484,18 @@ export function AccessGrid() {
       <Word x={c.wordX} y={bottomY + 16} fill={cyan} size={WORD}>
         ALLOW
       </Word>
-      <Mono x={c.node} y={topY - c.badge / 2 - 58} fill={band.ink} size={LABEL} bold>
+      {/* The check's name and the verdict are left out on phones, where the
+          run window beneath carries both. */}
+      <Mono x={c.left} y={topY - c.badge / 2 - 58} fill={band.ink} size={LABEL} bold sx={PHONE_HIDDEN}>
         viewer → read
       </Mono>
-      <Mono x={c.node} y={topY - c.badge / 2 - 26} fill={band.ink} size={LABEL} bold>
+      <Mono x={c.left} y={topY - c.badge / 2 - 26} fill={band.ink} size={LABEL} bold sx={PHONE_HIDDEN}>
         private-document
       </Mono>
-      <Box component="g" data-part="plate">
-        <rect x={c.node} y={plateY} width={c.plate.width} height={c.plate.height} fill={pink} />
+      <Box component="g" data-part="plate" sx={PHONE_HIDDEN}>
+        <rect x={c.left} y={plateY} width={c.plate.width} height={c.plate.height} fill={pink} />
         <Word
-          x={c.node + c.plate.width / 2}
+          x={c.left + c.plate.width / 2}
           y={plateY + c.plate.height / 2 + 9}
           fill={palette.secondary.contrastText}
           size={PLATE_WORD}
@@ -492,7 +509,7 @@ export function AccessGrid() {
       <Mono x={GRID_X} y={64} fill={band.inkMuted} size={LABEL}>
         128 prepared checks
       </Mono>
-      <Mono x={1200} y={64} fill={palette.secondary.light} size={LABEL} anchor="end">
+      <Mono x={c.right} y={64} fill={palette.secondary.light} size={LABEL} anchor="end">
         1 changed
       </Mono>
     </Figure>
@@ -509,13 +526,13 @@ const RUN_WIDTH = RUN_X * 2 + (COLS - 1) * RUN_PITCH + RUN_CELL
 const RUN_HEIGHT = RUN_Y + (ROWS - 1) * RUN_PITCH + RUN_CELL + 58
 
 /** When the closing band's figure's parts arrive, in ms. */
-const RUN_TIMING = { sweep: 150, sweepMs: 900, flip: 950, labels: 1150, done: 1310 }
+const RUN_TIMING = { sweep: 150, sweepMs: 900, flip: 1060, labels: 1230, done: 1400 }
 
 /**
  * The closing band's figure: your next PR's 128 checks, open squares until
  * the run sweeps across them and fills the allowed ones, and the one that
- * changed splits and is ringed. Drawn with the navy band's inks: the closing
- * band sets it on a navy plate.
+ * changed fills pink and is ringed. Drawn with the navy band's inks: the
+ * closing band sets it on a navy plate.
  */
 export function RunGrid() {
   const palette = useTheme().vars.palette
@@ -527,7 +544,7 @@ export function RunGrid() {
   const motion = (phase: RunPhase) => ({
     ...(phase === 'armed' && { '& [data-part]': { opacity: 0 } }),
     ...(phase === 'playing' && {
-      '& [data-part="run"]': { animation: play(wipeIn, t.sweepMs, t.sweep) },
+      '& [data-part="run"]': { animation: play(wipeIn, t.sweepMs, t.sweep, 'linear') },
       '& [data-part="flip"]': { animation: play(nodeIn, 220, t.flip) },
       '& [data-part="label"]': { animation: play(lineIn, 160, t.labels) },
     }),
@@ -539,7 +556,7 @@ export function RunGrid() {
 
   return (
     <Figure
-      label="Your next PR's 128 prepared checks, run against main: the run fills in the allowed ones, and the one decision that changed is split and ringed."
+      label="Your next PR's 128 prepared checks, run against main: the run fills in the allowed ones, and the one decision that changed is filled pink and ringed."
       viewBox={`0 0 ${RUN_WIDTH} ${RUN_HEIGHT}`}
       maxWidth={{ xs: 520, xl: 640 }}
       playMs={t.done + 60}
@@ -567,14 +584,7 @@ export function RunGrid() {
           fill={cyan}
         />
       </Box>
-      <ChangedCell
-        x={runX(CHANGED.col)}
-        y={runY(CHANGED.row)}
-        cell={RUN_CELL}
-        band={band}
-        pink={pink}
-        cyan={cyan}
-      />
+      <ChangedCell x={runX(CHANGED.col)} y={runY(CHANGED.row)} cell={RUN_CELL} band={band} pink={pink} />
       <Mono x={RUN_X} y={RUN_HEIGHT - 12} fill={band.inkMuted} size={RUN_LABEL}>
         128 checks, 1 changed
       </Mono>

@@ -7,22 +7,20 @@ import Box from '@mui/material/Box'
 import Section from './Section.tsx'
 import { RunGrid } from './AccessGrid.tsx'
 import { floodActionSx, floodOutlineSx } from './floodButtons.ts'
-import { useInView } from '../hooks/useInView.ts'
-import { revealSx } from '../motion.ts'
 import { links } from '../links.ts'
 import { pageColumn, rhythm } from '../rhythm.ts'
 
 /**
  * The closing band answers the hero: the cyan flood (in both schemes), the
- * same flush-left poster on the same grid, and a heading at the hero's scale,
- * so the page ends on the statement it opened with. Beside it, from md, the
- * access grid of your next PR's checks being run. Every word
- * here repeats a claim the page has already made.
+ * same flush-left poster on the same grid, the hero's two actions, and a
+ * heading at the hero's scale, so the page ends on the statement it opened
+ * with. Beside it, from md, the access grid of your next PR's checks being
+ * run, on a navy plate. Every word here repeats a claim the page has already
+ * made.
  */
 export default function Cta() {
   const palette = useTheme().vars.palette
   const flood = palette.flood
-  const { ref, inView } = useInView<HTMLDivElement>()
 
   return (
     <Section tone="flood">
@@ -37,7 +35,7 @@ export default function Cta() {
           alignItems: 'center',
         }}
       >
-        <Box ref={ref} sx={revealSx(inView)}>
+        <Box>
           <Typography
             variant="h2"
             sx={{
@@ -63,7 +61,8 @@ export default function Cta() {
           <Stack
             direction={{ xs: 'column', sm: 'row' }}
             spacing={2}
-            sx={{ mt: rhythm.intro, width: { xs: '100%', sm: 'auto' } }}
+            // Pinned below xl: the buttons belong to the copy above them.
+            sx={{ mt: { xs: 6, md: 9 }, width: { xs: '100%', sm: 'auto' } }}
           >
             <Button
               variant="contained"
@@ -80,10 +79,10 @@ export default function Cta() {
               color="inherit"
               size="large"
               component="a"
-              href={links.faq}
+              href={links.howItWorks}
               sx={floodOutlineSx(flood)}
             >
-              Read the FAQ
+              See how it works
             </Button>
           </Stack>
         </Box>

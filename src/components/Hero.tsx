@@ -232,14 +232,29 @@ export default function Hero() {
               inset: '0 0 auto',
               height: 20,
               backgroundColor: hero.ink,
-              animation: `heroScrollCue ${motionDuration.entrance * 4}ms ${motionEasing.decel} infinite`,
+              animation: `heroScrollCue ${motionDuration.cue}ms ${motionEasing.inOut} infinite`,
             },
+            // The runner fades in at the top, travels the track, rests at
+            // the foot, and fades out there, so it points down for most of
+            // its pass.
             '@keyframes heroScrollCue': {
-              '0%': { transform: 'translateY(-20px)' },
-              '75%, 100%': { transform: 'translateY(56px)' },
+              '0%': { transform: 'translateY(-20px)', opacity: 0 },
+              '14%': { opacity: 1 },
+              '70%': { transform: 'translateY(36px)', opacity: 1 },
+              '86%, 100%': { transform: 'translateY(56px)', opacity: 0 },
             },
+            // Gone once the visitor has started down: fades over the first
+            // 160px of scroll. Browsers without scroll-driven animations
+            // keep it. The timeline is set after the shorthand, which
+            // would reset it.
+            '@supports (animation-timeline: scroll())': {
+              animation: 'heroCueOut linear both',
+              animationTimeline: 'scroll(root)',
+              animationRange: '0px 160px',
+            },
+            '@keyframes heroCueOut': { to: { opacity: 0 } },
             '@media (prefers-reduced-motion: reduce)': {
-              '&::after': { animation: 'none', transform: 'translateY(18px)' },
+              '&::after': { animation: 'none', transform: 'translateY(36px)' },
             },
           }}
         />

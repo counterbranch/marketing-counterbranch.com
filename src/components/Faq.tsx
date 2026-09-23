@@ -98,7 +98,7 @@ export default function Faq() {
         }}
       >
         <Box sx={{ position: { lg: 'sticky' }, top: { lg: 96 } }}>
-          <Typography variant="h2" sx={{ fontSize: 'clamp(2rem, 1.2rem + 2.8vw, 4.5rem)' }}>
+          <Typography variant="h2">
             Before you install.
           </Typography>
           <Typography

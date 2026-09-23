@@ -18,9 +18,19 @@ export const motionDuration = {
   /**
    * The reel window resizing to the next word. Shorter than the roll so a
    * growing window is at full width before the word lands, and a shrinking
-   * one waits until the word has landed before closing in.
+   * one starts once the outgoing word is nearly out of the window and
+   * finishes as the new one lands.
    */
   reelWindow: 240,
+  /**
+   * The window resizing to the next entry of a phrase reel (the install
+   * heading's chores), whose entries differ in width by up to about 240px
+   * at 1440: half the speed of the headline's, still inside the roll so a
+   * growing window is fully open before the phrase lands.
+   */
+  reelWindowPhrase: 360,
+  /** One pass of the hero's scroll cue. */
+  cue: 2200,
   /** A command typed out at a terminal prompt, a character per step. */
   typing: 900,
   /** One on-and-off cycle of a resting terminal cursor. */
@@ -30,10 +40,19 @@ export const motionDuration = {
 export const motionEasing = {
   /** Confident, natural deceleration for arrivals. */
   decel: 'cubic-bezier(0.16, 1, 0.3, 1)',
+  /** Symmetric ease for a mark that travels and returns. */
+  inOut: 'cubic-bezier(0.45, 0, 0.55, 1)',
 } as const
 
 /** How long each word rests in the headline reel before it rolls, in ms. */
 export const reelDwell = 2000
+
+/**
+ * Dwell for a reel entry that is a phrase rather than a word (the install
+ * heading's chores): twice the headline's, so three or four words can be
+ * read before the next rolls in.
+ */
+export const reelDwellPhrase = 4000
 
 /** Delay between successive hero entrance stages, in ms. */
 export const motionStagger = 80
@@ -227,7 +246,7 @@ export const sweepAcross = keyframes`
     opacity: 1;
     transform: translateX(0);
   }
-  90% {
+  96% {
     opacity: 1;
   }
   to {
@@ -279,18 +298,3 @@ export function heroStageSx(index: number): SxProps<Theme> {
   }
 }
 
-/**
- * Scroll-triggered reveal, driven by the `useInView` hook. Fires once and
- * animates opacity + transform only.
- */
-export function revealSx(inView: boolean): SxProps<Theme> {
-  return {
-    opacity: inView ? 1 : 0,
-    transform: inView ? 'none' : 'translateY(16px)',
-    transition: `opacity ${motionDuration.base}ms ${motionEasing.decel}, transform ${motionDuration.base}ms ${motionEasing.decel}`,
-    [reduceMotion]: {
-      transition: 'opacity 1ms linear',
-      transform: 'none',
-    },
-  }
-}

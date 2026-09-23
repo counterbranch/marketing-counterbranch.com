@@ -275,6 +275,9 @@ const theme = createTheme({
       textWrap: 'balance',
       letterSpacing: '0.07em',
       lineHeight: 1,
+      // Section heads share this size; only the hero (h1) and the closing
+      // band opt up to the display scale inline.
+      fontSize: 'clamp(2rem, 1.2rem + 2.8vw, 4.5rem)',
     },
     h3: {
       fontFamily: displayFont,
@@ -430,10 +433,30 @@ const theme = createTheme({
               props: { color: 'secondary' },
               style: outlinedFamily(theme, { light: '#C4005A', dark: '#FF0074' }),
             },
+            // Every other outlined button is the page's one secondary action:
+            // ink text on an ink hairline, the same family as the flood
+            // buttons. Brand cyan stays for focus rings and link hover.
             {
               props: ({ ownerState }) =>
                 ownerState.color !== 'secondary' && ownerState.color !== 'inherit',
-              style: outlinedFamily(theme, { light: '#00707D', dark: '#00E8FC' }),
+              style: {
+                backgroundColor: 'transparent',
+                color: theme.vars.palette.text.primary,
+                // 0.6 keeps the hairline at 3:1 or better on the page and paper.
+                borderColor: alpha(brandNavy, 0.6),
+                '&:hover': {
+                  backgroundColor: alpha(brandNavy, 0.06),
+                  borderColor: theme.vars.palette.text.primary,
+                },
+                ...theme.applyStyles('dark', {
+                  backgroundColor: 'transparent',
+                  borderColor: alpha('#FFFFFF', 0.45),
+                  '&:hover': {
+                    backgroundColor: alpha('#FFFFFF', 0.08),
+                    borderColor: theme.vars.palette.text.primary,
+                  },
+                }),
+              },
             },
           ],
         }),
