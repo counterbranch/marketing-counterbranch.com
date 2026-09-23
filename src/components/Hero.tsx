@@ -4,24 +4,14 @@ import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import { useTheme } from '@mui/material/styles'
+import type { ReactNode } from 'react'
 import SlotWord from './SlotWord.tsx'
 import { floodActionSx, floodOutlineSx } from './floodButtons.ts'
 import { srOnly } from '../a11y.ts'
 import { pageColumn, rhythm } from '../rhythm.ts'
 import { heroStageSx, motionDuration, motionEasing } from '../motion.ts'
 import { links } from '../links.ts'
-
-/** Where the access changes happen. The first is what rests on screen. */
-const REEL_WORDS = [
-  'PRs',
-  'pipelines',
-  'releases',
-  'terminal',
-  'code reviews',
-  'agent workflows',
-  'local development',
-  'CLI',
-] as const
+import { REEL_WORDS } from '../reel.ts'
 
 /**
  * The reel is aria-hidden, so the heading also carries the whole sentence for
@@ -39,7 +29,16 @@ const HEADLINE_FOR_SCREEN_READERS =
  * reel window grows to the right from a fixed start instead of re-centring
  * on every roll.
  */
-export default function Hero() {
+export default function Hero({
+  aside,
+}: {
+  /**
+   * Something to show beside the headline from lg, such as a live run. The
+   * page as shipped has none; a variant page uses it to put the product in
+   * the first screen.
+   */
+  aside?: ReactNode
+} = {}) {
   const theme = useTheme()
   // Cyan with dark ink in the light scheme, near-black with light ink in the
   // dark one. Every colour below is a CSS variable, so the switch is instant.
@@ -85,8 +84,21 @@ export default function Hero() {
           background: hero.wash,
         }}
       />
-      <Container maxWidth={false} sx={[pageColumn, { position: 'relative', zIndex: 1 }]}>
-        <Stack spacing={{ xs: 5, md: 6 }} sx={{ alignItems: 'flex-start' }}>
+      <Container
+        maxWidth={false}
+        sx={[
+          pageColumn,
+          { position: 'relative', zIndex: 1 },
+          Boolean(aside) && {
+            display: 'grid',
+            gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'repeat(2, minmax(0, 1fr))' },
+            columnGap: { lg: 8, xl: 12 },
+            rowGap: 8,
+            alignItems: 'center',
+          },
+        ]}
+      >
+        <Stack spacing={{ xs: 5, md: 6 }} sx={{ alignItems: 'flex-start', minWidth: 0 }}>
           <Stack spacing={rhythm.display} sx={{ alignItems: 'flex-start', alignSelf: 'stretch' }}>
             <Typography
               variant="h1"
@@ -95,7 +107,9 @@ export default function Hero() {
                 // in your" still fits the widest column on one line, so wide
                 // screens get two lines plus the reel instead of stranding "in
                 // your" on its own.
-                fontSize: 'clamp(2.5rem, 1.2rem + 4.8vw, 6rem)',
+                fontSize: aside
+                  ? 'clamp(2.5rem, 1.2rem + 3.2vw, 4.5rem)'
+                  : 'clamp(2.5rem, 1.2rem + 4.8vw, 6rem)',
                 ...heroStageSx(0),
               }}
             >
@@ -186,6 +200,7 @@ export default function Hero() {
             </Typography>
           </Stack>
         </Stack>
+        {aside && <Box sx={{ minWidth: 0, ...heroStageSx(4) }}>{aside}</Box>}
       </Container>
 
       {/* The hero's lower edge: the scroll cue, centred on the screen. */}

@@ -1,4 +1,4 @@
-import { useId, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import type { ReactNode } from 'react'
 import { flushSync } from 'react-dom'
 import Box from '@mui/material/Box'
@@ -40,6 +40,8 @@ interface DiffLine {
 
 interface Example {
   key: string
+  /** Opens this example from a link: #review-<slug>. */
+  slug: string
   tab: string
   file: string
   lines: DiffLine[]
@@ -60,6 +62,7 @@ interface Example {
 const EXAMPLES: Example[] = [
   {
     key: 'custom',
+    slug: 'custom-auth',
     tab: 'Custom auth',
     file: 'src/auth/can-read.ts',
     lines: [
@@ -74,6 +77,7 @@ const EXAMPLES: Example[] = [
   },
   {
     key: 'opa',
+    slug: 'opa',
     tab: 'OPA',
     file: 'policy/authz.rego',
     lines: [
@@ -89,6 +93,7 @@ const EXAMPLES: Example[] = [
   },
   {
     key: 'cedar',
+    slug: 'cedar',
     tab: 'Cedar',
     file: 'policies/documents.cedar',
     lines: [
@@ -105,6 +110,7 @@ const EXAMPLES: Example[] = [
   },
   {
     key: 'openfga',
+    slug: 'openfga',
     tab: 'OpenFGA',
     file: 'authz/model.fga',
     lines: [
@@ -403,6 +409,24 @@ export default function ReviewVersusRun() {
   const band = palette.bands.navy
   const prefersReducedMotion = usePrefersReducedMotion()
   const [selected, setSelected] = useState(0)
+
+  // A link to #review-<slug> (the footer's use cases) lands on that slug's
+  // anchor below, and this opens its example, on arrival and on later hash
+  // changes. The browser does the scrolling, except on arrival at a page
+  // rendered in the browser, where the anchor did not exist yet.
+  useEffect(() => {
+    const open = (arriving: boolean) => {
+      const match = /^#review-([a-z-]+)$/.exec(window.location.hash)
+      const index = match ? EXAMPLES.findIndex((item) => item.slug === match[1]) : -1
+      if (index < 0) return
+      setSelected(index)
+      if (arriving) document.getElementById(`review-${EXAMPLES[index].slug}`)?.scrollIntoView()
+    }
+    open(true)
+    const onHashChange = () => open(false)
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
   const baseId = useId()
   const example = EXAMPLES[selected]
 
@@ -417,7 +441,16 @@ export default function ReviewVersusRun() {
   }
 
   return (
-    <Box sx={{ mt: rhythm.exhibit }}>
+    <Box sx={{ mt: rhythm.exhibit, position: 'relative' }}>
+      {EXAMPLES.map((item) => (
+        <Box
+          key={item.slug}
+          component="span"
+          id={`review-${item.slug}`}
+          aria-hidden
+          sx={{ position: 'absolute', top: 0, scrollMarginTop: 24 }}
+        />
+      ))}
       <MorphStyles />
       <Typography variant="h4" component="h3">
         Review reads it. Counterbranch runs it.

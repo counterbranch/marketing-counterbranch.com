@@ -6,8 +6,11 @@ import { useTheme } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import Section from './Section.tsx'
 import { RunGrid } from './AccessGrid.tsx'
+import SlotWord from './SlotWord.tsx'
 import { floodActionSx, floodOutlineSx } from './floodButtons.ts'
 import { links } from '../links.ts'
+import { srOnly } from '../a11y.ts'
+import { REEL_WORDS, reelSentence } from '../reel.ts'
 import { pageColumn, rhythm } from '../rhythm.ts'
 
 /**
@@ -18,9 +21,14 @@ import { pageColumn, rhythm } from '../rhythm.ts'
  * run, on a navy plate. Every word here repeats a claim the page has already
  * made.
  */
+/** The reel is aria-hidden, so the heading carries the whole sentence once. */
+const CTA_FOR_SCREEN_READERS = reelSentence('See what changes access in your')
+
 export default function Cta() {
-  const palette = useTheme().vars.palette
+  const theme = useTheme()
+  const palette = theme.vars.palette
   const flood = palette.flood
+  const tracking = theme.typography.h2.letterSpacing
 
   return (
     <Section tone="flood">
@@ -36,16 +44,45 @@ export default function Cta() {
         }}
       >
         <Box>
-          <Typography
-            variant="h2"
-            sx={{
-              maxWidth: '16ch',
-              fontSize: 'clamp(2.5rem, 1.2rem + 4.8vw, 6rem)',
-              lineHeight: 0.98,
-            }}
-          >
-            See what your next PR does to access.
-          </Typography>
+          {/* The hero's reel, with its words and settings: the band answers
+              the headline it opened with. The column is a size container so
+              the reel's line fits it. The longest word is about 10.5em; the
+              divisor of 11 leaves room for the plate's padding and the stop. */}
+          <Box sx={{ containerType: 'inline-size' }}>
+            <Typography
+              variant="h2"
+              sx={{
+                // A step under the hero's cap: the band's column is narrower,
+                // and this keeps it to two lines plus the reel, as the hero is.
+                fontSize: 'clamp(2.5rem, 1.2rem + 3.6vw, 5rem)',
+                lineHeight: 0.98,
+              }}
+            >
+              <Box component="span" sx={srOnly}>
+                {CTA_FOR_SCREEN_READERS}
+              </Box>
+              <Box component="span" aria-hidden sx={{ display: 'block' }}>
+                See what changes access in your
+                <Box
+                  component="span"
+                  sx={{
+                    display: 'flex',
+                    mt: '0.16em',
+                    fontSize: 'min(1em, 7.5vw)',
+                    '@supports (width: 1cqi)': { fontSize: 'min(1em, 100cqi / 11)' },
+                  }}
+                >
+                  <SlotWord
+                    words={REEL_WORDS}
+                    plate={flood.plate}
+                    ink={flood.plateInk}
+                    suffix="."
+                    tracking={typeof tracking === 'number' ? `${tracking}px` : tracking}
+                  />
+                </Box>
+              </Box>
+            </Typography>
+          </Box>
           <Typography
             variant="body1"
             sx={{

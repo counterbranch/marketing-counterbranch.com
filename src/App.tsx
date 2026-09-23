@@ -1,6 +1,4 @@
-import Box from '@mui/material/Box'
-import Link from '@mui/material/Link'
-import Header from './components/Header.tsx'
+import PageShell from './components/PageShell.tsx'
 import Hero from './components/Hero.tsx'
 import CompareTerminal from './components/CompareTerminal.tsx'
 import DiffVersusRun from './components/DiffVersusRun.tsx'
@@ -8,51 +6,18 @@ import Features from './components/Features.tsx'
 import Cta from './components/Cta.tsx'
 import GetStarted from './components/GetStarted.tsx'
 import Faq from './components/Faq.tsx'
-import Footer from './components/Footer.tsx'
-import { motionDuration, motionEasing } from './motion.ts'
 
 function App() {
   return (
-    <Box sx={{ position: 'relative' }}>
-      <Link
-        href="#main"
-        sx={(theme) => ({
-          position: 'fixed',
-          top: 8,
-          left: 8,
-          zIndex: theme.zIndex.tooltip + 1,
-          transform: 'translateY(-150%)',
-          bgcolor: 'background.paper',
-          color: 'text.primary',
-          px: 2,
-          py: 1,
-          boxShadow: theme.shadows[4],
-          transition: theme.transitions.create('transform', {
-            duration: motionDuration.fast,
-            easing: motionEasing.decel,
-          }),
-          '&:focus-visible': {
-            transform: 'translateY(0)',
-          },
-          '@media (prefers-reduced-motion: reduce)': {
-            transition: 'none',
-          },
-        })}
-      >
-        Skip to content
-      </Link>
-      <Header />
-      <Box component="main" id="main" tabIndex={-1} sx={{ outline: 'none' }}>
-        <Hero />
-        <CompareTerminal />
-        <DiffVersusRun />
-        <Features />
-        <GetStarted />
-        <Faq />
-        <Cta />
-      </Box>
-      <Footer />
-    </Box>
+    <PageShell>
+      <Hero />
+      <CompareTerminal />
+      <DiffVersusRun />
+      <Features />
+      <GetStarted />
+      <Faq />
+      <Cta />
+    </PageShell>
   )
 }
 
