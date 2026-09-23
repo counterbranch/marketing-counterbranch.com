@@ -169,6 +169,65 @@ export const slideIn = keyframes`
   }
 `
 
+/**
+ * A line drawn from its start. For an SVG path with `pathLength="1"` and a
+ * stroke-dasharray of 1, so every line draws in the same time whatever its
+ * real length. Ends on the path's own (undashed-looking) state.
+ */
+export const drawLine = keyframes`
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+`
+
+/**
+ * A mark appearing in place (a grid cell, a changed check): from under its size and
+ * unseen, anchored on its own centre.
+ */
+export const nodeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+`
+
+/**
+ * A part revealed from its left edge, as a run sweeping across it. Clips
+ * rather than moves, so it holds its place the whole time.
+ */
+export const wipeIn = keyframes`
+  from {
+    opacity: 1;
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0);
+  }
+`
+
+/**
+ * One half of a split square slipping apart from the other, along the
+ * square's diagonal, to rest where it is drawn.
+ */
+export const slipIn = keyframes`
+  from {
+    opacity: 1;
+    transform: translate(-12px, -12px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+`
+
 type Keyframes = typeof slideIn
 
 /**

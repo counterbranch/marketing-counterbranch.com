@@ -42,7 +42,7 @@ function ColorRamp({ label, color }: { label: string; color: PaletteColor }) {
                 </Typography>
               </Box>
               <Box sx={{ px: 1.5, py: 1 }}>
-                <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace', display: 'block' }}>
+                <Typography variant="caption" color="textSecondary" sx={{ fontFamily: 'monospace', display: 'block' }}>
                   {shade.hex}
                 </Typography>
               </Box>
@@ -89,8 +89,8 @@ export default function PaletteSection() {
   const palette = useResolvedPalette()
 
   const alphaTints = [
-    { label: 'primary 6% (Section tone="tinted", light)', hex: alpha(palette.primary.main, 0.06) },
-    { label: 'primary 8% (Section tone="tinted", dark)', hex: alpha(palette.primary.main, 0.08) },
+    { label: 'primary 6% tint', hex: alpha(palette.primary.main, 0.06) },
+    { label: 'primary 8% tint', hex: alpha(palette.primary.main, 0.08) },
     { label: 'primary 14% (feature icon chip)', hex: alpha(palette.primary.main, 0.14) },
     { label: 'primary 50% (card hover border)', hex: alpha(palette.primary.main, 0.5) },
     { label: 'divider', hex: palette.divider },
@@ -146,7 +146,7 @@ export default function PaletteSection() {
                   <Typography variant="caption" sx={{ display: 'block' }}>
                     {tint.label}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ fontFamily: 'monospace' }}>
+                  <Typography variant="caption" color="textSecondary" sx={{ fontFamily: 'monospace' }}>
                     {tint.hex}
                   </Typography>
                 </Box>

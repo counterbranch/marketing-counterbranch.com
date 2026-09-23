@@ -6,13 +6,15 @@ import Container from '@mui/material/Container'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 import Section from './Section.tsx'
-import DiffVersusRun, { MacWindow, MONO_FONT, MUTED } from './DiffVersusRun.tsx'
+import { MacWindow, MONO_FONT, MUTED } from './DiffVersusRun.tsx'
+import { OutcomeGlyph } from './AccessGrid.tsx'
 import { displayFont } from '../theme.ts'
-import { rhythm } from '../rhythm.ts'
+import { pageColumn, rhythm } from '../rhythm.ts'
 import { srOnly } from '../a11y.ts'
 import {
   arrivalSx,
   caretBlink,
+  nodeIn,
   caretOut,
   caretTravel,
   glyphIn,
@@ -34,8 +36,8 @@ type Phase = RunPhase
 /** Share of the terminal that must be on screen before the first run plays. */
 const START_THRESHOLD = 0.35
 
-/** About one step per character of the 71-character command. */
-const TYPE_STEPS = 72
+/** One step per character of the typed line: the 58-character command and its `$ ` prompt. */
+const TYPE_STEPS = 60
 
 /** How far apart the lines of output arrive, in ms. */
 const LINE_STEP = 350
@@ -130,7 +132,7 @@ const EXAMPLE_RUNS: ExampleRun[] = [
         <Pad n={3} />
         {'viewer → read private-document'}
         <Pad n={3} />
-        {verdict('unexpected')}
+        {verdict('VIOLATION')}
       </>
     ),
     meaning: 'One decision changed: a viewer can now read a private document.',
@@ -150,7 +152,7 @@ const EXAMPLE_RUNS: ExampleRun[] = [
         <Pad n={3} />
         {'128 of 128 decisions match main'}
         <Pad n={3} />
-        {verdict('clean')}
+        {verdict('CLEAN')}
       </>
     ),
     meaning: 'No decision changed across the 128 prepared checks.',
@@ -170,7 +172,7 @@ const EXAMPLE_RUNS: ExampleRun[] = [
         <Pad n={3} />
         {'export-report timed out on pr-144'}
         <Pad n={3} />
-        {verdict('not a pass')}
+        {verdict('INCOMPLETE')}
       </>
     ),
     meaning: '127 checks match; 1 check could not finish on pr-144.',
@@ -179,10 +181,14 @@ const EXAMPLE_RUNS: ExampleRun[] = [
 ]
 
 /**
- * Each outcome's colour. `text` is the verdict's ink on the terminal's dark
- * ground, where pink needs the lighter member of its family to read at 4.5:1
- * in both schemes; `swatch` is the full-strength brand colour of the key
- * beside each option, a graphic rather than text.
+ * Each outcome's colour, in every role it plays:
+ * - `text`: the verdict's ink on the terminal's dark ground, where pink needs
+ *   the lighter member of its family to read at 4.5:1 in both schemes;
+ * - `plate`: the chosen option filled with the full-strength colour and set
+ *   in the ink that reads on it (5.1:1 or better on all three);
+ * - `glyph`: the option's grid icon on the page background, the readable
+ *   member of the family in the light scheme (3:1 or better as a graphic);
+ * - `glow`: the terminal's shadow while that run is chosen.
  */
 function useOutcomeInk() {
   const palette = useTheme().vars.palette
@@ -192,13 +198,24 @@ function useOutcomeInk() {
       unchanged: palette.primary.main,
       incomplete: palette.warning.main,
     } satisfies Record<Outcome, string>,
-    swatch: {
+    plate: {
+      changed: { fill: palette.secondary.main, ink: palette.secondary.contrastText },
+      unchanged: { fill: palette.primary.main, ink: palette.primary.contrastText },
+      incomplete: { fill: palette.warning.main, ink: palette.flood.ink },
+    } satisfies Record<Outcome, { fill: string; ink: string }>,
+    glyph: {
+      changed: { light: palette.secondary.dark, dark: palette.secondary.main },
+      unchanged: { light: palette.primary.dark, dark: palette.primary.main },
+      incomplete: { light: palette.warning.dark, dark: palette.warning.main },
+    } satisfies Record<Outcome, { light: string; dark: string }>,
+    glow: {
       changed: palette.secondary.main,
       unchanged: palette.primary.main,
       incomplete: palette.warning.main,
     } satisfies Record<Outcome, string>,
   }
 }
+
 
 /**
  * One line of output. Inline-block so it can rise into place while the real
@@ -333,9 +350,9 @@ function Command({ phase, head }: { phase: Phase; head: string }) {
           $
         </Box>{' '}
         <Box component="span" sx={strong}>
-          counterbranch compare
+          counterbranch run
         </Box>
-        {` --base main --head ${head} --tests ./authz-tests`}
+        {` --repository . --base main --head ${head}`}
       </Box>
       {phase === 'playing' && (
         <Box
@@ -401,11 +418,7 @@ function Transcript({
       {'\n'}
       <Line phase={phase} delay={LOAD_DELAY}>
         <Step />
-        {' Loading 128 prepared permission checks'}
-        <Pad n={9} />
-        <Box component="span" sx={muted}>
-          ./authz-tests
-        </Box>
+        {' Loading 128 prepared permission checks from the repository'}
       </Line>
       {'\n'}
       <Line phase={phase} delay={MAIN_RUN_DELAY}>
@@ -491,7 +504,7 @@ function RunPicker({
 }) {
   const theme = useTheme()
   const palette = theme.vars.palette
-  const swatch = useOutcomeInk().swatch
+  const outcomeInk = useOutcomeInk()
 
   const focusRing = {
     outline: `2px solid ${palette.primary.dark}`,
@@ -502,15 +515,24 @@ function RunPicker({
     }),
   }
 
-  const chosen = {
-    borderColor: palette.hero.plate,
-    backgroundColor: palette.hero.plate,
-    color: palette.hero.plateInk,
-    zIndex: 1,
-    '& [data-summary]': {
-      color: `color-mix(in srgb, ${palette.hero.plateInk} 72%, transparent)`,
-    },
-    '& [data-swatch]': { boxShadow: 'none' },
+  // The chosen option is a plate in its outcome's colour, the same colour
+  // its verdict takes in the terminal; its grid icon's cells pop in as it is
+  // chosen.
+  const chosenFor = (outcome: Outcome) => {
+    const plate = outcomeInk.plate[outcome]
+    return {
+      borderColor: plate.fill,
+      backgroundColor: plate.fill,
+      color: plate.ink,
+      zIndex: 1,
+      '& [data-summary], & [data-glyph]': { color: plate.ink },
+      '& [data-cell]': {
+        transformBox: 'fill-box',
+        transformOrigin: 'center',
+        animation: `${nodeIn} 200ms ${motionEasing.decel} var(--d) both`,
+        [REDUCED_MOTION]: { animation: 'none' },
+      },
+    }
   }
 
   return (
@@ -556,9 +578,16 @@ function RunPicker({
                 easing: motionEasing.decel,
               }),
               '&:hover': { borderColor: palette.text.primary, zIndex: 2 },
-              '&:has(input:checked)': chosen,
+              '& [data-glyph]': {
+                color: outcomeInk.glyph[run.outcome].light,
+                ...theme.applyStyles('dark', { color: outcomeInk.glyph[run.outcome].dark }),
+              },
+              '&:has(input:checked)': chosenFor(run.outcome),
               '&:has(input:focus-visible)': focusRing,
-              [NO_HAS]: { '&[data-chosen="true"]': chosen, '&:focus-within': focusRing },
+              [NO_HAS]: {
+                '&[data-chosen="true"]': chosenFor(run.outcome),
+                '&:focus-within': focusRing,
+              },
               [REDUCED_MOTION]: { transition: 'none' },
             }}
           >
@@ -571,25 +600,15 @@ function RunPicker({
               onChange={() => onChoose(index)}
               sx={srOnly}
             />
-            {/* The outcome's colour, as a key to the verdict in the terminal.
-                On the light page cyan and pink are a graphic here, not text,
-                and the label beside it carries the meaning. */}
-            <Box
-              aria-hidden
-              data-swatch
-              sx={{
-                width: 10,
-                height: 10,
-                backgroundColor: swatch[run.outcome],
-                boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${palette.text.primary} 25%, transparent)`,
-              }}
-            />
+            {/* The outcome's colour, as a key to the verdict in the terminal;
+                the label beside it carries the meaning. */}
+            <OutcomeGlyph outcome={run.outcome} />
             <Box
               component="span"
               sx={{
                 fontFamily: displayFont,
                 fontWeight: 600,
-                fontSize: '0.9375rem',
+                fontSize: { xs: '0.9375rem', xl: '1.0625rem' },
                 lineHeight: 1.2,
                 letterSpacing: '0.12em',
                 textTransform: 'uppercase',
@@ -602,7 +621,7 @@ function RunPicker({
               data-summary
               sx={{
                 gridColumn: '1 / -1',
-                fontSize: '0.875rem',
+                fontSize: { xs: '0.875rem', xl: '1rem' },
                 lineHeight: 1.45,
                 color: palette.text.secondary,
                 textWrap: 'pretty',
@@ -625,8 +644,7 @@ function RunPicker({
  * comments say what the run is for, the command is typed, the prepared checks
  * load and execute against each version, the comparison stamps its verdict,
  * and two more comments say what that means. "Replay run" plays the chosen
- * one again. Under it, DiffVersusRun sets the changed run beside what a code
- * review tool shows of the same change.
+ * one again.
  *
  * The first render is the finished first run, so the prerendered HTML and
  * visitors without JavaScript see its whole transcript, and can still switch
@@ -706,6 +724,7 @@ export default function CompareTerminal() {
   }, [phase, runKey])
 
   const secondaryText = { color: palette.text.secondary }
+  const glow = useOutcomeInk().glow
 
   // The action is outlined in the section's own ink rather than a brand
   // colour, so it never reads as the page's primary action.
@@ -731,7 +750,7 @@ export default function CompareTerminal() {
 
   return (
     <Section id="how-it-works">
-      <Container maxWidth="lg">
+      <Container maxWidth={false} sx={pageColumn}>
         {/* Intro across the top, then the runs and the terminal as one
             control-and-display unit. On phones everything stacks in reading
             order: intro, runs, terminal, note, replay. From lg the runs take
@@ -740,7 +759,7 @@ export default function CompareTerminal() {
         <Typography
           variant="h2"
           component="h2"
-          sx={{ fontSize: 'clamp(2rem, 1.4rem + 2.6vw, 3.5rem)' }}
+          sx={{ fontSize: 'clamp(2rem, 1.2rem + 2.8vw, 4.5rem)' }}
         >
           See what access changed.
         </Typography>
@@ -749,7 +768,7 @@ export default function CompareTerminal() {
           sx={{
             mt: rhythm.heading,
             maxWidth: '46ch',
-            fontSize: { md: '1.125rem' },
+            fontSize: { md: '1.125rem', xl: '1.25rem' },
             ...secondaryText,
             textWrap: 'pretty',
           }}
@@ -768,7 +787,11 @@ export default function CompareTerminal() {
               xs: '"runs" "terminal" "aside"',
               lg: '"runs terminal" "aside terminal"',
             },
-            gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'minmax(0, 340px) minmax(0, 1fr)' },
+            gridTemplateColumns: {
+              xs: 'minmax(0, 1fr)',
+              lg: 'minmax(0, 340px) minmax(0, 1fr)',
+              xl: 'minmax(0, 400px) minmax(0, 1fr)',
+            },
             gridTemplateRows: { lg: 'auto 1fr' },
             columnGap: 6,
             alignItems: 'start',
@@ -781,7 +804,12 @@ export default function CompareTerminal() {
           </Box>
 
           <Box sx={{ gridArea: 'terminal', minWidth: 0, mt: { xs: 3, lg: 0 } }}>
-            <MacWindow ref={terminal} title="counterbranch — zsh" label="Example compare run">
+            <MacWindow
+              ref={terminal}
+              title="counterbranch — zsh"
+              label="Example compare run"
+              glow={glow[EXAMPLE_RUNS[selected].outcome]}
+            >
               {/* Every run is laid in the same cell, so the tallest one sets
                   the window's height and switching never moves the page.
                   Only the chosen one is visible, or read out. */}
@@ -801,7 +829,7 @@ export default function CompareTerminal() {
                         px: { xs: 2, sm: 3 },
                         py: 2.5,
                         fontFamily: MONO_FONT,
-                        fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                        fontSize: { xs: '0.8125rem', sm: '0.875rem', xl: '1rem' },
                         lineHeight: 1.65,
                         // Wrap rather than scroll sideways, so no part of the
                         // run is ever off-screen.
@@ -839,8 +867,6 @@ export default function CompareTerminal() {
             </Button>
           </Box>
         </Box>
-
-        <DiffVersusRun />
       </Container>
     </Section>
   )

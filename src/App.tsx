@@ -2,8 +2,12 @@ import Box from '@mui/material/Box'
 import Link from '@mui/material/Link'
 import Header from './components/Header.tsx'
 import Hero from './components/Hero.tsx'
+import CompareTerminal from './components/CompareTerminal.tsx'
+import DiffVersusRun from './components/DiffVersusRun.tsx'
 import Features from './components/Features.tsx'
 import Cta from './components/Cta.tsx'
+import GetStarted from './components/GetStarted.tsx'
+import Faq from './components/Faq.tsx'
 import Footer from './components/Footer.tsx'
 import { motionDuration, motionEasing } from './motion.ts'
 
@@ -40,8 +44,12 @@ function App() {
       <Header />
       <Box component="main" id="main" tabIndex={-1} sx={{ outline: 'none' }}>
         <Hero />
+        <CompareTerminal />
+        <DiffVersusRun />
         <Features />
         <Cta />
+        <GetStarted />
+        <Faq />
       </Box>
       <Footer />
     </Box>

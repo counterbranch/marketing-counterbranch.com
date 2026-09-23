@@ -2,7 +2,7 @@ import type { HeroPalette } from '../theme.ts'
 
 /**
  * The two actions on a flood surface (the hero and the closing band), styled
- * from the hero's tokens so they switch with the scheme through CSS
+ * from that surface's tokens, which switch with the scheme through CSS
  * variables: the filled action in the surface's ink, and the outlined one as
  * a hairline in that ink. Both keep a 48px target and go full width on phones.
  */

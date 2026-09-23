@@ -23,7 +23,7 @@ export default function SectionBlock({ id, title, description, children }: Secti
               {title}
             </Typography>
             {description ? (
-              <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 720 }}>
+              <Typography variant="body1" color="textSecondary" sx={{ maxWidth: 720 }}>
                 {description}
               </Typography>
             ) : null}

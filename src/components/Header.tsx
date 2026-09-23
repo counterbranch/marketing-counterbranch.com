@@ -17,6 +17,7 @@ import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined'
 import Logo from './Logo.tsx'
 import ColorModeToggle from './ColorModeToggle.tsx'
 import { links } from '../links.ts'
+import { pageColumn } from '../rhythm.ts'
 import { displayFont } from '../theme.ts'
 import { floodActionSx } from './floodButtons.ts'
 
@@ -30,9 +31,9 @@ const drawerLabelSx = {
 } as const
 
 const navItems = [
-  { label: 'Docs', href: links.docs },
-  { label: 'Pricing', href: links.pricing },
-  { label: 'Login', href: links.login },
+  { label: 'How it works', href: links.howItWorks },
+  { label: 'Install', href: links.getStarted },
+  { label: 'FAQ', href: links.faq },
 ]
 
 export default function Header() {
@@ -68,7 +69,7 @@ export default function Header() {
     >
       {/* Same grid as the hero, so the logo and the headline share a left
           edge at every width. */}
-      <Container maxWidth="lg">
+      <Container maxWidth={false} sx={pageColumn}>
         <Toolbar disableGutters sx={{ gap: 1 }}>
           <Link
             href={links.home}
@@ -79,6 +80,28 @@ export default function Header() {
           >
             <Logo />
           </Link>
+          {/* The release status, beside the name it qualifies. Left out on
+              the narrowest phones, where it would push the menu off screen;
+              the hero's free line says it too. */}
+          <Box
+            component="span"
+            sx={(theme) => ({
+              '@media (max-width: 359.95px)': { display: 'none' },
+              ml: 1.5,
+              px: 0.75,
+              py: 0.25,
+              border: '1px solid',
+              borderColor: theme.vars.palette.hero.line,
+              fontFamily: displayFont,
+              fontWeight: 600,
+              fontSize: '0.75rem',
+              lineHeight: 1.4,
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+            })}
+          >
+            Alpha
+          </Box>
           <Box sx={{ flexGrow: 1 }} />
           <Box component="nav" aria-label="Primary" sx={{ display: { xs: 'none', md: 'block' } }}>
             <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
@@ -105,12 +128,13 @@ export default function Header() {
               display: { xs: 'none', sm: 'inline-flex' },
             })}
           >
-            Get started
+            Get started free
           </Button>
           <IconButton
             aria-label="Open menu"
             aria-expanded={menuOpen}
-            aria-controls="mobile-nav"
+            // The drawer's content is only in the page while it is open.
+            aria-controls={menuOpen ? 'mobile-nav' : undefined}
             onClick={() => setMenuOpen(true)}
             sx={{ display: { xs: 'inline-flex', md: 'none' } }}
           >
@@ -141,7 +165,7 @@ export default function Header() {
                 onClick={() => setMenuOpen(false)}
               >
                 <ListItemText
-                  primary="Get started"
+                  primary="Get started free"
                   slotProps={{
                     primary: {
                       sx: [

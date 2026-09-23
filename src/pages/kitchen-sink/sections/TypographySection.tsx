@@ -45,7 +45,7 @@ export default function TypographySection() {
           <Box key={variant}>
             <Typography
               variant="caption"
-              color="text.secondary"
+              color="textSecondary"
               sx={{ display: 'block', mb: 0.5, fontFamily: 'monospace' }}
             >
               {variant}

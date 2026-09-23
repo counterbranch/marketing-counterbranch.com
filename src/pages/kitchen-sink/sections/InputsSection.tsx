@@ -182,13 +182,13 @@ export default function InputsSection() {
         <GroupLabel>Slider & rating</GroupLabel>
         <Grid container spacing={4}>
           <Grid size={{ xs: 12, sm: 4 }}>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
+            <Typography variant="body2" color="textSecondary" gutterBottom>
               Continuous
             </Typography>
             <Slider value={volume} onChange={(_event, value) => setVolume(value as number)} aria-label="Volume" />
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
+            <Typography variant="body2" color="textSecondary" gutterBottom>
               Range with marks
             </Typography>
             <Slider
@@ -201,7 +201,7 @@ export default function InputsSection() {
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
-            <Typography variant="body2" color="text.secondary" gutterBottom>
+            <Typography variant="body2" color="textSecondary" gutterBottom>
               Rating
             </Typography>
             <Rating value={rating} onChange={(_event, value) => setRating(value)} />

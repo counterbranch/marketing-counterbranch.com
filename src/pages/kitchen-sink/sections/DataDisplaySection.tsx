@@ -158,7 +158,7 @@ export default function DataDisplaySection() {
                     <Typography variant="h4" sx={{ fontWeight: 800 }}>
                       {stat.value}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" color="textSecondary">
                       {stat.label}
                     </Typography>
                   </Paper>

@@ -1,6 +1,7 @@
 // Enables typings for `theme.vars` (CSS theme variables) throughout the app.
 import type {} from '@mui/material/themeCssVarsAugmentation'
 import { createTheme, alpha, lighten } from '@mui/material/styles'
+import type { Theme } from '@mui/material/styles'
 import { motionDuration, motionEasing } from './motion.ts'
 
 // Brand
@@ -31,7 +32,7 @@ const darkSurface = '#1A1A1E'
 const heroInk = '#0B1220'
 const heroInkDark = '#F7F7F8'
 
-// Secondary pink and the near-black that reads on it (5.5:1). White on this
+// Secondary pink and the near-black that reads on it (5.1:1). White on this
 // pink is only 3.8:1, so it is never the pairing.
 const brandPink = '#FF0074'
 const brandPinkInk = '#14061A'
@@ -70,18 +71,107 @@ export interface HeroPalette {
   actionHover: string
 }
 
+/**
+ * A band's own surface and inks, for the sections that sit on a brand colour
+ * rather than the page background.
+ */
+export interface BandPalette {
+  background: string
+  ink: string
+  /** Supporting copy; at least 4.5:1 on the background. */
+  inkMuted: string
+  /** Rules and hairlines inside the band. */
+  line: string
+}
+
 declare module '@mui/material/styles' {
   interface Palette {
     hero: HeroPalette
+    /**
+     * The cyan flood in both schemes: the closing band answers the hero with
+     * the brand's own colour even where the dark hero is near-black.
+     */
+    flood: HeroPalette
+    bands: { navy: BandPalette; pink: BandPalette }
   }
   interface PaletteOptions {
     hero?: HeroPalette
+    flood?: HeroPalette
+    bands?: { navy: BandPalette; pink: BandPalette }
+  }
+}
+
+// Ink contrast on the cyan flood: 12.4:1 for ink, 7.8:1 muted, 6.2:1 subtle,
+// 3.7:1 for outlined borders.
+const cyanFlood: HeroPalette = {
+  background: '#00E8FC',
+  // Depth sits low and to the right, balancing the type mass on the left.
+  wash: `radial-gradient(85% 75% at 85% 120%, ${alpha(heroInk, 0.22)} 0%, transparent 60%)`,
+  ink: heroInk,
+  inkMuted: alpha(heroInk, 0.8),
+  inkSubtle: alpha(heroInk, 0.72),
+  line: alpha(heroInk, 0.55),
+  hover: alpha(heroInk, 0.08),
+  // The reel window is ink, like the filled action: black with white text
+  // here, inverted on the dark hero.
+  plate: heroInk,
+  plateInk: '#FFFFFF',
+  action: heroInk,
+  actionInk: '#FFFFFF',
+  actionHover: '#242424',
+}
+
+// The pink band keeps every line of text in the full-strength ink (5.1:1):
+// even a light tint of pink into it drops body copy under 4.5:1, so size and
+// weight carry the hierarchy there instead.
+const pinkBand: BandPalette = {
+  background: brandPink,
+  ink: brandPinkInk,
+  inkMuted: brandPinkInk,
+  line: alpha(brandPinkInk, 0.28),
+}
+
+// The navy band is the logo's shield outline as a surface (light scheme) and
+// the raised paper surface in the neutral dark scheme; light ink reads 14:1
+// and the muted ink 9.5:1 on either.
+const navyInk = '#F7F7F8'
+const navyBand = (background: string): BandPalette => ({
+  background,
+  ink: navyInk,
+  inkMuted: alpha(navyInk, 0.78),
+  line: alpha('#FFFFFF', 0.14),
+})
+
+/** An outlined button in one colour family: `light` for the light scheme, `dark` for the dark one. */
+function outlinedFamily(theme: Theme, family: { light: string; dark: string }) {
+  return {
+    backgroundColor: 'transparent',
+    color: family.light,
+    borderColor: alpha(family.light, 0.45),
+    '&:hover': {
+      backgroundColor: alpha(family.light, 0.06),
+      borderColor: family.light,
+    },
+    ...theme.applyStyles('dark', {
+      backgroundColor: 'transparent',
+      color: family.dark,
+      borderColor: alpha(family.dark, 0.45),
+      '&:hover': {
+        backgroundColor: alpha(family.dark, 0.1),
+        borderColor: family.dark,
+      },
+    }),
   }
 }
 
 const theme = createTheme({
   cssVariables: {
     colorSchemeSelector: 'data-mui-color-scheme',
+  },
+  // MUI's own transitions (the FAQ's accordions, the mobile menu's drawer)
+  // follow the visitor's reduced-motion setting, like the page's motion does.
+  motion: {
+    reducedMotion: 'system',
   },
   colorSchemes: {
     light: {
@@ -113,25 +203,9 @@ const theme = createTheme({
           secondary: alpha(brandNavy, 0.7),
         },
         divider: alpha(brandNavy, 0.12),
-        // Ink contrast on the cyan flood: 12.4:1 for ink, 7.8:1 muted,
-        // 6.2:1 subtle, 3.7:1 for outlined borders.
-        hero: {
-          background: '#00E8FC',
-          // Depth sits low and to the right, balancing the type mass on the left.
-          wash: `radial-gradient(85% 75% at 85% 120%, ${alpha(heroInk, 0.22)} 0%, transparent 60%)`,
-          ink: heroInk,
-          inkMuted: alpha(heroInk, 0.8),
-          inkSubtle: alpha(heroInk, 0.72),
-          line: alpha(heroInk, 0.55),
-          hover: alpha(heroInk, 0.08),
-          // The reel window is ink, like the filled action: black with white
-          // text here, inverted on the dark hero.
-          plate: heroInk,
-          plateInk: '#FFFFFF',
-          action: heroInk,
-          actionInk: '#FFFFFF',
-          actionHover: '#242424',
-        },
+        hero: cyanFlood,
+        flood: cyanFlood,
+        bands: { navy: navyBand(brandNavy), pink: pinkBand },
       },
     },
     dark: {
@@ -175,6 +249,8 @@ const theme = createTheme({
           actionInk: '#000000',
           actionHover: '#DCDCDC',
         },
+        flood: cyanFlood,
+        bands: { navy: navyBand(darkSurface), pink: pinkBand },
       },
     },
   },
@@ -319,85 +395,81 @@ const theme = createTheme({
         // cyan and pink are both too light to read in the light scheme. Each
         // falls back to the accessible member of its own family there and
         // keeps the full-strength brand colour on dark.
-        text: ({ theme, ownerState }) => {
-          if (ownerState.color === 'secondary') {
-            return {
-              color: theme.vars.palette.secondary.dark,
-              ...theme.applyStyles('dark', {
-                color: theme.vars.palette.secondary.main,
-              }),
-            }
-          }
-          if (ownerState.color === 'primary') {
-            return {
-              color: theme.vars.palette.primary.dark,
-              ...theme.applyStyles('dark', {
-                color: theme.vars.palette.primary.main,
-              }),
-            }
-          }
-          return {}
-        },
+        text: ({ theme }) => ({
+          variants: [
+            {
+              props: { color: 'secondary' },
+              style: {
+                color: theme.vars.palette.secondary.dark,
+                ...theme.applyStyles('dark', {
+                  color: theme.vars.palette.secondary.main,
+                }),
+              },
+            },
+            {
+              props: { color: 'primary' },
+              style: {
+                color: theme.vars.palette.primary.dark,
+                ...theme.applyStyles('dark', {
+                  color: theme.vars.palette.primary.main,
+                }),
+              },
+            },
+          ],
+        }),
         // Secondary actions are outlined and fully transparent: a hairline
         // border and a label, with no fill at rest and only a faint tint on
         // hover so the shape never turns into a second filled button.
-        outlined: ({ theme, ownerState }) => {
-          // `inherit` means "this surface styles its own button" — used where
-          // the backdrop is dark in both schemes (the video hero, the CTA
-          // band), which the scheme-driven colours below cannot know about.
-          if (ownerState.color === 'inherit') return {}
-          const family =
-            ownerState.color === 'secondary'
-              ? { light: '#C4005A', dark: '#FF0074' }
-              : { light: '#00707D', dark: '#00E8FC' }
-          return {
-            backgroundColor: 'transparent',
-            color: family.light,
-            borderColor: alpha(family.light, 0.45),
-            '&:hover': {
-              backgroundColor: alpha(family.light, 0.06),
-              borderColor: family.light,
+        // `inherit` means "this surface styles its own button" — used where
+        // the backdrop is dark in both schemes (the video hero, the CTA band),
+        // which the scheme-driven colours here cannot know about — so it
+        // matches neither variant.
+        outlined: ({ theme }) => ({
+          variants: [
+            {
+              props: { color: 'secondary' },
+              style: outlinedFamily(theme, { light: '#C4005A', dark: '#FF0074' }),
             },
-            ...theme.applyStyles('dark', {
-              backgroundColor: 'transparent',
-              color: family.dark,
-              borderColor: alpha(family.dark, 0.45),
-              '&:hover': {
-                backgroundColor: alpha(family.dark, 0.1),
-                borderColor: family.dark,
-              },
-            }),
-          }
-        },
+            {
+              props: ({ ownerState }) =>
+                ownerState.color !== 'secondary' && ownerState.color !== 'inherit',
+              style: outlinedFamily(theme, { light: '#00707D', dark: '#00E8FC' }),
+            },
+          ],
+        }),
         // The filled action is ink, never brand colour: black on light
         // surfaces, inverted to white on dark ones so it stays readable
         // against the near-black background. The focus ring inverts with it.
-        contained: ({ theme, ownerState }) => {
-          if (ownerState.color === 'inherit') return {}
-          return {
-            backgroundColor: '#000000',
-            color: '#FFFFFF',
-            '&:hover': {
-              backgroundColor: '#242424',
-            },
-            '&.Mui-focusVisible, &:focus-visible': {
-              outline: '2px solid #FFFFFF',
-              outlineOffset: -4,
-              boxShadow: `0 0 0 2px ${theme.vars.palette.text.primary}`,
-            },
-            ...theme.applyStyles('dark', {
-              backgroundColor: '#FFFFFF',
-              color: '#000000',
-              '&:hover': {
-                backgroundColor: '#DCDCDC',
+        contained: ({ theme }) => ({
+          variants: [
+            {
+              props: ({ ownerState }) => ownerState.color !== 'inherit',
+              style: {
+                backgroundColor: '#000000',
+                color: '#FFFFFF',
+                '&:hover': {
+                  backgroundColor: '#242424',
+                },
+                '&.Mui-focusVisible, &:focus-visible': {
+                  outline: '2px solid #FFFFFF',
+                  outlineOffset: -4,
+                  boxShadow: `0 0 0 2px ${theme.vars.palette.text.primary}`,
+                },
+                ...theme.applyStyles('dark', {
+                  backgroundColor: '#FFFFFF',
+                  color: '#000000',
+                  '&:hover': {
+                    backgroundColor: '#DCDCDC',
+                  },
+                  '&.Mui-focusVisible, &:focus-visible': {
+                    outline: '2px solid #000000',
+                    boxShadow: `0 0 0 2px ${theme.vars.palette.text.primary}`,
+                  },
+                }),
               },
-              '&.Mui-focusVisible, &:focus-visible': {
-                outline: '2px solid #000000',
-                boxShadow: `0 0 0 2px ${theme.vars.palette.text.primary}`,
-              },
-            }),
-          }
-        },
+            },
+          ],
+        }),
       },
     },
     MuiLink: {

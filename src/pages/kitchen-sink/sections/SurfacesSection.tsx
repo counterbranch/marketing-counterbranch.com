@@ -70,7 +70,7 @@ export default function SurfacesSection() {
             <Typography variant="h6" sx={{ fontWeight: 700 }}>
               Q3 roadmap review
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" color="textSecondary">
               Three feature requests are trending — see what customers have been asking for this quarter.
             </Typography>
           </CardContent>
@@ -92,7 +92,7 @@ export default function SurfacesSection() {
                 <Typography sx={{ fontWeight: 600 }}>{title}</Typography>
               </AccordionSummary>
               <AccordionDetails>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="textSecondary">
                   Placeholder settings content for the {title.toLowerCase()} panel.
                 </Typography>
               </AccordionDetails>
@@ -118,17 +118,17 @@ export default function SurfacesSection() {
           </Tabs>
           <Box sx={{ px: 2, pb: 2 }}>
             <TabPanel value={tab} index={0}>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="textSecondary">
                 Overview panel content.
               </Typography>
             </TabPanel>
             <TabPanel value={tab} index={1}>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="textSecondary">
                 Feedback panel content.
               </Typography>
             </TabPanel>
             <TabPanel value={tab} index={2}>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" color="textSecondary">
                 Settings panel content.
               </Typography>
             </TabPanel>

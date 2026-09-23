@@ -1,15 +1,19 @@
 import { StrictMode } from 'react'
 import { createRoot, hydrateRoot } from 'react-dom/client'
-import '@fontsource-variable/inter'
-import '@fontsource-variable/oswald'
-import '@fontsource/anton'
+import { CacheProvider } from '@emotion/react'
+import './fonts.css'
+// The alternative display face (see displayFont in theme.ts), Latin only.
+import '@fontsource/anton/latin.css'
 import './index.css'
 import AppRoot from './AppRoot.tsx'
+import { createEmotionCache } from './emotionCache.ts'
 
 const container = document.getElementById('root')!
 const app = (
   <StrictMode>
-    <AppRoot />
+    <CacheProvider value={createEmotionCache()}>
+      <AppRoot />
+    </CacheProvider>
   </StrictMode>
 )
 
