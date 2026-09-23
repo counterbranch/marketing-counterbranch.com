@@ -4,6 +4,8 @@ import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
+import CheckIcon from '@mui/icons-material/Check'
+import CloseIcon from '@mui/icons-material/Close'
 import Section from './Section.tsx'
 import { AccessGrid } from './AccessGrid.tsx'
 import { displayFont } from '../theme.ts'
@@ -237,8 +239,9 @@ function Caption({ children }: { children: ReactNode }) {
 
 /**
  * One version's half of the run window: the check slides in, then its
- * decision stamps in under it at display size. `allowed` marks the decision
- * the run is about.
+ * decision stamps in under it at display size, in the decision's colour with
+ * its mark beside it: the same colour and mark pairing as the access grid's
+ * callout. A rule in that colour runs down the pane to the badge.
  */
 function VersionPane({
   phase,
@@ -258,45 +261,77 @@ function VersionPane({
   allowed: boolean
 }) {
   const palette = useTheme().vars.palette
+  // On the window's dark ground, full-strength pink is under 4.5:1 as text;
+  // the lighter member of the family reads there.
+  const wordInk = allowed ? palette.primary.main : palette.secondary.light
+  const badgeFill = allowed ? palette.primary.main : palette.secondary.main
+  const badgeInk = allowed ? palette.primary.contrastText : palette.secondary.contrastText
+  const Mark = allowed ? CheckIcon : CloseIcon
   return (
-    <Box sx={{ minWidth: 0, px: 2.5, py: 2.5 }}>
-      <Box
-        component="p"
-        sx={{ ...windowTextSx, fontSize: { xs: '0.75rem', xl: '0.875rem' }, color: MUTED }}
-      >
-        {`${side}: ${version}`}
+    <Box
+      sx={{
+        minWidth: 0,
+        px: 2.5,
+        py: 2.5,
+        display: 'grid',
+        gridTemplateColumns: '22px minmax(0, 1fr)',
+        columnGap: 1.5,
+      }}
+    >
+      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Box sx={{ width: 2, flexGrow: 1, mb: 1, backgroundColor: badgeFill }} />
+        <Box
+          aria-hidden
+          sx={{
+            width: 22,
+            height: 22,
+            display: 'grid',
+            placeItems: 'center',
+            backgroundColor: badgeFill,
+            color: badgeInk,
+            // Level with the middle of the decision word's line.
+            mb: 'calc(clamp(1.75rem, 1.2rem + 1.4vw, 3rem) * 0.55 - 11px)',
+          }}
+        >
+          <Mark sx={{ fontSize: 18 }} />
+        </Box>
       </Box>
-      <Box
-        component="p"
-        sx={{
-          ...windowTextSx,
-          mt: 1,
-          fontSize: { xs: '0.8125rem', xl: '0.9375rem' },
-          ...arrivalSx(phase, slideIn, checkDelay),
-        }}
-      >
-        check viewer → read private-document
-      </Box>
-      <Box
-        component="p"
-        sx={{
-          m: 0,
-          mt: 2,
-          display: 'inline-block',
-          px: '0.28em',
-          fontFamily: displayFont,
-          fontSize: 'clamp(1.75rem, 1.2rem + 1.4vw, 3rem)',
-          fontWeight: 700,
-          letterSpacing: '0.07em',
-          lineHeight: 1.1,
-          transformOrigin: '0 50%',
-          // The window's own inks, swapped; the changed decision in pink.
-          backgroundColor: allowed ? palette.secondary.main : WINDOW_INK,
-          color: allowed ? palette.secondary.contrastText : WINDOW_GROUND,
-          ...arrivalSx(phase, stampIn, decisionDelay),
-        }}
-      >
-        {decision}
+      <Box sx={{ minWidth: 0 }}>
+        <Box
+          component="p"
+          sx={{ ...windowTextSx, fontSize: { xs: '0.75rem', xl: '0.875rem' }, color: MUTED }}
+        >
+          {`${side}: ${version}`}
+        </Box>
+        <Box
+          component="p"
+          sx={{
+            ...windowTextSx,
+            mt: 1,
+            fontSize: { xs: '0.8125rem', xl: '0.9375rem' },
+            ...arrivalSx(phase, slideIn, checkDelay),
+          }}
+        >
+          check viewer → read private-document
+        </Box>
+        <Box
+          component="p"
+          sx={{
+            m: 0,
+            mt: 2,
+            display: 'inline-block',
+            fontFamily: displayFont,
+            fontSize: 'clamp(1.75rem, 1.2rem + 1.4vw, 3rem)',
+            fontWeight: 700,
+            letterSpacing: '0.07em',
+            lineHeight: 1.1,
+            transformOrigin: '0 50%',
+            color: wordInk,
+            ...arrivalSx(phase, stampIn, decisionDelay),
+          }}
+        >
+          {decision}
+        </Box>
       </Box>
     </Box>
   )

@@ -195,9 +195,9 @@ export default function Hero() {
         </Stack>
       </Container>
 
-      {/* The hero's lower edge, on the same grid: the scroll cue sits on the
-          text's left edge and the reel's pause control opposite it, where
-          motion controls conventionally live. */}
+      {/* The hero's lower edge: the scroll cue centred on the screen, and
+          the reel's pause control in the corner, where motion controls
+          conventionally live. */}
       <Container
         maxWidth={false}
         sx={{
@@ -209,25 +209,37 @@ export default function Hero() {
           zIndex: 1,
           display: 'flex',
           alignItems: 'flex-end',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-end',
           pointerEvents: 'none',
         }}
       >
+        {/* A short track with a segment running down it, pointing the way
+            to the rest of the page. */}
         <Box
           aria-hidden
           sx={{
-            width: '1px',
+            position: 'absolute',
+            left: '50%',
+            bottom: 0,
+            transform: 'translateX(-50%)',
+            width: 2,
             height: 56,
-            transformOrigin: 'bottom',
-            background: `linear-gradient(180deg, transparent, ${hero.inkSubtle})`,
-            animation: `heroScrollCue ${motionDuration.entrance * 4}ms ${motionEasing.decel} infinite`,
+            overflow: 'hidden',
+            backgroundColor: hero.line,
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              inset: '0 0 auto',
+              height: 20,
+              backgroundColor: hero.ink,
+              animation: `heroScrollCue ${motionDuration.entrance * 4}ms ${motionEasing.decel} infinite`,
+            },
             '@keyframes heroScrollCue': {
-              '0%, 100%': { opacity: 0.25, transform: 'scaleY(0.6)' },
-              '50%': { opacity: 1, transform: 'scaleY(1)' },
+              '0%': { transform: 'translateY(-20px)' },
+              '75%, 100%': { transform: 'translateY(56px)' },
             },
             '@media (prefers-reduced-motion: reduce)': {
-              animation: 'none',
-              opacity: 0.6,
+              '&::after': { animation: 'none', transform: 'translateY(18px)' },
             },
           }}
         />

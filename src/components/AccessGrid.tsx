@@ -3,6 +3,7 @@ import { useTheme } from '@mui/material/styles'
 import type { CSSProperties, ReactNode } from 'react'
 import { MONO_FONT } from './DiffVersusRun.tsx'
 import { displayFont } from '../theme.ts'
+import type { BandPalette } from '../theme.ts'
 import { useArrivalPhase } from '../hooks/useArrivalPhase.ts'
 import {
   drawLine,
@@ -10,7 +11,8 @@ import {
   lineIn,
   motionEasing,
   nodeIn,
-  slipIn,
+  stampIn,
+  sweepAcross,
   wipeIn,
   type RunPhase,
 } from '../motion.ts'
@@ -18,12 +20,11 @@ import {
 /**
  * The access grid: the page's running example drawn as data. All 128
  * prepared checks are squares, one per check, in rows from the most
- * privileged role down to viewer, so what is allowed (cyan) steps down from
- * the top left and the rest is denied (ink). Every square is two halves, the
- * check's decision on main and on pr-142; where the two runs agree they fuse
- * into one square. The one check that changed is the only square that splits,
- * and a loupe beside the grid shows it slipped apart: DENY on main, ALLOW on
- * pr-142.
+ * privileged role down to viewer: allowed checks are filled cyan, denied
+ * ones are open outlines, so what is allowed steps down from the top left.
+ * The one check that changed is split, cyan and pink, and ringed. A callout
+ * leads from it to the two decisions, DENY on main and ALLOW on pr-142, and
+ * the verdict.
  *
  * Each figure draws once, the first time it is on screen, then settles. The
  * first render is the finished figure, so the prerendered page, visitors
@@ -54,8 +55,11 @@ const MAIN_ALLOWS: number[][] = [
   [],
 ]
 
-/** viewer → read private-document: denied on main, allowed on pr-142. */
-const CHANGED = { row: 6, col: 8 }
+/**
+ * viewer → read private-document: denied on main, allowed on pr-142. In the
+ * grid's last column, so the callout leads straight out of the grid.
+ */
+const CHANGED = { row: 6, col: 15 }
 
 const allowedOnMain = (row: number, col: number) => MAIN_ALLOWS[row].includes(col)
 const isChanged = (row: number, col: number) => row === CHANGED.row && col === CHANGED.col
@@ -65,6 +69,9 @@ const CELLS = Array.from({ length: COLS * ROWS }, (_, i) => ({
   row: i % ROWS,
 }))
 
+/** Stroke of an open square, a ring and the callout's lines. */
+const STROKE = 3
+
 /** A label in the terminal's face, sized per breakpoint in viewBox units. */
 function Mono({
   x,
@@ -72,6 +79,7 @@ function Mono({
   fill,
   size,
   anchor = 'start',
+  bold = false,
   children,
 }: {
   x: number
@@ -79,6 +87,7 @@ function Mono({
   fill: string
   size: Record<string, number>
   anchor?: 'start' | 'end'
+  bold?: boolean
   children: ReactNode
 }) {
   return (
@@ -89,37 +98,81 @@ function Mono({
       y={y}
       textAnchor={anchor}
       fill={fill}
-      sx={{ fontFamily: MONO_FONT, fontSize: size }}
+      sx={{ fontFamily: MONO_FONT, fontSize: size, ...(bold && { fontWeight: 700 }) }}
     >
       {children}
     </Box>
   )
 }
 
-/** A decision word in the display face. */
+/** A decision word in the display face, sized per breakpoint in viewBox units. */
 function Word({
   x,
   y,
   fill,
+  size,
   anchor = 'start',
+  spacing = '0.07em',
   children,
 }: {
   x: number
   y: number
   fill: string
-  anchor?: 'start' | 'end'
+  size: Record<string, number>
+  anchor?: 'start' | 'middle'
+  /** Letter-spacing, wider for a word set small on a plate. */
+  spacing?: string
   children: string
 }) {
   return (
-    <text
+    <Box
+      component="text"
+      data-part="label"
       x={x}
       y={y}
       textAnchor={anchor}
       fill={fill}
-      style={{ fontFamily: displayFont, fontWeight: 700, fontSize: 64, letterSpacing: '0.07em' }}
+      sx={{ fontFamily: displayFont, fontWeight: 700, fontSize: size, letterSpacing: spacing }}
     >
       {children}
-    </text>
+    </Box>
+  )
+}
+
+/**
+ * A decision's mark: a filled square with a cross (denied) or a tick
+ * (allowed) in the square's own ink, centred on (x, y).
+ */
+function Badge({
+  x,
+  y,
+  size,
+  fill,
+  ink,
+  allowed,
+}: {
+  x: number
+  y: number
+  size: number
+  fill: string
+  ink: string
+  allowed: boolean
+}) {
+  const r = size * 0.22
+  return (
+    <Box component="g" data-part="badge" style={{ transform: 'none' }}>
+      <rect x={x - size / 2} y={y - size / 2} width={size} height={size} fill={fill} />
+      <path
+        d={
+          allowed
+            ? `M${x - r} ${y}l${r * 0.75} ${r * 0.75}L${x + r} ${y - r * 0.75}`
+            : `M${x - r} ${y - r}L${x + r} ${y + r}M${x + r} ${y - r}L${x - r} ${y + r}`
+        }
+        fill="none"
+        stroke={ink}
+        strokeWidth={STROKE}
+      />
+    </Box>
   )
 }
 
@@ -153,7 +206,7 @@ function Figure({
           width: '100%',
           height: 'auto',
           overflow: 'visible',
-          // Parts that scale or slip do so about their own box.
+          // Parts that scale do so about their own box.
           '& [data-part]': { transformBox: 'fill-box', transformOrigin: 'center' },
           ...motion(phase),
           [REDUCED_MOTION]: {
@@ -163,6 +216,8 @@ function Figure({
               clipPath: 'none',
               transform: 'none',
             },
+            // The run's scan line only exists while the run plays.
+            '& [data-scan]': { display: 'none' },
           },
         }}
       >
@@ -180,21 +235,18 @@ const play = (frames: string, ms: number, delay: number | string) =>
 /** A per-element delay, read by a part's animation as `var(--d)`. */
 const delayVar = (ms: number) => ({ '--d': `${ms}ms` }) as CSSProperties
 
-// The access grid's geometry, in its 1200 x 560 viewBox.
-const CELL = 38
-const PITCH = 44
-const GRID_X = 28
-const GRID_Y = 100
-const LOUPE = { x: 826, y: 100, size: 346 }
-const LOUPE_GAP = 16
-const LABEL = { xs: 38, sm: 28 }
-
-const cellX = (col: number) => GRID_X + col * PITCH
-const cellY = (row: number) => GRID_Y + row * PITCH
+/** A filled square at its origin. */
+const solid = (cell: number) => (x: number, y: number) => `M${x} ${y}h${cell}v${cell}h${-cell}z`
+/** An open square's outline, drawn on the stroke's centre line. */
+const openSquare = (cell: number) => (x: number, y: number) => {
+  const inset = STROKE / 2
+  const side = cell - STROKE
+  return `M${x + inset} ${y + inset}h${side}v${side}h${-side}z`
+}
 /** The top-left half of a cell: main's decision. */
-const mainHalf = (x: number, y: number) => `M${x} ${y}h${CELL}L${x} ${y + CELL}z`
+const mainHalf = (cell: number) => (x: number, y: number) => `M${x} ${y}h${cell}L${x} ${y + cell}z`
 /** The bottom-right half of a cell: pr-142's decision. */
-const headHalf = (x: number, y: number) => `M${x + CELL} ${y}v${CELL}H${x}z`
+const headHalf = (cell: number) => (x: number, y: number) => `M${x + cell} ${y}v${cell}H${x}z`
 
 /**
  * Many cells as one path, so the grid costs a few elements rather than one
@@ -207,143 +259,241 @@ const cellsPath = (
   y: (row: number) => number,
 ) => cells.map(({ col, row }) => shape(x(col), y(row))).join('')
 
+/**
+ * The one check that changed, drawn over its open square: main's half in
+ * pink, pr-142's in cyan, and a ring in the band's ink so it is found first.
+ */
+function ChangedCell({
+  x,
+  y,
+  cell,
+  band,
+  pink,
+  cyan,
+}: {
+  x: number
+  y: number
+  cell: number
+  band: BandPalette
+  pink: string
+  cyan: string
+}) {
+  const gap = cell * 0.16
+  return (
+    <Box component="g" data-part="flip">
+      <path d={mainHalf(cell)(x, y)} fill={pink} />
+      <path d={headHalf(cell)(x, y)} fill={cyan} />
+      <rect
+        x={x - gap}
+        y={y - gap}
+        width={cell + gap * 2}
+        height={cell + gap * 2}
+        fill="none"
+        stroke={band.ink}
+        strokeWidth={STROKE}
+      />
+    </Box>
+  )
+}
+
+// The access grid's geometry, in its 1200 x 560 viewBox.
+const CELL = 38
+const PITCH = 44
+const GRID_X = 28
+const GRID_Y = 100
+const GRID_WIDTH = (COLS - 1) * PITCH + CELL
+const GRID_HEIGHT = (ROWS - 1) * PITCH + CELL
+const LABEL = { xs: 30, sm: 24 }
+const WORD = { xs: 52, sm: 44 }
+const PLATE_WORD = { xs: 26 }
+
+const cellX = (col: number) => GRID_X + col * PITCH
+const cellY = (row: number) => GRID_Y + row * PITCH
+
+/**
+ * The callout, to the right of the grid: a leader from the changed square
+ * to a node, and from the node an elbow up to main's decision and one down
+ * to pr-142's. The check's name sits over the rows and the verdict under.
+ */
+const CALLOUT = {
+  node: 830,
+  nodeSize: 12,
+  rowGap: 70,
+  badge: 34,
+  badgeX: 879,
+  textX: 914,
+  wordX: 1034,
+  plate: { width: 210, height: 44 },
+}
+
 /** When the navy band's figure's parts arrive, in ms. */
 const GRID_TIMING = {
   column: 15,
-  head: 350,
-  flip: 620,
-  rays: 900,
-  loupe: 1050,
-  slip: 1300,
-  labels: 1350,
-  done: 1600,
+  scan: 400,
+  scanMs: 650,
+  flip: 1000,
+  leader: 1100,
+  node: 1300,
+  branches: 1350,
+  badges: 1600,
+  labels: 1650,
+  plate: 1800,
+  done: 2050,
 }
 
 /**
- * The navy band's figure: the 128 checks and the loupe on the one that
+ * The navy band's figure: the 128 checks and the callout on the one that
  * changed. It plays in the order the product works: main's decisions land a
- * column at a time, pr-142's run wipes across them, the one split square
- * turns pink as the wipe passes it, and the loupe draws out and slips apart.
+ * column at a time, pr-142's run scans across them, the one check that
+ * changed splits and is ringed, and the callout draws out to its decisions.
  */
 export function AccessGrid() {
   const palette = useTheme().vars.palette
   const band = palette.bands.navy
   const cyan = palette.primary.main
   const pink = palette.secondary.main
-  const ink = palette.flood.ink
-  const decision = (allowed: boolean) => (allowed ? cyan : ink)
+  const t = GRID_TIMING
+  const c = CALLOUT
 
   const cx = cellX(CHANGED.col)
-  const cy = cellY(CHANGED.row)
-  const { x: lx, y: ly, size: ls } = LOUPE
-  const t = GRID_TIMING
+  const cy = cellY(CHANGED.row) + CELL / 2
+  // The ring's stroke is centred on its path, so its outer edge is half a
+  // stroke beyond it.
+  const ringEdge = cx + CELL + CELL * 0.16 + STROKE / 2
+  const topY = cy - c.rowGap
+  const bottomY = cy + c.rowGap
+  const plateY = bottomY + c.badge / 2 + 30
 
   const motion = (phase: RunPhase) => ({
     ...(phase === 'armed' && { '& [data-part]': { opacity: 0 } }),
     ...(phase === 'playing' && {
       '& [data-part="main"]': { animation: play(glyphIn, 160, 'var(--d)') },
-      '& [data-part="head"]': { animation: play(wipeIn, 600, t.head) },
-      '& [data-part="flip"]': { animation: play(nodeIn, 180, t.flip) },
-      '& [data-part="rays"]': { animation: play(drawLine, 300, t.rays) },
-      '& [data-part="loupe"]': { animation: play(wipeIn, 350, t.loupe) },
-      '& [data-part="slip"]': { animation: play(slipIn, 200, t.slip) },
-      '& [data-part="label"]': { animation: play(lineIn, 150, t.labels) },
+      '& [data-scan]': { animation: play(sweepAcross, t.scanMs, t.scan) },
+      '& [data-part="flip"]': { animation: play(nodeIn, 200, t.flip) },
+      '& [data-part="leader"]': { animation: play(drawLine, 220, t.leader) },
+      '& [data-part="node"]': { animation: play(nodeIn, 160, t.node) },
+      '& [data-part="branch"]': { animation: play(drawLine, 280, t.branches) },
+      '& [data-part="badge"]': { animation: play(nodeIn, 200, t.badges) },
+      '& [data-part="label"]': { animation: play(lineIn, 160, t.labels) },
+      '& [data-part="plate"]': { animation: play(stampIn, 220, t.plate) },
     }),
   })
 
   return (
     <Figure
-      label="All 128 prepared permission checks drawn as a grid, each square made of its decision on main and on pr-142. Where both versions agree the halves fuse into one square. The one check that changed, viewer read private-document, splits apart: denied on main, allowed on pr-142."
+      label="All 128 prepared permission checks drawn as a grid: allowed checks filled, denied ones open. The one check that changed, viewer read private-document, is split and ringed, and a callout leads from it to its two decisions: denied on main, allowed on pr-142. Verdict: violation."
       viewBox="0 0 1200 560"
       maxWidth={{ xs: 720, xl: 900 }}
       playMs={t.done + 60}
       motion={motion}
     >
-      {/* The loupe's rays, under the grid, so among the squares they show
-          only in the gutters. */}
-      <Box
-        component="path"
-        data-part="rays"
-        d={`M${cx + CELL} ${cy}L${lx} ${ly}M${cx + CELL} ${cy + CELL}L${lx} ${ly + ls}`}
-        pathLength={1}
-        stroke={pink}
-        strokeWidth={3}
-        fill="none"
-        sx={{ strokeDasharray: 1 }}
-      />
-
-      {/* main's run: the top-left half of every check, a column at a time. */}
+      {/* main's run: a column at a time, allowed checks filled, denied open. */}
       {Array.from({ length: COLS }, (_, col) => {
         const column = CELLS.filter((cell) => cell.col === col)
         return (
           <Box key={col} component="g" data-part="main" style={delayVar(col * t.column)}>
-            {[true, false].map((allowed) => (
-              <path
-                key={String(allowed)}
-                d={cellsPath(
-                  column.filter(({ row }) => allowedOnMain(row, col) === allowed),
-                  mainHalf,
-                  cellX,
-                  cellY,
-                )}
-                fill={decision(allowed)}
-              />
-            ))}
+            <path
+              d={cellsPath(column.filter(({ row }) => allowedOnMain(row, col)), solid(CELL), cellX, cellY)}
+              fill={cyan}
+            />
+            <path
+              d={cellsPath(column.filter(({ row }) => !allowedOnMain(row, col)), openSquare(CELL), cellX, cellY)}
+              fill="none"
+              stroke={band.line}
+              strokeWidth={STROKE}
+            />
           </Box>
         )
       })}
 
-      {/* pr-142's run: the bottom-right halves, the same as main's except the
-          one that changed, which is drawn on its own. */}
-      <Box component="g" data-part="head">
-        {[true, false].map((allowed) => (
-          <path
-            key={String(allowed)}
-            d={cellsPath(
-              CELLS.filter(
-                ({ col, row }) => !isChanged(row, col) && allowedOnMain(row, col) === allowed,
-              ),
-              headHalf,
-              cellX,
-              cellY,
-            )}
-            fill={decision(allowed)}
-          />
-        ))}
-      </Box>
-      <Box component="path" data-part="flip" d={headHalf(cx, cy)} fill={pink} />
+      {/* pr-142's run: a scan line across the grid, then the one check that
+          changed splits where it passed. */}
+      <Box
+        component="rect"
+        data-scan
+        x={GRID_X}
+        y={GRID_Y - 8}
+        width={STROKE}
+        height={GRID_HEIGHT + 16}
+        fill={cyan}
+        style={{ '--sweep': `${GRID_WIDTH - STROKE}px` } as CSSProperties}
+        sx={{ opacity: 0 }}
+      />
+      <ChangedCell x={cx} y={cellY(CHANGED.row)} cell={CELL} band={band} pink={pink} cyan={cyan} />
 
-      {/* The loupe: the changed check, slipped apart along its diagonal. */}
-      <Box component="g" data-part="loupe">
-        <path d={`M${lx} ${ly}h${ls - LOUPE_GAP}L${lx} ${ly + ls - LOUPE_GAP}z`} fill={ink} />
-        <Box component="g" data-part="slip">
-          <path d={`M${lx + ls} ${ly + LOUPE_GAP}V${ly + ls}H${lx + LOUPE_GAP}z`} fill={pink} />
-        </Box>
-        <Mono x={lx + 26} y={ly + 64} fill={band.inkMuted} size={LABEL}>
-          main
-        </Mono>
-        <Word x={lx + 24} y={ly + 132} fill={band.ink}>
-          DENY
-        </Word>
-        <Mono x={lx + ls - 26} y={ly + ls - 92} fill={ink} size={LABEL} anchor="end">
-          pr-142
-        </Mono>
-        <Word x={lx + ls - 24} y={ly + ls - 24} fill={palette.secondary.contrastText} anchor="end">
-          ALLOW
+      {/* The callout. */}
+      <Box
+        component="path"
+        data-part="leader"
+        d={`M${ringEdge} ${cy}H${c.node}`}
+        pathLength={1}
+        stroke={band.ink}
+        strokeWidth={STROKE}
+        fill="none"
+        sx={{ strokeDasharray: 1 }}
+      />
+      <Box
+        component="rect"
+        data-part="node"
+        x={c.node - c.nodeSize / 2}
+        y={cy - c.nodeSize / 2}
+        width={c.nodeSize}
+        height={c.nodeSize}
+        fill={band.ink}
+      />
+      {[topY, bottomY].map((rowY) => (
+        <Box
+          key={rowY}
+          component="path"
+          data-part="branch"
+          d={`M${c.node} ${cy}V${rowY}H${c.badgeX - c.badge / 2}`}
+          pathLength={1}
+          stroke={band.ink}
+          strokeWidth={STROKE}
+          strokeLinejoin="miter"
+          fill="none"
+          sx={{ strokeDasharray: 1 }}
+        />
+      ))}
+      <Badge x={c.badgeX} y={topY} size={c.badge} fill={pink} ink={palette.secondary.contrastText} allowed={false} />
+      <Badge x={c.badgeX} y={bottomY} size={c.badge} fill={cyan} ink={palette.primary.contrastText} allowed />
+      <Mono x={c.textX} y={topY + 8} fill={band.inkMuted} size={LABEL}>
+        main
+      </Mono>
+      <Word x={c.wordX} y={topY + 16} fill={pink} size={WORD}>
+        DENY
+      </Word>
+      <Mono x={c.textX} y={bottomY + 8} fill={band.inkMuted} size={LABEL}>
+        pr-142
+      </Mono>
+      <Word x={c.wordX} y={bottomY + 16} fill={cyan} size={WORD}>
+        ALLOW
+      </Word>
+      <Mono x={c.node} y={topY - c.badge / 2 - 58} fill={band.ink} size={LABEL} bold>
+        viewer → read
+      </Mono>
+      <Mono x={c.node} y={topY - c.badge / 2 - 26} fill={band.ink} size={LABEL} bold>
+        private-document
+      </Mono>
+      <Box component="g" data-part="plate">
+        <rect x={c.node} y={plateY} width={c.plate.width} height={c.plate.height} fill={pink} />
+        <Word
+          x={c.node + c.plate.width / 2}
+          y={plateY + c.plate.height / 2 + 9}
+          fill={palette.secondary.contrastText}
+          size={PLATE_WORD}
+          anchor="middle"
+          spacing="0.1em"
+        >
+          VIOLATION
         </Word>
       </Box>
 
       <Mono x={GRID_X} y={64} fill={band.inkMuted} size={LABEL}>
         128 prepared checks
       </Mono>
-      <Mono x={lx + ls} y={64} fill={palette.secondary.light} size={LABEL} anchor="end">
+      <Mono x={1200} y={64} fill={palette.secondary.light} size={LABEL} anchor="end">
         1 changed
-      </Mono>
-      <Mono x={GRID_X} y={512} fill={band.ink} size={LABEL}>
-        viewer → read private-document
-      </Mono>
-      <Mono x={lx + ls} y={512} fill={palette.secondary.light} size={LABEL} anchor="end">
-        VIOLATION
       </Mono>
     </Figure>
   )
@@ -363,14 +513,15 @@ const RUN_TIMING = { sweep: 150, sweepMs: 900, flip: 950, labels: 1150, done: 13
 
 /**
  * The closing band's figure: your next PR's 128 checks, open squares until
- * the run sweeps across them. Denied checks fill with ink, allowed ones stay
- * open with an ink edge, and the one that changed lands in the deeper pink,
- * which holds its contrast on the cyan. Drawn in
- * the flood's ink, so it reads on the cyan in both schemes.
+ * the run sweeps across them and fills the allowed ones, and the one that
+ * changed splits and is ringed. Drawn with the navy band's inks: the closing
+ * band sets it on a navy plate.
  */
 export function RunGrid() {
   const palette = useTheme().vars.palette
-  const flood = palette.flood
+  const band = palette.bands.navy
+  const cyan = palette.primary.main
+  const pink = palette.secondary.main
   const t = RUN_TIMING
 
   const motion = (phase: RunPhase) => ({
@@ -382,66 +533,49 @@ export function RunGrid() {
     }),
   })
 
-  const at = (col: number, row: number, inset = 0) => ({
-    x: RUN_X + col * RUN_PITCH + inset,
-    y: RUN_Y + row * RUN_PITCH + inset,
-    width: RUN_CELL - inset * 2,
-    height: RUN_CELL - inset * 2,
-  })
   const runX = (col: number) => RUN_X + col * RUN_PITCH
   const runY = (row: number) => RUN_Y + row * RUN_PITCH
-  // An open square's outline, drawn on the stroke's centre line.
-  const outline = (x: number, y: number) =>
-    `M${x + 1} ${y + 1}h${RUN_CELL - 2}v${RUN_CELL - 2}h${2 - RUN_CELL}z`
-  const solid = (x: number, y: number) => `M${x} ${y}h${RUN_CELL}v${RUN_CELL}h${-RUN_CELL}z`
   const unchanged = CELLS.filter(({ col, row }) => !isChanged(row, col))
 
   return (
     <Figure
-      label="Your next PR's 128 prepared checks, run against main: the run fills them in, and the one decision that changed is marked in pink."
+      label="Your next PR's 128 prepared checks, run against main: the run fills in the allowed ones, and the one decision that changed is split and ringed."
       viewBox={`0 0 ${RUN_WIDTH} ${RUN_HEIGHT}`}
       maxWidth={{ xs: 520, xl: 640 }}
       playMs={t.done + 60}
       motion={motion}
     >
-      <Mono x={RUN_X} y={34} fill={flood.ink} size={RUN_LABEL}>
+      <Mono x={RUN_X} y={34} fill={band.inkMuted} size={RUN_LABEL}>
         your next PR
       </Mono>
       {/* Before the run: every check an open square. */}
-      <path d={cellsPath(CELLS, outline, runX, runY)} fill="none" stroke={flood.line} strokeWidth={2} />
-      {/* The run, swept across: denied checks solid, allowed ones edged. */}
+      <path
+        d={cellsPath(CELLS, openSquare(RUN_CELL), runX, runY)}
+        fill="none"
+        stroke={band.line}
+        strokeWidth={STROKE}
+      />
+      {/* The run, swept across: allowed checks fill. */}
       <Box component="g" data-part="run">
         <path
           d={cellsPath(
-            unchanged.filter(({ col, row }) => !allowedOnMain(row, col)),
-            solid,
-            runX,
-            runY,
-          )}
-          fill={flood.ink}
-        />
-        <path
-          d={cellsPath(
             unchanged.filter(({ col, row }) => allowedOnMain(row, col)),
-            outline,
+            solid(RUN_CELL),
             runX,
             runY,
           )}
-          fill="none"
-          stroke={flood.ink}
-          strokeWidth={2}
+          fill={cyan}
         />
       </Box>
-      <Box
-        component="rect"
-        data-part="flip"
-        {...at(CHANGED.col, CHANGED.row, -3)}
-        // The deeper pink: 4:1 on the cyan, where full-strength pink is 2.5:1.
-        fill={palette.secondary.dark}
-        stroke={flood.ink}
-        strokeWidth={3}
+      <ChangedCell
+        x={runX(CHANGED.col)}
+        y={runY(CHANGED.row)}
+        cell={RUN_CELL}
+        band={band}
+        pink={pink}
+        cyan={cyan}
       />
-      <Mono x={RUN_X} y={RUN_HEIGHT - 12} fill={flood.inkMuted} size={RUN_LABEL}>
+      <Mono x={RUN_X} y={RUN_HEIGHT - 12} fill={band.inkMuted} size={RUN_LABEL}>
         128 checks, 1 changed
       </Mono>
     </Figure>

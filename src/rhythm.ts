@@ -7,9 +7,9 @@
  */
 export const rhythm = {
   /** A band's padding above and below its content. */
-  section: { xs: 12, md: 16, xl: 20 },
+  section: { xs: 14, md: 20, xl: 26 },
   /** From a heading and its line to the content they introduce. */
-  intro: { xs: 5, md: 7 },
+  intro: { xs: 6, md: 9 },
   /** Above and below each row of a list, inside its rules. */
   row: { xs: 4, md: 5 },
   /** From a heading to its own line of copy. */

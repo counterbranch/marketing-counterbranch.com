@@ -214,17 +214,25 @@ export const wipeIn = keyframes`
 `
 
 /**
- * One half of a split square slipping apart from the other, along the
- * square's diagonal, to rest where it is drawn.
+ * A run's scan line crossing what it checks: from its own place to
+ * `--sweep` further along, gone once it arrives. Hidden at its first frame,
+ * so a `both` fill keeps it out of sight until its delay is up.
  */
-export const slipIn = keyframes`
+export const sweepAcross = keyframes`
   from {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  1% {
     opacity: 1;
-    transform: translate(-12px, -12px);
+    transform: translateX(0);
+  }
+  90% {
+    opacity: 1;
   }
   to {
-    opacity: 1;
-    transform: translate(0, 0);
+    opacity: 0;
+    transform: translateX(var(--sweep));
   }
 `
 

@@ -20,7 +20,8 @@ import { pageColumn, rhythm } from '../rhythm.ts'
  * here repeats a claim the page has already made.
  */
 export default function Cta() {
-  const flood = useTheme().vars.palette.flood
+  const palette = useTheme().vars.palette
+  const flood = palette.flood
   const { ref, inView } = useInView<HTMLDivElement>()
 
   return (
@@ -86,9 +87,20 @@ export default function Cta() {
             </Button>
           </Stack>
         </Box>
-        {/* On phones the poster carries the band alone. */}
+        {/* On phones the poster carries the band alone. The grid sits on a
+            navy plate, the same ground as the access grid above. */}
         <Box sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'flex-end' }}>
-          <RunGrid />
+          <Box
+            sx={{
+              width: '100%',
+              maxWidth: { xs: 560, xl: 700 },
+              p: { md: 3, xl: 4 },
+              backgroundColor: palette.bands.navy.background,
+              color: palette.bands.navy.ink,
+            }}
+          >
+            <RunGrid />
+          </Box>
         </Box>
       </Container>
     </Section>

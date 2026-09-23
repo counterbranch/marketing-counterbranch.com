@@ -37,6 +37,8 @@ interface SlotWordProps {
   tracking?: string
   /** Stops the reel on its current word, for an explicit pause control. */
   paused?: boolean
+  /** How long each word rests before the reel rolls on, in ms. */
+  dwell?: number
 }
 
 /**
@@ -70,6 +72,7 @@ export default function SlotWord({
   suffix = '',
   tracking = '0',
   paused = false,
+  dwell = reelDwell,
 }: SlotWordProps) {
   const prefersReducedMotion = usePrefersReducedMotion()
   const rootRef = useRef<HTMLSpanElement>(null)
@@ -137,9 +140,9 @@ export default function SlotWord({
     const timer = window.setTimeout(() => {
       setAnimated(true)
       setIndex((current) => current + 1)
-    }, reelDwell)
+    }, dwell)
     return () => window.clearTimeout(timer)
-  }, [running, atLoopCopy, index])
+  }, [running, atLoopCopy, index, dwell])
 
   // After rolling onto the copy of the first word, jump to the real one
   // without transitions. Timed rather than tied to `transitionend`, which a

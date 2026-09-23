@@ -32,6 +32,12 @@ const CHORES = [
   'finding the unmute button',
 ] as const
 
+/**
+ * How long each chore rests before the reel rolls on. The hero's reel shows
+ * one word; these are phrases of three or four, so they get the time to read.
+ */
+const CHORE_DWELL = 3600
+
 /** The reel is aria-hidden, so the heading carries the whole list once. */
 const HEADING_FOR_SCREEN_READERS = `Less effort than ${CHORES.join(', ')}.`
 
@@ -473,6 +479,7 @@ export default function GetStarted() {
                   ink={palette.hero.plateInk}
                   suffix="."
                   paused={reelPaused}
+                  dwell={CHORE_DWELL}
                   tracking={typeof headingTracking === 'number' ? `${headingTracking}px` : headingTracking}
                 />
               </Box>
