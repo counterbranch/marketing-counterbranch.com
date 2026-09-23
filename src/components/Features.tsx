@@ -75,16 +75,16 @@ const SPECIMEN_PAD = 3
 function KeyLine({
   phase,
   delay,
-  tone = 'changed',
+  status = 'changed',
   children,
 }: {
   phase: RunPhase
   delay: number
-  tone?: 'changed' | 'incomplete'
+  status?: 'changed' | 'incomplete'
   children: ReactNode
 }) {
   const palette = useTheme().vars.palette
-  const tint = tone === 'changed' ? palette.secondary.main : palette.warning.main
+  const tint = status === 'changed' ? palette.secondary.main : palette.warning.main
   return (
     <Box
       component="span"
@@ -167,7 +167,7 @@ function ReportSpecimen({ phase }: { phase: RunPhase }) {
         <Changed>ALLOW</Changed>
       </KeyLine>
       {'\n'}
-      <KeyLine phase={phase} delay={SECOND_LINE_DELAY} tone="incomplete">
+      <KeyLine phase={phase} delay={SECOND_LINE_DELAY} status="incomplete">
         <Muted>incomplete</Muted>
         {'     '}
         <Incomplete>1</Incomplete>

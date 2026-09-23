@@ -106,12 +106,13 @@ export default function Header() {
               display: { xs: 'none', sm: 'inline-flex' },
             })}
           >
-            Get started
+            Get started free
           </Button>
           <IconButton
             aria-label="Open menu"
             aria-expanded={menuOpen}
-            aria-controls="mobile-nav"
+            // The drawer's content is only in the page while it is open.
+            aria-controls={menuOpen ? 'mobile-nav' : undefined}
             onClick={() => setMenuOpen(true)}
             sx={{ display: { xs: 'inline-flex', md: 'none' } }}
           >
@@ -142,7 +143,7 @@ export default function Header() {
                 onClick={() => setMenuOpen(false)}
               >
                 <ListItemText
-                  primary="Get started"
+                  primary="Get started free"
                   slotProps={{
                     primary: {
                       sx: [

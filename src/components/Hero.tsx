@@ -14,7 +14,6 @@ import { srOnly } from '../a11y.ts'
 import { pageColumn, rhythm } from '../rhythm.ts'
 import { heroStageSx, motionDuration, motionEasing } from '../motion.ts'
 import { links } from '../links.ts'
-import { displayFont } from '../theme.ts'
 
 /** Where the access changes happen. The first is what rests on screen. */
 const REEL_WORDS = [
@@ -163,7 +162,7 @@ export default function Hero() {
                 href={links.getStarted}
                 sx={floodActionSx(hero)}
               >
-                Get started
+                Get started free
               </Button>
               <Button
                 variant="outlined"
@@ -176,18 +175,17 @@ export default function Hero() {
                 See how it works
               </Button>
             </Stack>
+            {/* The offer, read as a sentence in the page's body face rather
+                than as fine print; the closing band repeats it the same way. */}
             <Typography
               component="p"
               sx={{
                 maxWidth: 560,
-                fontFamily: displayFont,
-                fontWeight: 600,
-                fontSize: '0.8125rem',
-                lineHeight: 1.7,
-                letterSpacing: '0.14em',
-                textTransform: 'uppercase',
-                textWrap: 'balance',
-                color: hero.inkSubtle,
+                fontWeight: 500,
+                fontSize: { xs: '0.9375rem', md: '1rem' },
+                lineHeight: 1.55,
+                textWrap: 'pretty',
+                color: hero.ink,
                 ...heroStageSx(3),
               }}
             >

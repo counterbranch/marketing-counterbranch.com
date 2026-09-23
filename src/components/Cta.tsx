@@ -72,7 +72,7 @@ export default function Cta() {
               href={links.getStarted}
               sx={floodActionSx(flood)}
             >
-              Get started
+              Get started free
             </Button>
             <Button
               variant="outlined"

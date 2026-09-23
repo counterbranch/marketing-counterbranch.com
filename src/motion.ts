@@ -184,7 +184,7 @@ export const drawLine = keyframes`
 `
 
 /**
- * A node in a branch graph appearing in place: from under its size and
+ * A mark appearing in place (a grid cell, a changed check): from under its size and
  * unseen, anchored on its own centre.
  */
 export const nodeIn = keyframes`

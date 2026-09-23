@@ -303,8 +303,8 @@ function VersionPane({
 }
 
 /**
- * The navy band after "how it works": the branch graph that gives the product
- * its name, then a code review tool's view of the change beside what
+ * The navy band after "how it works": the access grid of every check with the
+ * one that changed, then a code review tool's view of the change beside what
  * Counterbranch runs. The two windows mirror each other and end
  * on the same line, each with an "Access impact" strip along its foot: the
  * diff's says it is not shown; the run's shows the decision that changed.

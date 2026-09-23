@@ -8,8 +8,6 @@
 export const rhythm = {
   /** A band's padding above and below its content. */
   section: { xs: 12, md: 16, xl: 20 },
-  /** Either side of the rule that opens a second part of the same band. */
-  subsection: { xs: 8, md: 10 },
   /** From a heading and its line to the content they introduce. */
   intro: { xs: 5, md: 7 },
   /** Above and below each row of a list, inside its rules. */

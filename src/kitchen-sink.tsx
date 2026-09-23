@@ -1,8 +1,8 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import '@fontsource-variable/inter'
-import '@fontsource-variable/oswald'
-import '@fontsource/anton'
+import './fonts.css'
+// The alternative display face (see displayFont in theme.ts), Latin only.
+import '@fontsource/anton/latin.css'
 import './index.css'
 import { ThemeProvider } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'

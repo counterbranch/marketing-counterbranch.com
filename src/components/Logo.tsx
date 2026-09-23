@@ -2,7 +2,8 @@ import Box from '@mui/material/Box'
 import logoLight from '../assets/logo-light.webp'
 import logoDark from '../assets/logo-dark.webp'
 
-// Width-to-height ratios of the two lockups (960×195 and 960×193).
+// Width-to-height ratios of the two lockups, as drawn (960×195 and 960×193).
+// The files are exported 480 wide: three times the header's 32px-high size.
 const LIGHT_ASPECT = 960 / 195
 const DARK_ASPECT = 960 / 193
 
