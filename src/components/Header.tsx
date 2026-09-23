@@ -18,6 +18,7 @@ import Logo from './Logo.tsx'
 import ColorModeToggle from './ColorModeToggle.tsx'
 import { links } from '../links.ts'
 import { displayFont } from '../theme.ts'
+import { floodActionSx } from './floodButtons.ts'
 
 // The drawer mirrors the toolbar nav, so its labels are set the same way the
 // buttons are: display face, caps, open tracking.
@@ -95,16 +96,13 @@ export default function Header() {
             component="a"
             href={links.getStarted}
             sx={(theme) => ({
+              ...floodActionSx(theme.vars.palette.hero),
+              // A step smaller than the hero's own action, which sits under it,
+              // but still a full 44px target.
+              minHeight: 44,
+              width: 'auto',
               ml: { xs: 0, md: 1 },
               display: { xs: 'none', sm: 'inline-flex' },
-              backgroundColor: theme.vars.palette.hero.action,
-              color: theme.vars.palette.hero.actionInk,
-              '&:hover': { backgroundColor: theme.vars.palette.hero.actionHover },
-              '&.Mui-focusVisible, &:focus-visible': {
-                outline: `2px solid ${theme.vars.palette.hero.actionInk}`,
-                outlineOffset: -4,
-                boxShadow: `0 0 0 2px ${theme.vars.palette.hero.ink}`,
-              },
             })}
           >
             Get started

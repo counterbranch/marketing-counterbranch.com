@@ -1,6 +1,6 @@
 // Enables typings for `theme.vars` (CSS theme variables) throughout the app.
 import type {} from '@mui/material/themeCssVarsAugmentation'
-import { createTheme, alpha } from '@mui/material/styles'
+import { createTheme, alpha, lighten } from '@mui/material/styles'
 import { motionDuration, motionEasing } from './motion.ts'
 
 // Brand
@@ -35,6 +35,12 @@ const heroInkDark = '#F7F7F8'
 // pink is only 3.8:1, so it is never the pairing.
 const brandPink = '#FF0074'
 const brandPinkInk = '#14061A'
+// Pink as text on the site's dark grounds (the terminal windows and the
+// specimens). Full-strength pink clears 4.5:1 on their plain ground only
+// just, and not at all on the tinted rows and footer strips inside them;
+// this lighter member of the family reads at 4.9:1 or better on every one
+// of those, in both schemes.
+const brandPinkOnDark = lighten(brandPink, 0.36)
 
 /**
  * The full-screen hero and the header that overlays it. A flood of brand cyan
@@ -95,6 +101,7 @@ const theme = createTheme({
           // it reads 3.7:1 as text on the light background. `dark` is the
           // readable member of the family (5.8:1) used for labels here.
           dark: '#C4005A',
+          light: brandPinkOnDark,
           contrastText: brandPinkInk,
         },
         background: {
@@ -139,6 +146,7 @@ const theme = createTheme({
         secondary: {
           main: brandPink,
           dark: '#C4005A',
+          light: brandPinkOnDark,
           contrastText: brandPinkInk,
         },
         background: {
