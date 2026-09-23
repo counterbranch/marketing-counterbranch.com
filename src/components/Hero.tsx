@@ -10,6 +10,9 @@ import PlayArrowOutlinedIcon from '@mui/icons-material/PlayArrowOutlined'
 import { useTheme } from '@mui/material/styles'
 import CompareTerminal from './CompareTerminal.tsx'
 import SlotWord from './SlotWord.tsx'
+import { floodActionSx, floodOutlineSx } from './floodButtons.ts'
+import { srOnly } from '../a11y.ts'
+import { rhythm } from '../rhythm.ts'
 import { heroStageSx, motionDuration, motionEasing } from '../motion.ts'
 import { links } from '../links.ts'
 import { displayFont } from '../theme.ts'
@@ -34,17 +37,6 @@ const REEL_WORDS = [
 const HEADLINE_FOR_SCREEN_READERS =
   'Catch unintended access changes in your PRs, pipelines, releases, terminal, code reviews, agent workflows, local development and CLI.'
 
-const srOnly = {
-  position: 'absolute',
-  width: '1px',
-  height: '1px',
-  margin: '-1px',
-  padding: 0,
-  overflow: 'hidden',
-  clip: 'rect(0 0 0 0)',
-  whiteSpace: 'nowrap',
-  border: 0,
-} as const
 
 /**
  * Full-screen hero, set flush left on the same wide grid as the header so the
@@ -84,6 +76,12 @@ export default function Hero() {
             backgroundColor: hero.plate,
             color: hero.plateInk,
           },
+          // The dark hero shares the page's near-black, so its lower edge is
+          // drawn; otherwise the next section would start with no boundary.
+          ...theme.applyStyles('dark', {
+            borderBottom: '1px solid',
+            borderColor: theme.vars.palette.divider,
+          }),
         }}
       >
         <Box
@@ -98,7 +96,7 @@ export default function Hero() {
         />
         <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
           <Stack spacing={{ xs: 5, md: 6 }} sx={{ alignItems: 'flex-start' }}>
-            <Stack spacing={{ xs: 3, md: 4 }} sx={{ alignItems: 'flex-start' }}>
+            <Stack spacing={rhythm.display} sx={{ alignItems: 'flex-start', alignSelf: 'stretch' }}>
               <Typography
                 variant="h1"
                 sx={{
@@ -164,18 +162,7 @@ export default function Hero() {
                   size="large"
                   component="a"
                   href={links.getStarted}
-                  sx={{
-                    minHeight: 48,
-                    width: { xs: '100%', sm: 'auto' },
-                    backgroundColor: hero.action,
-                    color: hero.actionInk,
-                    '&:hover': { backgroundColor: hero.actionHover },
-                    '&.Mui-focusVisible, &:focus-visible': {
-                      outline: `2px solid ${hero.actionInk}`,
-                      outlineOffset: -4,
-                      boxShadow: `0 0 0 2px ${hero.ink}`,
-                    },
-                  }}
+                  sx={floodActionSx(hero)}
                 >
                   Get started
                 </Button>
@@ -185,21 +172,7 @@ export default function Hero() {
                   size="large"
                   component="a"
                   href={links.howItWorks}
-                  sx={{
-                    minHeight: 48,
-                    width: { xs: '100%', sm: 'auto' },
-                    color: hero.ink,
-                    borderColor: hero.line,
-                    backgroundColor: 'transparent',
-                    '&:hover': {
-                      borderColor: hero.ink,
-                      backgroundColor: hero.hover,
-                    },
-                    '&.Mui-focusVisible, &:focus-visible': {
-                      outline: `2px solid ${hero.ink}`,
-                      outlineOffset: 2,
-                    },
-                  }}
+                  sx={floodOutlineSx(hero)}
                 >
                   See how it works
                 </Button>

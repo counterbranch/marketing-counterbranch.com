@@ -19,7 +19,7 @@ export default function Footer() {
     <Box component="footer">
       <Divider />
       <Container maxWidth="md">
-        <Stack spacing={2} sx={{ alignItems: 'center', textAlign: 'center', py: 6 }}>
+        <Stack spacing={2} sx={{ alignItems: 'center', textAlign: 'center', py: { xs: 6, md: 8 } }}>
           <Logo size={24} />
           <Typography variant="body2" color="text.secondary">
             © 2026 DUVATL, Inc. Counterbranch™ is a trademark of DUVATL, Inc.

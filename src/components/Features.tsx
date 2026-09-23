@@ -8,6 +8,7 @@ import Section from './Section.tsx'
 import { MONO_FONT, MUTED } from './DiffVersusRun.tsx'
 import { useInView } from '../hooks/useInView.ts'
 import { arrivalSx, stampIn, type RunPhase } from '../motion.ts'
+import { rhythm } from '../rhythm.ts'
 
 /** Share of a specimen that must be on screen before its key line stamps in. */
 const STAMP_THRESHOLD = 0.4
@@ -35,20 +36,15 @@ function Held({ children }: { children: ReactNode }) {
   )
 }
 
-/** A decision or response that changed: brand pink, as in the terminal. */
+/**
+ * A decision or response that changed, in pink as in the terminal. The
+ * lighter member of the family, since it sits on the key line's pink tint,
+ * where full-strength pink falls under 4.5:1 in both schemes.
+ */
 function Changed({ children }: { children: ReactNode }) {
   const palette = useTheme().vars.palette
   return (
-    <Box
-      component="span"
-      sx={(theme) => ({
-        ...strong,
-        color: palette.secondary.main,
-        // Full-strength pink is 4.55:1 on the dark paper ground; the lighter
-        // member of the family gives real headroom there.
-        ...theme.applyStyles('dark', { color: palette.secondary.light }),
-      })}
-    >
+    <Box component="span" sx={{ ...strong, color: palette.secondary.light }}>
       {children}
     </Box>
   )
@@ -64,24 +60,45 @@ function Incomplete({ children }: { children: ReactNode }) {
   )
 }
 
+/** How far the specimen's text sits in from its edges, in theme units. */
+const SPECIMEN_PAD = 3
+
 /**
- * The line a specimen is about. Inline-block so it can stamp in at its own
- * scale, anchored on its left edge so the columns above it never shift; the
- * real newline after it still ends the line.
+ * The line a specimen is about, tinted edge to edge like a changed line in a
+ * diff, so it is the first thing read in the panel: pink for a decision that
+ * changed, the warning hue for a check that did not finish. Inline-block so it
+ * can stamp in at its own scale, anchored on its left edge so the lines above
+ * it never shift; the real newline after it still ends the line.
  */
 function KeyLine({
   phase,
   delay,
+  tone = 'changed',
   children,
 }: {
   phase: RunPhase
   delay: number
+  tone?: 'changed' | 'incomplete'
   children: ReactNode
 }) {
+  const palette = useTheme().vars.palette
+  const tint = tone === 'changed' ? palette.secondary.main : palette.warning.main
   return (
     <Box
       component="span"
-      sx={{ display: 'inline-block', transformOrigin: '0 50%', ...arrivalSx(phase, stampIn, delay) }}
+      sx={(theme) => ({
+        display: 'inline-block',
+        boxSizing: 'content-box',
+        width: '100%',
+        mx: -SPECIMEN_PAD,
+        px: SPECIMEN_PAD,
+        backgroundColor: `color-mix(in srgb, ${tint} 16%, transparent)`,
+        transformOrigin: '0 50%',
+        ...theme.applyStyles('dark', {
+          backgroundColor: `color-mix(in srgb, ${tint} 20%, transparent)`,
+        }),
+        ...arrivalSx(phase, stampIn, delay),
+      })}
     >
       {children}
     </Box>
@@ -148,7 +165,7 @@ function ReportSpecimen({ phase }: { phase: RunPhase }) {
         <Changed>ALLOW</Changed>
       </KeyLine>
       {'\n'}
-      <KeyLine phase={phase} delay={SECOND_LINE_DELAY}>
+      <KeyLine phase={phase} delay={SECOND_LINE_DELAY} tone="incomplete">
         <Muted>incomplete</Muted>
         {'     '}
         <Incomplete>1</Incomplete>
@@ -221,22 +238,34 @@ function FeatureRow({ feature }: { feature: Feature }) {
         display: 'grid',
         gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: 'minmax(0, 5fr) minmax(0, 7fr)' },
         gap: { xs: 3, md: 8 },
-        // From md the specimen stretches to the text column's height, with
-        // its output centred, so each row reads as one block.
-        alignItems: { xs: 'start', md: 'stretch' },
-        py: { xs: 5, md: 6 },
+        // The specimen's top meets the claim's heading and it is only as tall
+        // as its output, so no panel carries dead space set by the copy
+        // beside it.
+        alignItems: 'start',
+        py: rhythm.row,
         borderTop: '1px solid',
         borderColor: palette.divider,
         '&:last-of-type': { borderBottom: '1px solid', borderBottomColor: palette.divider },
       }}
     >
       <Box sx={{ minWidth: 0 }}>
-        <Typography variant="h5" component="h3">
+        {/* Each claim reads as a headline over its evidence, a step under the
+            section heading; the copy and the specimen stay quiet around it. */}
+        <Typography
+          variant="h4"
+          component="h3"
+          sx={{ fontSize: 'clamp(1.375rem, 1.1rem + 1vw, 2rem)' }}
+        >
           {title}
         </Typography>
         <Typography
           variant="body1"
-          sx={{ mt: 2, maxWidth: '46ch', color: palette.text.secondary, textWrap: 'pretty' }}
+          sx={{
+            mt: rhythm.heading,
+            maxWidth: '46ch',
+            color: palette.text.secondary,
+            textWrap: 'pretty',
+          }}
         >
           {body}
         </Typography>
@@ -260,11 +289,8 @@ function FeatureRow({ feature }: { feature: Feature }) {
         sx={{
           m: 0,
           minWidth: 0,
-          px: 3,
-          py: 2.5,
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
+          px: SPECIMEN_PAD,
+          py: 3,
           border: '1px solid',
           borderColor: palette.hero.plate,
           backgroundColor: palette.hero.plate,
@@ -281,8 +307,8 @@ function FeatureRow({ feature }: { feature: Feature }) {
           sx={{
             m: 0,
             fontFamily: MONO_FONT,
-            fontSize: '0.875rem',
-            lineHeight: 1.65,
+            fontSize: { xs: '0.8125rem', md: '0.9375rem' },
+            lineHeight: 1.7,
             // Wrap rather than scroll sideways on phones.
             whiteSpace: 'pre-wrap',
             overflowWrap: 'anywhere',
@@ -306,7 +332,7 @@ export default function Features() {
   return (
     <Section id="features" tone="tinted">
       <Container maxWidth="lg">
-        <Box sx={{ mb: { xs: 6, md: 8 } }}>
+        <Box sx={{ mb: rhythm.intro }}>
           <Typography
             variant="h2"
             component="h2"
@@ -316,7 +342,13 @@ export default function Features() {
           </Typography>
           <Typography
             variant="body1"
-            sx={{ mt: 2.5, maxWidth: '46ch', color: palette.text.secondary, textWrap: 'pretty' }}
+            sx={{
+              mt: rhythm.heading,
+              maxWidth: '46ch',
+              fontSize: { md: '1.125rem' },
+              color: palette.text.secondary,
+              textWrap: 'pretty',
+            }}
           >
             Run the same access checks before and after a change. See who gained or lost access,
             what the app returned, and which checks completed.
