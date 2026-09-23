@@ -19,7 +19,7 @@ export default function SectionBlock({ id, title, description, children }: Secti
       <Container maxWidth="lg">
         <Stack spacing={{ xs: 4, md: 5 }}>
           <Stack spacing={1.5}>
-            <Typography variant="h4" component="h2" sx={{ fontWeight: 800 }}>
+            <Typography variant="h4" component="h2" sx={{ fontWeight: 800, fontSize: '2.125rem' }}>
               {title}
             </Typography>
             {description ? (

@@ -35,8 +35,6 @@ interface SlotWordProps {
    * keep the window's padding optically even on both sides.
    */
   tracking?: string
-  /** Stops the reel on its current word, for an explicit pause control. */
-  paused?: boolean
   /** How long each word rests before the reel rolls on, in ms. */
   dwell?: number
   /**
@@ -69,8 +67,7 @@ interface SlotWordProps {
  * Purely visual and aria-hidden: the surrounding heading must carry an
  * accessible version of the sentence. It rests on the first word for visitors
  * who prefer reduced motion, and pauses while hovered, while scrolled out of
- * view, while the tab is hidden, and whenever `paused` is set, which is how
- * the page's own pause control stops it.
+ * view and while the tab is hidden.
  */
 export default function SlotWord({
   words,
@@ -78,7 +75,6 @@ export default function SlotWord({
   ink,
   suffix = '',
   tracking = '0',
-  paused = false,
   dwell = reelDwell,
   windowMs = motionDuration.reelWindow,
 }: SlotWordProps) {
@@ -136,7 +132,6 @@ export default function SlotWord({
   const running =
     measured &&
     count > 1 &&
-    !paused &&
     !prefersReducedMotion &&
     !hovered &&
     onScreen &&

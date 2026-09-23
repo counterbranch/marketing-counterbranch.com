@@ -155,7 +155,7 @@ export default function DataDisplaySection() {
               {stats.map((stat) => (
                 <Grid key={stat.label} size={{ xs: 12, sm: 4, md: 12, lg: 4 }}>
                   <Paper variant="outlined" sx={{ p: 2.5 }}>
-                    <Typography variant="h4" sx={{ fontWeight: 800 }}>
+                    <Typography variant="h4" sx={{ fontWeight: 800, fontSize: '2.125rem' }}>
                       {stat.value}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">

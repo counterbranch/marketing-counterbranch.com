@@ -4,10 +4,7 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import ButtonBase from '@mui/material/ButtonBase'
 import Container from '@mui/material/Container'
-import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
-import PauseOutlinedIcon from '@mui/icons-material/PauseOutlined'
-import PlayArrowOutlinedIcon from '@mui/icons-material/PlayArrowOutlined'
 import { useTheme } from '@mui/material/styles'
 import Section from './Section.tsx'
 import SlotWord from './SlotWord.tsx'
@@ -383,7 +380,7 @@ function InstallPanel({
       }}
     >
       <Box sx={{ minWidth: 0 }}>
-        <Typography variant="h4" component="h3" sx={{ fontSize: 'clamp(1.375rem, 1.1rem + 1vw, 2.5rem)' }}>
+        <Typography variant="h4" component="h3">
           {path.title}
         </Typography>
         <Typography
@@ -427,7 +424,6 @@ export default function GetStarted() {
     setSelected(index)
     setSwitched(true)
   }
-  const [reelPaused, setReelPaused] = useState(false)
   const tabs = useRef<(HTMLButtonElement | null)[]>([])
   const baseId = useId()
   const tabId = (index: number) => `${baseId}-tab-${index}`
@@ -480,7 +476,6 @@ export default function GetStarted() {
                   plate={palette.hero.plate}
                   ink={palette.hero.plateInk}
                   suffix="."
-                  paused={reelPaused}
                   dwell={reelDwellPhrase}
                   windowMs={motionDuration.reelWindowPhrase}
                   tracking={typeof headingTracking === 'number' ? `${headingTracking}px` : headingTracking}
@@ -489,7 +484,7 @@ export default function GetStarted() {
             </Box>
           </Typography>
         </Box>
-        <Box sx={{ mt: rhythm.display, display: 'flex', alignItems: 'center', gap: { xs: 2, md: 3 } }}>
+        <Box sx={{ mt: rhythm.display }}>
           <Typography
             variant="body1"
             sx={{
@@ -501,28 +496,6 @@ export default function GetStarted() {
           >
             Four ways into the workflow you already have, all free during the alpha.
           </Typography>
-          {/* The chores roll indefinitely, so they need a way to stop them
-              (WCAG 2.2.2); hidden when reduced motion already stops them. */}
-          <IconButton
-            onClick={() => setReelPaused((paused) => !paused)}
-            aria-label={reelPaused ? 'Play the rotating heading' : 'Pause the rotating heading'}
-            sx={{
-              flexShrink: 0,
-              width: 44,
-              height: 44,
-              border: '1px solid',
-              borderColor: palette.divider,
-              color: palette.text.secondary,
-              '&:hover': { color: palette.text.primary, borderColor: palette.text.primary },
-              [REDUCED_MOTION]: { display: 'none' },
-            }}
-          >
-            {reelPaused ? (
-              <PlayArrowOutlinedIcon aria-hidden fontSize="small" />
-            ) : (
-              <PauseOutlinedIcon aria-hidden fontSize="small" />
-            )}
-          </IconButton>
         </Box>
 
         <Box

@@ -294,6 +294,8 @@ const theme = createTheme({
       textWrap: 'balance',
       letterSpacing: '0.07em',
       lineHeight: 1.08,
+      // A claim or exhibit heading inside a section, a step under its head.
+      fontSize: 'clamp(1.375rem, 1.1rem + 1vw, 2.5rem)',
     },
     h5: {
       fontFamily: displayFont,

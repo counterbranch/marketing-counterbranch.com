@@ -237,11 +237,7 @@ function FeatureRow({ feature }: { feature: Feature }) {
       <Box sx={{ minWidth: 0 }}>
         {/* Each claim reads as a headline over its evidence, a step under the
             section heading; the copy and the specimen stay quiet around it. */}
-        <Typography
-          variant="h4"
-          component="h3"
-          sx={{ fontSize: 'clamp(1.375rem, 1.1rem + 1vw, 2.5rem)' }}
-        >
+        <Typography variant="h4" component="h3">
           {title}
         </Typography>
         <Typography
@@ -256,17 +252,33 @@ function FeatureRow({ feature }: { feature: Feature }) {
         >
           {body}
         </Typography>
+        {/* The row's takeaway, set on an ink plate like the hero's reel: a
+            highlighter over the line that says why the claim matters. Each
+            wrapped line gets its own plate. */}
         <Typography
-          variant="body2"
+          variant="body1"
           sx={{
-            mt: 2.5,
+            mt: 3,
             maxWidth: '46ch',
-            fontSize: { xl: '1rem' },
-            color: band.ink,
+            fontSize: { xl: '1.125rem' },
+            fontWeight: 600,
+            lineHeight: 1.8,
             textWrap: 'pretty',
           }}
         >
-          {why}
+          <Box
+            component="span"
+            sx={{
+              px: '0.4em',
+              py: '0.15em',
+              backgroundColor: band.ink,
+              color: band.background,
+              boxDecorationBreak: 'clone',
+              WebkitBoxDecorationBreak: 'clone',
+            }}
+          >
+            {why}
+          </Box>
         </Typography>
       </Box>
 

@@ -1,12 +1,8 @@
-import { useState } from 'react'
 import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
-import IconButton from '@mui/material/IconButton'
-import PauseOutlinedIcon from '@mui/icons-material/PauseOutlined'
-import PlayArrowOutlinedIcon from '@mui/icons-material/PlayArrowOutlined'
 import { useTheme } from '@mui/material/styles'
 import SlotWord from './SlotWord.tsx'
 import { floodActionSx, floodOutlineSx } from './floodButtons.ts'
@@ -49,7 +45,6 @@ export default function Hero() {
   // dark one. Every colour below is a CSS variable, so the switch is instant.
   const hero = theme.vars.palette.hero
   const headlineTracking = theme.typography.h1.letterSpacing
-  const [reelPaused, setReelPaused] = useState(false)
 
   return (
     <Box
@@ -65,8 +60,7 @@ export default function Hero() {
         overflow: 'hidden',
         bgcolor: hero.background,
         color: hero.ink,
-        // Clears the overlaid header above, and the scroll cue and pause
-        // control below.
+        // Clears the overlaid header above and the scroll cue below.
         pt: { xs: 14, md: 16 },
         pb: { xs: 14, md: 16 },
         '&::selection, & ::selection': {
@@ -122,7 +116,6 @@ export default function Hero() {
                     plate={hero.plate}
                     ink={hero.plateInk}
                     suffix="."
-                    paused={reelPaused}
                     tracking={
                       typeof headlineTracking === 'number'
                         ? `${headlineTracking}px`
@@ -195,9 +188,7 @@ export default function Hero() {
         </Stack>
       </Container>
 
-      {/* The hero's lower edge: the scroll cue centred on the screen, and
-          the reel's pause control in the corner, where motion controls
-          conventionally live. */}
+      {/* The hero's lower edge: the scroll cue, centred on the screen. */}
       <Container
         maxWidth={false}
         sx={{
@@ -258,38 +249,6 @@ export default function Hero() {
             },
           }}
         />
-        {/* The rotating word updates indefinitely, so it needs a way to
-            stop it (WCAG 2.2.2). Hover already pauses it for a pointer;
-            this covers touch and keyboard. Hidden when the visitor prefers
-            reduced motion, since the reel does not move at all then. */}
-        <IconButton
-          onClick={() => setReelPaused((paused) => !paused)}
-          aria-label={reelPaused ? 'Play the rotating headline' : 'Pause the rotating headline'}
-          sx={{
-            pointerEvents: 'auto',
-            width: 44,
-            height: 44,
-            color: hero.inkSubtle,
-            border: '1px solid',
-            borderColor: hero.line,
-            '&:hover': {
-              color: hero.ink,
-              borderColor: hero.ink,
-              backgroundColor: hero.hover,
-            },
-            '&.Mui-focusVisible, &:focus-visible': {
-              outline: `2px solid ${hero.ink}`,
-              outlineOffset: 2,
-            },
-            '@media (prefers-reduced-motion: reduce)': { display: 'none' },
-          }}
-        >
-          {reelPaused ? (
-            <PlayArrowOutlinedIcon aria-hidden fontSize="small" />
-          ) : (
-            <PauseOutlinedIcon aria-hidden fontSize="small" />
-          )}
-        </IconButton>
       </Container>
     </Box>
   )

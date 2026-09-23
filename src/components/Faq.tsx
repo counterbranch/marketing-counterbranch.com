@@ -70,7 +70,7 @@ const QUESTIONS = [
   {
     question: 'What does alpha mean here?',
     answer:
-      'The comparison and its reports work today. Commands, options and report formats can still change between releases.',
+      'The comparison and its reports work today, and commands, options and report formats can still change between releases. Each mode listed here has to pass one test before it ships: a tester configures it, runs a baseline, introduces a permission regression, sees the finding, fixes it and reruns, without an agent. Missing setup is reported as INCOMPLETE, never as a pass.',
   },
 ] as const
 
