@@ -7,6 +7,8 @@ import Box from '@mui/material/Box'
 import Section from './Section.tsx'
 import { RunGrid } from './AccessGrid.tsx'
 import SlotWord from './SlotWord.tsx'
+import ReelFrame from './ReelFrame.tsx'
+import { REEL_CONTROL_ROOM } from './reelFrameContext.ts'
 import { floodActionSx, floodOutlineSx } from './floodButtons.ts'
 import { links } from '../links.ts'
 import { srOnly } from '../a11y.ts'
@@ -45,10 +47,11 @@ export default function Cta() {
       >
         <Box>
           {/* The hero's reel, with its words and settings: the band answers
-              the headline it opened with. The column is a size container so
-              the reel's line fits it. The longest word is about 10.5em; the
-              divisor of 11 leaves room for the plate's padding and the stop. */}
-          <Box sx={{ containerType: 'inline-size' }}>
+              the headline it opened with. The reel's line scales to the
+              frame, less the pause control's room; the longest word, full
+              stop included, reaches about 11.75em on the smallest phones,
+              where the tracking in px counts for most. */}
+          <ReelFrame>
             <Typography
               variant="h2"
               sx={{
@@ -69,7 +72,9 @@ export default function Cta() {
                     display: 'flex',
                     mt: '0.16em',
                     fontSize: 'min(1em, 7.5vw)',
-                    '@supports (width: 1cqi)': { fontSize: 'min(1em, 100cqi / 11)' },
+                    '@supports (width: 1cqi)': {
+                      fontSize: `min(1em, (100cqi - ${REEL_CONTROL_ROOM}px) / 11.75)`,
+                    },
                   }}
                 >
                   <SlotWord
@@ -82,7 +87,7 @@ export default function Cta() {
                 </Box>
               </Box>
             </Typography>
-          </Box>
+          </ReelFrame>
           <Typography
             variant="body1"
             sx={{

@@ -6,6 +6,8 @@ import Button from '@mui/material/Button'
 import { useTheme } from '@mui/material/styles'
 import type { ReactNode } from 'react'
 import SlotWord from './SlotWord.tsx'
+import ReelFrame from './ReelFrame.tsx'
+import { REEL_CONTROL_ROOM } from './reelFrameContext.ts'
 import { floodActionSx, floodOutlineSx } from './floodButtons.ts'
 import { srOnly } from '../a11y.ts'
 import { pageColumn, rhythm } from '../rhythm.ts'
@@ -100,45 +102,55 @@ export default function Hero({
       >
         <Stack spacing={{ xs: 5, md: 6 }} sx={{ alignItems: 'flex-start', minWidth: 0 }}>
           <Stack spacing={rhythm.display} sx={{ alignItems: 'flex-start', alignSelf: 'stretch' }}>
-            <Typography
-              variant="h1"
-              sx={{
-                // Grows with the screen to the display cap, where "Access changes
-                // in your" still fits the widest column on one line, so wide
-                // screens get two lines plus the reel instead of stranding "in
-                // your" on its own.
-                fontSize: aside
-                  ? 'clamp(2.5rem, 1.2rem + 3.2vw, 4.5rem)'
-                  : 'clamp(2.5rem, 1.2rem + 4.8vw, 6rem)',
-                ...heroStageSx(0),
-              }}
-            >
-              <Box component="span" sx={srOnly}>
-                {HEADLINE_FOR_SCREEN_READERS}
-              </Box>
-              <Box component="span" aria-hidden sx={{ display: 'block' }}>
-                Catch unintended access changes in your
-                {/* The reel gets its own line so a long word never reflows
-                    the sentence above it. On narrow screens the line
-                    scales down so the longest word still fits. */}
-                <Box
-                  component="span"
-                  sx={{ display: 'flex', mt: '0.16em', fontSize: 'min(1em, 7.5vw)' }}
-                >
-                  <SlotWord
-                    words={REEL_WORDS}
-                    plate={hero.plate}
-                    ink={hero.plateInk}
-                    suffix="."
-                    tracking={
-                      typeof headlineTracking === 'number'
-                        ? `${headlineTracking}px`
-                        : headlineTracking
-                    }
-                  />
+            <ReelFrame sx={heroStageSx(0)}>
+              <Typography
+                variant="h1"
+                sx={{
+                  // Grows with the screen to the display cap, where "Access changes
+                  // in your" still fits the widest column on one line, so wide
+                  // screens get two lines plus the reel instead of stranding "in
+                  // your" on its own.
+                  fontSize: aside
+                    ? 'clamp(2.5rem, 1.2rem + 3.2vw, 4.5rem)'
+                    : 'clamp(2.5rem, 1.2rem + 4.8vw, 6rem)',
+                }}
+              >
+                <Box component="span" sx={srOnly}>
+                  {HEADLINE_FOR_SCREEN_READERS}
                 </Box>
-              </Box>
-            </Typography>
+                <Box component="span" aria-hidden sx={{ display: 'block' }}>
+                  Catch unintended access changes in your
+                  {/* The reel gets its own line so a long word never reflows
+                      the sentence above it. On narrow screens the line
+                      scales down so the longest word and the pause control
+                      still fit: with the tracking in px, the longest word and
+                      its full stop reach about 11.8em on the smallest phones. */}
+                  <Box
+                    component="span"
+                    sx={{
+                      display: 'flex',
+                      mt: '0.16em',
+                      fontSize: 'min(1em, 7.5vw)',
+                      '@supports (width: 1cqi)': {
+                        fontSize: `min(1em, (100cqi - ${REEL_CONTROL_ROOM}px) / 11.8)`,
+                      },
+                    }}
+                  >
+                    <SlotWord
+                      words={REEL_WORDS}
+                      plate={hero.plate}
+                      ink={hero.plateInk}
+                      suffix="."
+                      tracking={
+                        typeof headlineTracking === 'number'
+                          ? `${headlineTracking}px`
+                          : headlineTracking
+                      }
+                    />
+                  </Box>
+                </Box>
+              </Typography>
+            </ReelFrame>
             <Typography
               variant="body1"
               sx={{

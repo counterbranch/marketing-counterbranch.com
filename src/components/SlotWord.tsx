@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import Box from '@mui/material/Box'
 import { motionDuration, motionEasing, reelDwell } from '../motion.ts'
+import { useReelFrame } from './reelFrameContext.ts'
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion.ts'
 
 /** Height of one reel row, in em. The window and every row share it, so one roll moves exactly one word. */
@@ -67,7 +68,9 @@ interface SlotWordProps {
  * Purely visual and aria-hidden: the surrounding heading must carry an
  * accessible version of the sentence. It rests on the first word for visitors
  * who prefer reduced motion, and pauses while hovered, while scrolled out of
- * view and while the tab is hidden.
+ * view and while the tab is hidden. Inside a ReelFrame it also stops while the
+ * visitor has it paused or rests the pointer on its control, and reports its
+ * right edge so the control can sit there.
  */
 export default function SlotWord({
   words,
@@ -79,6 +82,7 @@ export default function SlotWord({
   windowMs = motionDuration.reelWindow,
 }: SlotWordProps) {
   const prefersReducedMotion = usePrefersReducedMotion()
+  const frame = useReelFrame()
   const rootRef = useRef<HTMLSpanElement>(null)
   const wordSizers = useRef<(HTMLSpanElement | null)[]>([])
   const suffixSizer = useRef<HTMLSpanElement>(null)
@@ -134,6 +138,8 @@ export default function SlotWord({
     count > 1 &&
     !prefersReducedMotion &&
     !hovered &&
+    !frame?.paused &&
+    !frame?.held &&
     onScreen &&
     tabVisible
 
@@ -172,6 +178,15 @@ export default function SlotWord({
     animated
       ? `${property} ${windowMs}ms ${motionEasing.decel} ${windowDelay}ms`
       : 'none'
+
+  // The frame's control follows the suffix, the reel's visible right edge.
+  const report = frame?.report
+  const edge = measured ? current + metrics.suffix : 0
+  const follow = resize('transform')
+  useLayoutEffect(() => {
+    const root = rootRef.current
+    if (report && root && measured) report({ root, edge, transition: follow })
+  }, [report, measured, edge, follow])
 
   return (
     <Box

@@ -8,6 +8,8 @@ import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 import Section from './Section.tsx'
 import SlotWord from './SlotWord.tsx'
+import ReelFrame from './ReelFrame.tsx'
+import { REEL_CONTROL_ROOM } from './reelFrameContext.ts'
 import { MacWindow, MONO_FONT, MUTED } from './DiffVersusRun.tsx'
 import { srOnly } from '../a11y.ts'
 import { links } from '../links.ts'
@@ -451,9 +453,11 @@ export default function GetStarted() {
   return (
     <Section id="get-started">
       <Container maxWidth={false} sx={pageColumn}>
-        {/* The column is a size container so the chore's line can scale to
-            it: the longest chore, full stop included, is about 16.3em wide. */}
-        <Box sx={{ containerType: 'inline-size' }}>
+        {/* The frame is a size container, so the chore's line scales to its
+            width less the pause control's room: the longest chore, full
+            stop included, reaches about 16.75em on the smallest phones,
+            where the tracking in px counts for most. */}
+        <ReelFrame>
           <Typography variant="h2" component="h2">
             <Box component="span" sx={srOnly}>
               {HEADING_FOR_SCREEN_READERS}
@@ -468,7 +472,9 @@ export default function GetStarted() {
                   display: 'flex',
                   mt: '0.16em',
                   fontSize: 'min(1em, 5.2vw)',
-                  '@supports (width: 1cqi)': { fontSize: 'min(1em, 100cqi / 16.8)' },
+                  '@supports (width: 1cqi)': {
+                    fontSize: `min(1em, (100cqi - ${REEL_CONTROL_ROOM}px) / 16.75)`,
+                  },
                 }}
               >
                 <SlotWord
@@ -483,7 +489,7 @@ export default function GetStarted() {
               </Box>
             </Box>
           </Typography>
-        </Box>
+        </ReelFrame>
         <Box sx={{ mt: rhythm.display }}>
           <Typography
             variant="body1"
