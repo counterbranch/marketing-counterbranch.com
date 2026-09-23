@@ -5,6 +5,9 @@ import { readFile, rm, writeFile } from 'node:fs/promises'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const root = fileURLToPath(new URL('..', import.meta.url))
+// The base the client build was made with (see vite.config.ts). Asset URLs in
+// the built HTML start with it, so it is stripped to find their files in dist.
+const base = process.env.BASE_PATH || '/'
 const ssrDir = `${root}dist-ssr`
 const page = `${root}dist/index.html`
 const mount = '<div id="root"></div>'
@@ -19,10 +22,14 @@ if (!template.includes(mount)) {
 
 // The page's only stylesheet is the @font-face rules and a small reset.
 // Inlining it means the prerendered page needs no extra round trip before
-// it can paint. Its asset URLs are absolute, so they resolve the same inline.
+// it can paint. Its asset URLs are absolute, base included, so they resolve
+// the same inline.
 let inlined = template
 for (const [link, href] of template.matchAll(/<link rel="stylesheet"[^>]*href="([^"]+\.css)"[^>]*>/g)) {
-  const css = await readFile(`${root}dist${href}`, 'utf8')
+  if (!href.startsWith(base)) {
+    throw new Error(`prerender: stylesheet ${href} is outside the base ${base}`)
+  }
+  const css = await readFile(`${root}dist/${href.slice(base.length)}`, 'utf8')
   inlined = inlined.replace(link, () => `<style>${css}</style>`)
 }
 

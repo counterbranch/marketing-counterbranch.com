@@ -60,7 +60,7 @@ export default function DataDisplaySection() {
           <Avatar sx={{ bgcolor: 'secondary.main' }}>
             <FaceOutlinedIcon fontSize="small" />
           </Avatar>
-          <Avatar src="/favicon.png" alt="Counterbranch" />
+          <Avatar src={`${import.meta.env.BASE_URL}favicon.png`} alt="Counterbranch" />
           <AvatarGroup max={4}>
             <Avatar alt="Jonny">JH</Avatar>
             <Avatar sx={{ bgcolor: 'primary.main', color: 'primary.contrastText' }}>AB</Avatar>

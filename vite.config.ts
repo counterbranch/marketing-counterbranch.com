@@ -40,9 +40,17 @@ function preloadFonts(files: RegExp[]): Plugin {
   }
 }
 
+/**
+ * Where the site is served from. The Pages workflow sets BASE_PATH from
+ * actions/configure-pages: the repository's subpath on github.io, or `/` once
+ * a custom domain serves the site from its root. Local builds use `/`.
+ * scripts/prerender.mjs reads the same variable.
+ */
+const base = process.env.BASE_PATH || '/'
+
 // https://vite.dev/config/
 export default defineConfig(({ isSsrBuild }) => ({
-  base: '/',
+  base,
   plugins: [
     react(),
     preloadFonts([/oswald-latin-wght-normal-[\w-]+\.woff2$/, /inter-latin-wght-normal-[\w-]+\.woff2$/]),
