@@ -12,4 +12,6 @@ export const srOnly = {
   clip: 'rect(0 0 0 0)',
   whiteSpace: 'nowrap',
   border: 0,
+  // Inherited caps would be spelled out letter by letter in accessible names.
+  textTransform: 'none',
 } as const

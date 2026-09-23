@@ -497,10 +497,13 @@ function RunPicker({
   name,
   selected,
   onChoose,
+  compact = false,
 }: {
   name: string
   selected: number
   onChoose: (index: number) => void
+  /** Three across at every width from sm, labels only: for a picker under the terminal. */
+  compact?: boolean
 }) {
   const theme = useTheme()
   const palette = theme.vars.palette
@@ -546,8 +549,9 @@ function RunPicker({
           gridTemplateColumns: {
             xs: 'minmax(0, 1fr)',
             sm: 'repeat(3, minmax(0, 1fr))',
-            lg: 'minmax(0, 1fr)',
+            lg: compact ? 'repeat(3, minmax(0, 1fr))' : 'minmax(0, 1fr)',
           },
+          ...(compact && { '& [data-summary]': { display: 'none' } }),
         }}
       >
         {EXAMPLE_RUNS.map((run, index) => (
@@ -567,8 +571,8 @@ function RunPicker({
               cursor: 'pointer',
               // Neighbouring options share one hairline rather than doubling it.
               ...(index > 0 && {
-                mt: { xs: '-1px', sm: 0, lg: '-1px' },
-                ml: { sm: '-1px', lg: 0 },
+                mt: { xs: '-1px', sm: 0, lg: compact ? 0 : '-1px' },
+                ml: { sm: '-1px', lg: compact ? '-1px' : 0 },
               }),
               border: '1px solid',
               borderColor: palette.divider,
@@ -651,7 +655,15 @@ function RunPicker({
  * runs (see RunPicker). Motion is CSS keyframes restarted by remounting
  * (`key={runKey}`); React only changes phase at the start and end of a run.
  */
-export default function CompareTerminal() {
+export default function CompareTerminal({
+  embedded = false,
+}: {
+  /**
+   * Just the run: the terminal, the picker under it and the note, with no
+   * section or heading, for a page that shows it inside another band.
+   */
+  embedded?: boolean
+} = {}) {
   const theme = useTheme()
   const palette = theme.vars.palette
   const terminal = useRef<HTMLElement | null>(null)
@@ -728,17 +740,6 @@ export default function CompareTerminal() {
 
   // The action is outlined in the section's own ink rather than a brand
   // colour, so it never reads as the page's primary action.
-  const outlinedButtonSx = {
-    minHeight: 44,
-    color: palette.text.primary,
-    borderColor: palette.divider,
-    transition: theme.transitions.create(['transform', 'background-color', 'border-color'], {
-      duration: motionDuration.fast,
-      easing: motionEasing.decel,
-    }),
-    '&:hover': { borderColor: palette.text.primary },
-  }
-
   // Which transcript shows follows the checked radio. The React-rendered
   // `data-chosen` is the fallback where `:has()` is not supported.
   const shownRun = Object.fromEntries(
@@ -747,6 +748,112 @@ export default function CompareTerminal() {
       { visibility: 'visible' },
     ]),
   )
+
+  const runUnit = (
+    <Box
+      ref={unit}
+      sx={{
+        mt: embedded ? 0 : rhythm.intro,
+        display: 'grid',
+        // Two columns only from lg: below that the terminal column would
+        // be narrower than its 71-character lines and hide the verdict.
+        // Embedded, the terminal leads and the runs sit under it.
+        gridTemplateAreas: embedded
+          ? '"terminal" "runs" "aside"'
+          : {
+              xs: '"runs" "terminal" "aside"',
+              lg: '"runs terminal" "aside terminal"',
+            },
+        gridTemplateColumns: embedded
+          ? 'minmax(0, 1fr)'
+          : {
+              xs: 'minmax(0, 1fr)',
+              lg: 'minmax(0, 340px) minmax(0, 1fr)',
+              xl: 'minmax(0, 400px) minmax(0, 1fr)',
+            },
+        gridTemplateRows: embedded ? undefined : { lg: 'auto 1fr' },
+        columnGap: 6,
+        alignItems: 'start',
+        ...shownRun,
+        [NO_HAS]: { '& [data-run][data-chosen="true"]': { visibility: 'visible' } },
+      }}
+    >
+      <Box sx={{ gridArea: 'runs', minWidth: 0, ...(embedded && { mt: 3 }) }}>
+        <RunPicker name={pickerName} selected={selected} onChoose={choose} compact={embedded} />
+      </Box>
+
+      <Box sx={{ gridArea: 'terminal', minWidth: 0, mt: embedded ? 0 : { xs: 3, lg: 0 } }}>
+        <MacWindow
+          ref={terminal}
+          title="counterbranch — zsh"
+          label="Example compare run"
+          glow={glow[EXAMPLE_RUNS[selected].outcome]}
+        >
+          {/* Every run is laid in the same cell, so the tallest one sets
+              the window's height and switching never moves the page.
+              Only the chosen one is visible, or read out. */}
+          <Box sx={{ display: 'grid' }}>
+            {EXAMPLE_RUNS.map((run, index) => {
+              const isSelected = index === selected
+              return (
+                <Box
+                  key={isSelected ? `${run.outcome}-${runKey}` : run.outcome}
+                  component="pre"
+                  data-run={index}
+                  data-chosen={isSelected}
+                  sx={{
+                    gridArea: '1 / 1',
+                    visibility: 'hidden',
+                    m: 0,
+                    px: { xs: 2, sm: 3 },
+                    py: 2.5,
+                    fontFamily: MONO_FONT,
+                    fontSize: { xs: '0.8125rem', sm: '0.875rem', xl: '1rem' },
+                    lineHeight: 1.65,
+                    // Wrap rather than scroll sideways, so no part of the
+                    // run is ever off-screen.
+                    whiteSpace: 'pre-wrap',
+                    overflowWrap: 'anywhere',
+                  }}
+                >
+                  <Transcript
+                    run={run}
+                    phase={isSelected ? phase : 'idle'}
+                    blinking={isSelected && runKey > 0}
+                  />
+                </Box>
+              )
+            })}
+          </Box>
+        </MacWindow>
+
+        <Typography
+          variant="body2"
+          sx={{ mt: 2, maxWidth: '64ch', ...secondaryText, textWrap: 'pretty' }}
+        >
+          Demonstration only. This output is simulated to show the shape of a run and does not
+          come from a live system. Counterbranch compares only the prepared authorization tests
+          you run; it does not certify an application as secure.
+        </Typography>
+      </Box>
+
+      {/* Replaying does nothing visible without motion, so the control
+          goes with it, margin and all. */}
+      <Box sx={{ gridArea: 'aside', mt: 3, [REDUCED_MOTION]: { display: 'none' } }}>
+        <Button variant="outlined" onClick={play} sx={{ minHeight: 44 }}>
+          Replay run
+        </Button>
+      </Box>
+    </Box>
+  )
+
+  if (embedded) {
+    return (
+      <Box id="how-it-works" sx={{ scrollMarginTop: 24 }}>
+        {runUnit}
+      </Box>
+    )
+  }
 
   return (
     <Section id="how-it-works">
@@ -759,7 +866,6 @@ export default function CompareTerminal() {
         <Typography
           variant="h2"
           component="h2"
-          sx={{ fontSize: 'clamp(2rem, 1.2rem + 2.8vw, 4.5rem)' }}
         >
           See what access changed.
         </Typography>
@@ -776,97 +882,7 @@ export default function CompareTerminal() {
           Run the same permission check against both versions of your authorization logic.
         </Typography>
 
-        <Box
-          ref={unit}
-          sx={{
-            mt: rhythm.intro,
-            display: 'grid',
-            // Two columns only from lg: below that the terminal column would
-            // be narrower than its 71-character lines and hide the verdict.
-            gridTemplateAreas: {
-              xs: '"runs" "terminal" "aside"',
-              lg: '"runs terminal" "aside terminal"',
-            },
-            gridTemplateColumns: {
-              xs: 'minmax(0, 1fr)',
-              lg: 'minmax(0, 340px) minmax(0, 1fr)',
-              xl: 'minmax(0, 400px) minmax(0, 1fr)',
-            },
-            gridTemplateRows: { lg: 'auto 1fr' },
-            columnGap: 6,
-            alignItems: 'start',
-            ...shownRun,
-            [NO_HAS]: { '& [data-run][data-chosen="true"]': { visibility: 'visible' } },
-          }}
-        >
-          <Box sx={{ gridArea: 'runs', minWidth: 0 }}>
-            <RunPicker name={pickerName} selected={selected} onChoose={choose} />
-          </Box>
-
-          <Box sx={{ gridArea: 'terminal', minWidth: 0, mt: { xs: 3, lg: 0 } }}>
-            <MacWindow
-              ref={terminal}
-              title="counterbranch — zsh"
-              label="Example compare run"
-              glow={glow[EXAMPLE_RUNS[selected].outcome]}
-            >
-              {/* Every run is laid in the same cell, so the tallest one sets
-                  the window's height and switching never moves the page.
-                  Only the chosen one is visible, or read out. */}
-              <Box sx={{ display: 'grid' }}>
-                {EXAMPLE_RUNS.map((run, index) => {
-                  const isSelected = index === selected
-                  return (
-                    <Box
-                      key={isSelected ? `${run.outcome}-${runKey}` : run.outcome}
-                      component="pre"
-                      data-run={index}
-                      data-chosen={isSelected}
-                      sx={{
-                        gridArea: '1 / 1',
-                        visibility: 'hidden',
-                        m: 0,
-                        px: { xs: 2, sm: 3 },
-                        py: 2.5,
-                        fontFamily: MONO_FONT,
-                        fontSize: { xs: '0.8125rem', sm: '0.875rem', xl: '1rem' },
-                        lineHeight: 1.65,
-                        // Wrap rather than scroll sideways, so no part of the
-                        // run is ever off-screen.
-                        whiteSpace: 'pre-wrap',
-                        overflowWrap: 'anywhere',
-                      }}
-                    >
-                      <Transcript
-                        run={run}
-                        phase={isSelected ? phase : 'idle'}
-                        blinking={isSelected && runKey > 0}
-                      />
-                    </Box>
-                  )
-                })}
-              </Box>
-            </MacWindow>
-
-            <Typography
-              variant="body2"
-              sx={{ mt: 2, maxWidth: '64ch', ...secondaryText, textWrap: 'pretty' }}
-            >
-              Demonstration only. This output is simulated to show the shape of a run and does not
-              come from a live system. Command names and counts are illustrative. Counterbranch
-              compares only the prepared authorization tests you run; it does not certify an
-              application as secure.
-            </Typography>
-          </Box>
-
-          {/* Replaying does nothing visible without motion, so the control
-              goes with it, margin and all. */}
-          <Box sx={{ gridArea: 'aside', mt: 3, [REDUCED_MOTION]: { display: 'none' } }}>
-            <Button variant="outlined" color="inherit" onClick={play} sx={outlinedButtonSx}>
-              Replay run
-            </Button>
-          </Box>
-        </Box>
+        {runUnit}
       </Container>
     </Section>
   )

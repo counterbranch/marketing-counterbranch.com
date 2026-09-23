@@ -70,7 +70,7 @@ const QUESTIONS = [
   {
     question: 'What does alpha mean here?',
     answer:
-      'The comparison and its reports work today. Commands, options and report formats can still change between releases.',
+      'The comparison and its reports work today, and commands, options and report formats can still change between releases. Each mode listed here has to pass one test before it ships: a tester configures it, runs a baseline, introduces a permission regression, sees the finding, fixes it and reruns, without an agent. Missing setup is reported as INCOMPLETE, never as a pass.',
   },
 ] as const
 
@@ -82,9 +82,10 @@ const QUESTIONS = [
 export default function Faq() {
   const theme = useTheme()
   const palette = theme.vars.palette
+  const band = palette.bands.navy
   const baseId = useId()
   return (
-    <Section id="faq">
+    <Section id="faq" tone="navy">
       <Container
         maxWidth={false}
         sx={{
@@ -97,7 +98,7 @@ export default function Faq() {
         }}
       >
         <Box sx={{ position: { lg: 'sticky' }, top: { lg: 96 } }}>
-          <Typography variant="h2" sx={{ fontSize: 'clamp(2rem, 1.2rem + 2.8vw, 4.5rem)' }}>
+          <Typography variant="h2">
             Before you install.
           </Typography>
           <Typography
@@ -106,14 +107,14 @@ export default function Faq() {
               mt: rhythm.heading,
               maxWidth: '40ch',
               fontSize: { md: '1.125rem', xl: '1.25rem' },
-              color: palette.text.secondary,
+              color: band.inkMuted,
               textWrap: 'pretty',
             }}
           >
             What runs where, who pays for what, and what alpha means.
           </Typography>
         </Box>
-        <Box sx={{ borderTop: '1px solid', borderColor: palette.divider }}>
+        <Box sx={{ borderTop: '1px solid', borderColor: band.line }}>
           {QUESTIONS.map(({ question, answer }, index) => (
             <Accordion
               key={question}
@@ -122,8 +123,9 @@ export default function Faq() {
               square
               sx={{
                 backgroundColor: 'transparent',
+                color: 'inherit',
                 borderBottom: '1px solid',
-                borderColor: palette.divider,
+                borderColor: band.line,
                 // The divider MUI draws above each panel doubles the border.
                 '&::before': { display: 'none' },
               }}
@@ -140,7 +142,7 @@ export default function Faq() {
                   minHeight: 56,
                   '& .MuiAccordionSummary-content': { my: 0, pr: 2 },
                   '& .MuiAccordionSummary-expandIconWrapper': {
-                    color: palette.text.primary,
+                    color: band.ink,
                     transition: theme.transitions.create('transform', {
                       duration: motionDuration.base,
                       easing: motionEasing.decel,
@@ -151,15 +153,13 @@ export default function Faq() {
                   '@media (prefers-reduced-motion: reduce)': {
                     '& .MuiAccordionSummary-expandIconWrapper': { transition: 'none' },
                   },
-                  // The theme's ring, in place of MUI's grey focus fill.
+                  // A cyan ring, which reads on the navy in both schemes, in
+                  // place of MUI's grey focus fill.
                   '&.Mui-focusVisible': {
                     backgroundColor: 'transparent',
-                    outline: `2px solid ${palette.primary.dark}`,
+                    outline: `2px solid ${palette.primary.main}`,
                     outlineOffset: 2,
                   },
-                  ...theme.applyStyles('dark', {
-                    '&.Mui-focusVisible': { outline: `2px solid ${palette.primary.main}` },
-                  }),
                 }}
               >
                 <Typography
@@ -175,7 +175,7 @@ export default function Faq() {
                   sx={{
                     maxWidth: '64ch',
                     fontSize: { md: '1.0625rem', xl: '1.125rem' },
-                    color: palette.text.secondary,
+                    color: band.inkMuted,
                     textWrap: 'pretty',
                   }}
                 >

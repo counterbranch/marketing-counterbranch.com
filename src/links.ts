@@ -8,6 +8,7 @@ export const links = {
   // Every "Get started free" button leads to the install section.
   getStarted: '#get-started',
   howItWorks: '#how-it-works',
+  moreThanADiff: '#more-than-a-diff',
   faq: '#faq',
   github: 'https://github.com/counterbranch',
   home: root,

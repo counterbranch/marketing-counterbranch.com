@@ -9,7 +9,7 @@ import type { SxProps, Theme } from '@mui/material/styles'
 export const motionDuration = {
   /** Immediate feedback: hover/press states. */
   fast: 150,
-  /** Routine state change: scroll-in reveals. */
+  /** Routine state change: a scripted run's parts arriving. */
   base: 240,
   /** Deliberately authored focal entrance: hero stages. */
   entrance: 420,
@@ -18,9 +18,19 @@ export const motionDuration = {
   /**
    * The reel window resizing to the next word. Shorter than the roll so a
    * growing window is at full width before the word lands, and a shrinking
-   * one waits until the word has landed before closing in.
+   * one starts once the outgoing word is nearly out of the window and
+   * finishes as the new one lands.
    */
   reelWindow: 240,
+  /**
+   * The window resizing to the next entry of a phrase reel (the install
+   * heading's chores), whose entries differ in width by up to about 240px
+   * at 1440: half again as long as the headline's, still inside the roll so a
+   * growing window is fully open before the phrase lands.
+   */
+  reelWindowPhrase: 360,
+  /** One pass of the hero's scroll cue. */
+  cue: 2200,
   /** A command typed out at a terminal prompt, a character per step. */
   typing: 900,
   /** One on-and-off cycle of a resting terminal cursor. */
@@ -30,10 +40,19 @@ export const motionDuration = {
 export const motionEasing = {
   /** Confident, natural deceleration for arrivals. */
   decel: 'cubic-bezier(0.16, 1, 0.3, 1)',
+  /** Symmetric ease for a mark that travels and returns. */
+  inOut: 'cubic-bezier(0.45, 0, 0.55, 1)',
 } as const
 
 /** How long each word rests in the headline reel before it rolls, in ms. */
 export const reelDwell = 2000
+
+/**
+ * Dwell for a reel entry that is a phrase rather than a word (the install
+ * heading's chores): twice the headline's, so three or four words can be
+ * read before the next rolls in.
+ */
+export const reelDwellPhrase = 4000
 
 /** Delay between successive hero entrance stages, in ms. */
 export const motionStagger = 80
@@ -154,22 +173,6 @@ export const stampIn = keyframes`
 `
 
 /**
- * A line arriving from just to its left, as if written into the window it
- * sits in. Ends on the element's own styles, so removing the animation after
- * it finishes changes nothing.
- */
-export const slideIn = keyframes`
-  from {
-    opacity: 0;
-    transform: translateX(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-`
-
-/**
  * A line drawn from its start. For an SVG path with `pathLength="1"` and a
  * stroke-dasharray of 1, so every line draws in the same time whatever its
  * real length. Ends on the path's own (undashed-looking) state.
@@ -214,21 +217,29 @@ export const wipeIn = keyframes`
 `
 
 /**
- * One half of a split square slipping apart from the other, along the
- * square's diagonal, to rest where it is drawn.
+ * A run's scan line crossing what it checks: from its own place to
+ * `--sweep` further along, gone once it arrives. Hidden at its first frame,
+ * so a `both` fill keeps it out of sight until its delay is up.
  */
-export const slipIn = keyframes`
+export const sweepAcross = keyframes`
   from {
+    opacity: 0;
+    transform: translateX(0);
+  }
+  1% {
     opacity: 1;
-    transform: translate(-12px, -12px);
+    transform: translateX(0);
+  }
+  96% {
+    opacity: 1;
   }
   to {
-    opacity: 1;
-    transform: translate(0, 0);
+    opacity: 0;
+    transform: translateX(var(--sweep));
   }
 `
 
-type Keyframes = typeof slideIn
+type Keyframes = ReturnType<typeof keyframes>
 
 /**
  * Where a scripted run is.
@@ -257,7 +268,7 @@ export function arrivalSx(phase: RunPhase, frames: Keyframes, delay: number) {
 
 /**
  * Staged entrance for hero content. `index` selects the stagger delay
- * (headline = 0, description = 1, buttons = 2, footnote = 3).
+ * (headline = 0, description = 1, buttons = 2, footnote = 3, aside = 4).
  * Animates opacity + transform only.
  */
 export function heroStageSx(index: number): SxProps<Theme> {
@@ -267,22 +278,6 @@ export function heroStageSx(index: number): SxProps<Theme> {
     [reduceMotion]: {
       animation: 'none',
       opacity: 1,
-    },
-  }
-}
-
-/**
- * Scroll-triggered reveal, driven by the `useInView` hook. Fires once and
- * animates opacity + transform only.
- */
-export function revealSx(inView: boolean): SxProps<Theme> {
-  return {
-    opacity: inView ? 1 : 0,
-    transform: inView ? 'none' : 'translateY(16px)',
-    transition: `opacity ${motionDuration.base}ms ${motionEasing.decel}, transform ${motionDuration.base}ms ${motionEasing.decel}`,
-    [reduceMotion]: {
-      transition: 'opacity 1ms linear',
-      transform: 'none',
     },
   }
 }

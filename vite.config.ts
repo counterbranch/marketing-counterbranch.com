@@ -55,7 +55,7 @@ export default defineConfig(({ isSsrBuild }) => ({
     react(),
     preloadFonts([/oswald-latin-wght-normal-[\w-]+\.woff2$/, /inter-latin-wght-normal-[\w-]+\.woff2$/]),
   ],
-  // Only the client build has the two HTML pages. The SSR build that feeds
+  // Only the client build has the HTML pages. The SSR build that feeds
   // scripts/prerender.mjs takes its single entry from the command line.
   build: isSsrBuild
     ? {}
@@ -64,6 +64,8 @@ export default defineConfig(({ isSsrBuild }) => ({
           input: {
             main: resolve(import.meta.dirname, 'index.html'),
             kitchenSink: resolve(import.meta.dirname, 'kitchen-sink.html'),
+            // A second opening, for comparing with the page as shipped.
+            variant: resolve(import.meta.dirname, 'variant.html'),
           },
         },
       },

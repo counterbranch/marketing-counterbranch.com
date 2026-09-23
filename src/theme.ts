@@ -56,8 +56,6 @@ export interface HeroPalette {
   ink: string
   /** Supporting copy. */
   inkMuted: string
-  /** Footnotes and the scroll cue. */
-  inkSubtle: string
   /** Outlined control borders. */
   line: string
   /** Outlined control hover fill. */
@@ -101,15 +99,14 @@ declare module '@mui/material/styles' {
   }
 }
 
-// Ink contrast on the cyan flood: 12.4:1 for ink, 7.8:1 muted, 6.2:1 subtle,
-// 3.7:1 for outlined borders.
+// Ink contrast on the cyan flood: 12.4:1 for ink, 7.8:1 muted, 3.7:1 for
+// outlined borders.
 const cyanFlood: HeroPalette = {
   background: '#00E8FC',
   // Depth sits low and to the right, balancing the type mass on the left.
   wash: `radial-gradient(85% 75% at 85% 120%, ${alpha(heroInk, 0.22)} 0%, transparent 60%)`,
   ink: heroInk,
   inkMuted: alpha(heroInk, 0.8),
-  inkSubtle: alpha(heroInk, 0.72),
   line: alpha(heroInk, 0.55),
   hover: alpha(heroInk, 0.08),
   // The reel window is ink, like the filled action: black with white text
@@ -240,7 +237,6 @@ const theme = createTheme({
           wash: `radial-gradient(70% 60% at 25% 0%, ${alpha('#FFFFFF', 0.05)} 0%, transparent 70%)`,
           ink: heroInkDark,
           inkMuted: alpha(heroInkDark, 0.78),
-          inkSubtle: alpha(heroInkDark, 0.66),
           line: alpha(heroInkDark, 0.5),
           hover: alpha(heroInkDark, 0.08),
           plate: '#FFFFFF',
@@ -275,6 +271,9 @@ const theme = createTheme({
       textWrap: 'balance',
       letterSpacing: '0.07em',
       lineHeight: 1,
+      // Section heads share this size; only the hero (h1) and the closing
+      // band opt up to the display scale inline.
+      fontSize: 'clamp(2rem, 1.2rem + 2.8vw, 4.5rem)',
     },
     h3: {
       fontFamily: displayFont,
@@ -291,6 +290,8 @@ const theme = createTheme({
       textWrap: 'balance',
       letterSpacing: '0.07em',
       lineHeight: 1.08,
+      // A claim or exhibit heading inside a section, a step under its head.
+      fontSize: 'clamp(1.375rem, 1.1rem + 1vw, 2.5rem)',
     },
     h5: {
       fontFamily: displayFont,
@@ -430,10 +431,30 @@ const theme = createTheme({
               props: { color: 'secondary' },
               style: outlinedFamily(theme, { light: '#C4005A', dark: '#FF0074' }),
             },
+            // Every other outlined button is the page's one secondary action:
+            // ink text on an ink hairline, the same family as the flood
+            // buttons. Brand cyan stays for focus rings and link hover.
             {
               props: ({ ownerState }) =>
                 ownerState.color !== 'secondary' && ownerState.color !== 'inherit',
-              style: outlinedFamily(theme, { light: '#00707D', dark: '#00E8FC' }),
+              style: {
+                backgroundColor: 'transparent',
+                color: theme.vars.palette.text.primary,
+                // 0.6 keeps the hairline at 3:1 or better on the page and paper.
+                borderColor: alpha(brandNavy, 0.6),
+                '&:hover': {
+                  backgroundColor: alpha(brandNavy, 0.06),
+                  borderColor: theme.vars.palette.text.primary,
+                },
+                ...theme.applyStyles('dark', {
+                  backgroundColor: 'transparent',
+                  borderColor: alpha('#FFFFFF', 0.45),
+                  '&:hover': {
+                    backgroundColor: alpha('#FFFFFF', 0.08),
+                    borderColor: theme.vars.palette.text.primary,
+                  },
+                }),
+              },
             },
           ],
         }),

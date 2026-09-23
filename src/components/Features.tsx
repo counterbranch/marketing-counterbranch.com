@@ -6,7 +6,7 @@ import { useTheme } from '@mui/material/styles'
 import Section from './Section.tsx'
 import { MONO_FONT, MUTED } from './DiffVersusRun.tsx'
 import { useArrivalPhase } from '../hooks/useArrivalPhase.ts'
-import { arrivalSx, motionDuration, stampIn, type RunPhase } from '../motion.ts'
+import { arrivalSx, motionDuration, lineIn, type RunPhase } from '../motion.ts'
 import { pageColumn, rhythm } from '../rhythm.ts'
 
 /** Share of a specimen that must be on screen before its key line stamps in. */
@@ -95,11 +95,10 @@ function KeyLine({
         mx: -SPECIMEN_PAD,
         px: SPECIMEN_PAD,
         backgroundColor: `color-mix(in srgb, ${tint} 16%, transparent)`,
-        transformOrigin: '0 50%',
         ...theme.applyStyles('dark', {
           backgroundColor: `color-mix(in srgb, ${tint} 20%, transparent)`,
         }),
-        ...arrivalSx(phase, stampIn, delay),
+        ...arrivalSx(phase, lineIn, delay),
       })}
     >
       {children}
@@ -238,11 +237,7 @@ function FeatureRow({ feature }: { feature: Feature }) {
       <Box sx={{ minWidth: 0 }}>
         {/* Each claim reads as a headline over its evidence, a step under the
             section heading; the copy and the specimen stay quiet around it. */}
-        <Typography
-          variant="h4"
-          component="h3"
-          sx={{ fontSize: 'clamp(1.375rem, 1.1rem + 1vw, 2.5rem)' }}
-        >
+        <Typography variant="h4" component="h3">
           {title}
         </Typography>
         <Typography
@@ -257,20 +252,33 @@ function FeatureRow({ feature }: { feature: Feature }) {
         >
           {body}
         </Typography>
+        {/* The row's takeaway, set on an ink plate like the hero's reel: a
+            highlighter over the line that says why the claim matters. Each
+            wrapped line gets its own plate. */}
         <Typography
-          variant="body2"
+          variant="body1"
           sx={{
-            mt: 2.5,
+            mt: 3,
             maxWidth: '46ch',
-            fontSize: { xl: '1rem' },
-            color: band.ink,
+            fontSize: { xl: '1.125rem' },
+            fontWeight: 600,
+            lineHeight: 1.8,
             textWrap: 'pretty',
           }}
         >
-          <Box component="strong" sx={strong}>
-            Why it matters:
-          </Box>{' '}
-          {why}
+          <Box
+            component="span"
+            sx={{
+              px: '0.4em',
+              py: '0.15em',
+              backgroundColor: band.ink,
+              color: band.background,
+              boxDecorationBreak: 'clone',
+              WebkitBoxDecorationBreak: 'clone',
+            }}
+          >
+            {why}
+          </Box>
         </Typography>
       </Box>
 
@@ -332,12 +340,7 @@ export default function Features() {
           <Typography
             variant="h2"
             component="h2"
-            // The band's statement, a size up from the other section heads:
-            // on the pink flood it answers the hero's scale.
-            sx={{
-              maxWidth: { xs: '18ch', lg: '20ch' },
-              fontSize: 'clamp(2.25rem, 1.2rem + 4vw, 5.5rem)',
-            }}
+            sx={{ maxWidth: { xs: '18ch', lg: '20ch' } }}
           >
             Know what changed about access.
           </Typography>

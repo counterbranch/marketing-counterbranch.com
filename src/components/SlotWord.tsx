@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import Box from '@mui/material/Box'
 import { motionDuration, motionEasing, reelDwell } from '../motion.ts'
+import { useReelFrame } from './reelFrameContext.ts'
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion.ts'
 
 /** Height of one reel row, in em. The window and every row share it, so one roll moves exactly one word. */
@@ -35,8 +36,15 @@ interface SlotWordProps {
    * keep the window's padding optically even on both sides.
    */
   tracking?: string
-  /** Stops the reel on its current word, for an explicit pause control. */
-  paused?: boolean
+  /** How long each word rests before the reel rolls on, in ms. */
+  dwell?: number
+  /**
+   * How long the window takes to resize to the next word, in ms. Must not
+   * exceed motionDuration.reel: a growing window has to be open before the
+   * word lands, and a shrinking one closes in with a delay of reel minus
+   * this.
+   */
+  windowMs?: number
 }
 
 /**
@@ -60,8 +68,9 @@ interface SlotWordProps {
  * Purely visual and aria-hidden: the surrounding heading must carry an
  * accessible version of the sentence. It rests on the first word for visitors
  * who prefer reduced motion, and pauses while hovered, while scrolled out of
- * view, while the tab is hidden, and whenever `paused` is set, which is how
- * the page's own pause control stops it.
+ * view and while the tab is hidden. Inside a ReelFrame it also stops while the
+ * visitor has it paused or rests the pointer on its control, and reports its
+ * right edge so the control can sit there.
  */
 export default function SlotWord({
   words,
@@ -69,9 +78,11 @@ export default function SlotWord({
   ink,
   suffix = '',
   tracking = '0',
-  paused = false,
+  dwell = reelDwell,
+  windowMs = motionDuration.reelWindow,
 }: SlotWordProps) {
   const prefersReducedMotion = usePrefersReducedMotion()
+  const frame = useReelFrame()
   const rootRef = useRef<HTMLSpanElement>(null)
   const wordSizers = useRef<(HTMLSpanElement | null)[]>([])
   const suffixSizer = useRef<HTMLSpanElement>(null)
@@ -125,9 +136,10 @@ export default function SlotWord({
   const running =
     measured &&
     count > 1 &&
-    !paused &&
     !prefersReducedMotion &&
     !hovered &&
+    !frame?.paused &&
+    !frame?.held &&
     onScreen &&
     tabVisible
 
@@ -137,9 +149,9 @@ export default function SlotWord({
     const timer = window.setTimeout(() => {
       setAnimated(true)
       setIndex((current) => current + 1)
-    }, reelDwell)
+    }, dwell)
     return () => window.clearTimeout(timer)
-  }, [running, atLoopCopy, index])
+  }, [running, atLoopCopy, index, dwell])
 
   // After rolling onto the copy of the first word, jump to the real one
   // without transitions. Timed rather than tied to `transitionend`, which a
@@ -160,12 +172,21 @@ export default function SlotWord({
   // the window opens first and the word rolls into a space already made;
   // when it is narrower, the window waits for the word to land, then closes
   // in around it.
-  const windowDelay = current >= previous ? 0 : motionDuration.reel - motionDuration.reelWindow
+  const windowDelay = current >= previous ? 0 : motionDuration.reel - windowMs
   const roll = animated ? `transform ${motionDuration.reel}ms ${motionEasing.decel}` : 'none'
   const resize = (property: string) =>
     animated
-      ? `${property} ${motionDuration.reelWindow}ms ${motionEasing.decel} ${windowDelay}ms`
+      ? `${property} ${windowMs}ms ${motionEasing.decel} ${windowDelay}ms`
       : 'none'
+
+  // The frame's control follows the suffix, the reel's visible right edge.
+  const report = frame?.report
+  const edge = measured ? current + metrics.suffix : 0
+  const follow = resize('transform')
+  useLayoutEffect(() => {
+    const root = rootRef.current
+    if (report && root && measured) report({ root, edge, transition: follow })
+  }, [report, measured, edge, follow])
 
   return (
     <Box

@@ -4,36 +4,40 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import ButtonBase from '@mui/material/ButtonBase'
 import Container from '@mui/material/Container'
-import IconButton from '@mui/material/IconButton'
 import Typography from '@mui/material/Typography'
-import PauseOutlinedIcon from '@mui/icons-material/PauseOutlined'
-import PlayArrowOutlinedIcon from '@mui/icons-material/PlayArrowOutlined'
 import { useTheme } from '@mui/material/styles'
 import Section from './Section.tsx'
 import SlotWord from './SlotWord.tsx'
+import ReelFrame from './ReelFrame.tsx'
+import { REEL_CONTROL_ROOM } from './reelFrameContext.ts'
 import { MacWindow, MONO_FONT, MUTED } from './DiffVersusRun.tsx'
 import { srOnly } from '../a11y.ts'
 import { links } from '../links.ts'
 import { displayFont } from '../theme.ts'
-import { lineIn, motionDuration, motionEasing } from '../motion.ts'
+import { lineIn, motionDuration, motionEasing, reelDwellPhrase } from '../motion.ts'
 import { pageColumn, rhythm } from '../rhythm.ts'
 
 const REDUCED_MOTION = '@media (prefers-reduced-motion: reduce)'
 
-/** The everyday chores the reel compares setup with, all shorter than a sentence. */
+/**
+ * The everyday chores the reel compares setup with, all shorter than a
+ * sentence. Ordered so their widths rise and then fall, with the first (the
+ * prerendered one) short, so the plate's edge never jumps more than about a
+ * quarter of the window between two chores.
+ */
 const CHORES = [
   'ordering Chipotle',
-  'brewing your WFH coffee',
-  'dressing for a Slack call',
-  'booking a meeting room',
-  'writing your OKRs',
-  'picking a reaction emoji',
   'expensing a $12 app',
+  'booking a meeting room',
+  'brewing your WFH coffee',
   'finding the unmute button',
+  'dressing for a Slack call',
+  'picking a reaction emoji',
+  'writing your OKRs',
 ] as const
 
-/** The reel is aria-hidden, so the heading carries the whole list once. */
-const HEADING_FOR_SCREEN_READERS = `Less effort than ${CHORES.join(', ')}.`
+/** The reel is aria-hidden, so the heading carries the sentence once, with its first chore. */
+const HEADING_FOR_SCREEN_READERS = `Less effort than ${CHORES[0]}.`
 
 /** How long "Copied" stays on a copy button, in ms. */
 const COPIED_MS = 2000
@@ -360,22 +364,25 @@ function InstallPanel({
       id={id}
       role="tabpanel"
       aria-labelledby={labelledBy}
-      hidden={!selected}
+      aria-hidden={!selected}
+      inert={!selected}
       sx={{
-        mt: { xs: 4, md: 5 },
-        display: selected ? 'grid' : 'none',
+        mt: { xs: 4, md: 5, xl: 6 },
+        gridArea: { lg: '1 / 1' },
+        display: { xs: selected ? 'grid' : 'none', lg: 'grid' },
+        visibility: { lg: selected ? 'visible' : 'hidden' },
         gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'minmax(0, 5fr) minmax(0, 7fr)' },
         columnGap: 8,
         rowGap: 4,
         alignItems: 'start',
-        ...(arrives && {
-          animation: `${lineIn} ${motionDuration.base}ms ${motionEasing.decel} both`,
-          [REDUCED_MOTION]: { animation: 'none' },
-        }),
+        // Adding the animation restarts it, so it plays on each switch.
+        animation:
+          selected && arrives ? `${lineIn} ${motionDuration.base}ms ${motionEasing.decel} both` : 'none',
+        [REDUCED_MOTION]: { animation: 'none' },
       }}
     >
       <Box sx={{ minWidth: 0 }}>
-        <Typography variant="h4" component="h3" sx={{ fontSize: 'clamp(1.375rem, 1.1rem + 1vw, 2.5rem)' }}>
+        <Typography variant="h4" component="h3">
           {path.title}
         </Typography>
         <Typography
@@ -419,7 +426,6 @@ export default function GetStarted() {
     setSelected(index)
     setSwitched(true)
   }
-  const [reelPaused, setReelPaused] = useState(false)
   const tabs = useRef<(HTMLButtonElement | null)[]>([])
   const baseId = useId()
   const tabId = (index: number) => `${baseId}-tab-${index}`
@@ -447,10 +453,12 @@ export default function GetStarted() {
   return (
     <Section id="get-started">
       <Container maxWidth={false} sx={pageColumn}>
-        {/* The column is a size container so the chore's line can scale to
-            it: the longest chore, full stop included, is about 16.3em wide. */}
-        <Box sx={{ containerType: 'inline-size' }}>
-          <Typography variant="h2" component="h2" sx={{ fontSize: 'clamp(2.25rem, 1.2rem + 4vw, 5.5rem)' }}>
+        {/* The frame is a size container, so the chore's line scales to its
+            width less the pause control's room: the longest chore, full
+            stop included, reaches about 16.75em on the smallest phones,
+            where the tracking in px counts for most. */}
+        <ReelFrame>
+          <Typography variant="h2" component="h2">
             <Box component="span" sx={srOnly}>
               {HEADING_FOR_SCREEN_READERS}
             </Box>
@@ -464,7 +472,9 @@ export default function GetStarted() {
                   display: 'flex',
                   mt: '0.16em',
                   fontSize: 'min(1em, 5.2vw)',
-                  '@supports (width: 1cqi)': { fontSize: 'min(1em, 100cqi / 16.8)' },
+                  '@supports (width: 1cqi)': {
+                    fontSize: `min(1em, (100cqi - ${REEL_CONTROL_ROOM}px) / 16.75)`,
+                  },
                 }}
               >
                 <SlotWord
@@ -472,14 +482,15 @@ export default function GetStarted() {
                   plate={palette.hero.plate}
                   ink={palette.hero.plateInk}
                   suffix="."
-                  paused={reelPaused}
+                  dwell={reelDwellPhrase}
+                  windowMs={motionDuration.reelWindowPhrase}
                   tracking={typeof headingTracking === 'number' ? `${headingTracking}px` : headingTracking}
                 />
               </Box>
             </Box>
           </Typography>
-        </Box>
-        <Box sx={{ mt: rhythm.display, display: 'flex', alignItems: 'center', gap: { xs: 2, md: 3 } }}>
+        </ReelFrame>
+        <Box sx={{ mt: rhythm.display }}>
           <Typography
             variant="body1"
             sx={{
@@ -491,28 +502,6 @@ export default function GetStarted() {
           >
             Four ways into the workflow you already have, all free during the alpha.
           </Typography>
-          {/* The chores roll indefinitely, so they need a way to stop them
-              (WCAG 2.2.2); hidden when reduced motion already stops them. */}
-          <IconButton
-            onClick={() => setReelPaused((paused) => !paused)}
-            aria-label={reelPaused ? 'Play the rotating heading' : 'Pause the rotating heading'}
-            sx={{
-              flexShrink: 0,
-              width: 44,
-              height: 44,
-              border: '1px solid',
-              borderColor: palette.divider,
-              color: palette.text.secondary,
-              '&:hover': { color: palette.text.primary, borderColor: palette.text.primary },
-              [REDUCED_MOTION]: { display: 'none' },
-            }}
-          >
-            {reelPaused ? (
-              <PlayArrowOutlinedIcon aria-hidden fontSize="small" />
-            ) : (
-              <PauseOutlinedIcon aria-hidden fontSize="small" />
-            )}
-          </IconButton>
         </Box>
 
         <Box
@@ -605,16 +594,20 @@ export default function GetStarted() {
           })}
         </Box>
 
-        {paths.map((path, index) => (
-          <InstallPanel
-            key={path.key}
-            path={path}
-            id={panelId(index)}
-            labelledBy={tabId(index)}
-            selected={index === selected}
-            arrives={switched}
-          />
-        ))}
+        {/* From lg the panels share one cell, so switching tabs never moves
+            the FAQ below; on phones only the chosen one takes space. */}
+        <Box sx={{ display: 'grid' }}>
+          {paths.map((path, index) => (
+            <InstallPanel
+              key={path.key}
+              path={path}
+              id={panelId(index)}
+              labelledBy={tabId(index)}
+              selected={index === selected}
+              arrives={switched}
+            />
+          ))}
+        </Box>
       </Container>
     </Section>
   )
