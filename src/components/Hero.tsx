@@ -11,7 +11,7 @@ import { useTheme } from '@mui/material/styles'
 import SlotWord from './SlotWord.tsx'
 import { floodActionSx, floodOutlineSx } from './floodButtons.ts'
 import { srOnly } from '../a11y.ts'
-import { rhythm } from '../rhythm.ts'
+import { pageColumn, rhythm } from '../rhythm.ts'
 import { heroStageSx, motionDuration, motionEasing } from '../motion.ts'
 import { links } from '../links.ts'
 import { displayFont } from '../theme.ts'
@@ -92,16 +92,17 @@ export default function Hero() {
           background: hero.wash,
         }}
       />
-      <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 1 }}>
+      <Container maxWidth={false} sx={[pageColumn, { position: 'relative', zIndex: 1 }]}>
         <Stack spacing={{ xs: 5, md: 6 }} sx={{ alignItems: 'flex-start' }}>
           <Stack spacing={rhythm.display} sx={{ alignItems: 'flex-start', alignSelf: 'stretch' }}>
             <Typography
               variant="h1"
               sx={{
-                // Capped where "Access changes in your" still fits the
-                // 1152px column on one line, so wide screens get two lines
-                // plus the reel instead of stranding "in your" on its own.
-                fontSize: 'clamp(2.5rem, 1.2rem + 4.8vw, 5.5rem)',
+                // Grows with the screen to the display cap, where "Access changes
+                // in your" still fits the widest column on one line, so wide
+                // screens get two lines plus the reel instead of stranding "in
+                // your" on its own.
+                fontSize: 'clamp(2.5rem, 1.2rem + 4.8vw, 6rem)',
                 ...heroStageSx(0),
               }}
             >
@@ -200,8 +201,9 @@ export default function Hero() {
           text's left edge and the reel's pause control opposite it, where
           motion controls conventionally live. */}
       <Container
-        maxWidth="lg"
+        maxWidth={false}
         sx={{
+          ...pageColumn,
           position: 'absolute',
           left: 0,
           right: 0,

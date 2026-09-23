@@ -7,7 +7,7 @@ import Section from './Section.tsx'
 import { MONO_FONT, MUTED } from './DiffVersusRun.tsx'
 import { useArrivalPhase } from '../hooks/useArrivalPhase.ts'
 import { arrivalSx, motionDuration, stampIn, type RunPhase } from '../motion.ts'
-import { rhythm } from '../rhythm.ts'
+import { pageColumn, rhythm } from '../rhythm.ts'
 
 /** Share of a specimen that must be on screen before its key line stamps in. */
 const STAMP_THRESHOLD = 0.4
@@ -224,7 +224,7 @@ function FeatureRow({ feature }: { feature: Feature }) {
       sx={{
         display: 'grid',
         gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: 'minmax(0, 5fr) minmax(0, 7fr)' },
-        gap: { xs: 3, md: 8 },
+        gap: { xs: 3, md: 8, xl: 12 },
         // The specimen's top meets the claim's heading and it is only as tall
         // as its output, so no panel carries dead space set by the copy
         // beside it.
@@ -241,7 +241,7 @@ function FeatureRow({ feature }: { feature: Feature }) {
         <Typography
           variant="h4"
           component="h3"
-          sx={{ fontSize: 'clamp(1.375rem, 1.1rem + 1vw, 2rem)' }}
+          sx={{ fontSize: 'clamp(1.375rem, 1.1rem + 1vw, 2.5rem)' }}
         >
           {title}
         </Typography>
@@ -250,6 +250,7 @@ function FeatureRow({ feature }: { feature: Feature }) {
           sx={{
             mt: rhythm.heading,
             maxWidth: '46ch',
+            fontSize: { xl: '1.125rem' },
             color: band.inkMuted,
             textWrap: 'pretty',
           }}
@@ -258,7 +259,13 @@ function FeatureRow({ feature }: { feature: Feature }) {
         </Typography>
         <Typography
           variant="body2"
-          sx={{ mt: 2.5, maxWidth: '46ch', color: band.ink, textWrap: 'pretty' }}
+          sx={{
+            mt: 2.5,
+            maxWidth: '46ch',
+            fontSize: { xl: '1rem' },
+            color: band.ink,
+            textWrap: 'pretty',
+          }}
         >
           <Box component="strong" sx={strong}>
             Why it matters:
@@ -296,7 +303,7 @@ function FeatureRow({ feature }: { feature: Feature }) {
           sx={{
             m: 0,
             fontFamily: MONO_FONT,
-            fontSize: { xs: '0.8125rem', md: '0.9375rem' },
+            fontSize: { xs: '0.8125rem', md: '0.9375rem', xl: '1.0625rem' },
             lineHeight: 1.7,
             // Wrap rather than scroll sideways on phones.
             whiteSpace: 'pre-wrap',
@@ -320,14 +327,17 @@ export default function Features() {
 
   return (
     <Section id="features" tone="pink">
-      <Container maxWidth="lg">
+      <Container maxWidth={false} sx={pageColumn}>
         <Box sx={{ mb: rhythm.intro }}>
           <Typography
             variant="h2"
             component="h2"
             // The band's statement, a size up from the other section heads:
             // on the pink flood it answers the hero's scale.
-            sx={{ maxWidth: '18ch', fontSize: 'clamp(2.25rem, 1.2rem + 4vw, 4.75rem)' }}
+            sx={{
+              maxWidth: { xs: '18ch', lg: '20ch' },
+              fontSize: 'clamp(2.25rem, 1.2rem + 4vw, 5.5rem)',
+            }}
           >
             Know what changed about access.
           </Typography>
@@ -336,7 +346,7 @@ export default function Features() {
             sx={{
               mt: rhythm.heading,
               maxWidth: '46ch',
-              fontSize: { md: '1.125rem' },
+              fontSize: { md: '1.125rem', xl: '1.25rem' },
               color: band.inkMuted,
               textWrap: 'pretty',
             }}

@@ -5,18 +5,18 @@ import Button from '@mui/material/Button'
 import { useTheme } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import Section from './Section.tsx'
-import { MergeGraph } from './BranchGraph.tsx'
+import { RunGrid } from './AccessGrid.tsx'
 import { floodActionSx, floodOutlineSx } from './floodButtons.ts'
 import { useInView } from '../hooks/useInView.ts'
 import { revealSx } from '../motion.ts'
 import { links } from '../links.ts'
-import { rhythm } from '../rhythm.ts'
+import { pageColumn, rhythm } from '../rhythm.ts'
 
 /**
  * The closing band answers the hero: the cyan flood (in both schemes), the
  * same flush-left poster on the same grid, and a heading at the hero's scale,
  * so the page ends on the statement it opened with. Beside it, from md, the
- * branch graph of where the check sits: before the PR merges. Every word
+ * access grid of your next PR's checks being run. Every word
  * here repeats a claim the page has already made.
  */
 export default function Cta() {
@@ -26,8 +26,9 @@ export default function Cta() {
   return (
     <Section tone="flood">
       <Container
-        maxWidth="lg"
+        maxWidth={false}
         sx={{
+          ...pageColumn,
           position: 'relative',
           display: 'grid',
           gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: 'minmax(0, 7fr) minmax(0, 5fr)' },
@@ -40,7 +41,7 @@ export default function Cta() {
             variant="h2"
             sx={{
               maxWidth: '16ch',
-              fontSize: 'clamp(2.5rem, 1.2rem + 4.8vw, 5.5rem)',
+              fontSize: 'clamp(2.5rem, 1.2rem + 4.8vw, 6rem)',
               lineHeight: 0.98,
             }}
           >
@@ -87,7 +88,7 @@ export default function Cta() {
         </Box>
         {/* On phones the poster carries the band alone. */}
         <Box sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'flex-end' }}>
-          <MergeGraph />
+          <RunGrid />
         </Box>
       </Container>
     </Section>

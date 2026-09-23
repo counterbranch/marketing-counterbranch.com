@@ -7,13 +7,14 @@ import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 import Section from './Section.tsx'
 import { MacWindow, MONO_FONT, MUTED } from './DiffVersusRun.tsx'
+import { OutcomeGlyph } from './AccessGrid.tsx'
 import { displayFont } from '../theme.ts'
-import { rhythm } from '../rhythm.ts'
+import { pageColumn, rhythm } from '../rhythm.ts'
 import { srOnly } from '../a11y.ts'
 import {
   arrivalSx,
   caretBlink,
-  drawLine,
+  nodeIn,
   caretOut,
   caretTravel,
   glyphIn,
@@ -185,7 +186,7 @@ const EXAMPLE_RUNS: ExampleRun[] = [
  *   the lighter member of its family to read at 4.5:1 in both schemes;
  * - `plate`: the chosen option filled with the full-strength colour and set
  *   in the ink that reads on it (5.1:1 or better on all three);
- * - `glyph`: the option's branch icon on the page background, the readable
+ * - `glyph`: the option's grid icon on the page background, the readable
  *   member of the family in the light scheme (3:1 or better as a graphic);
  * - `glow`: the terminal's shadow while that run is chosen.
  */
@@ -215,32 +216,6 @@ function useOutcomeInk() {
   }
 }
 
-/**
- * A branch leaving main, as the option's icon: the product's name in 20px.
- * Authored rather than a glyph, in the option's current colour. The branch
- * stroke draws in when its option is chosen (see RunPicker).
- */
-function BranchGlyph() {
-  return (
-    <Box
-      component="svg"
-      data-glyph
-      aria-hidden
-      viewBox="0 0 20 20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      sx={{ display: 'block', width: 20, height: 20 }}
-    >
-      {/* Two commits on main, and a branch tip joining it between them. */}
-      <path d="M5 6 V14" />
-      <path data-branch d="M15 6 V9 L6 15" pathLength={1} strokeDasharray={1} />
-      <rect x={3} y={2} width={4} height={4} fill="currentColor" stroke="none" />
-      <rect x={3} y={14} width={4} height={4} fill="currentColor" stroke="none" />
-      <rect x={13} y={2} width={4} height={4} fill="currentColor" stroke="none" />
-    </Box>
-  )
-}
 
 /**
  * One line of output. Inline-block so it can rise into place while the real
@@ -545,7 +520,7 @@ function RunPicker({
   }
 
   // The chosen option is a plate in its outcome's colour, the same colour
-  // its verdict takes in the terminal; its branch icon draws in as it is
+  // its verdict takes in the terminal; its grid icon's cells pop in as it is
   // chosen.
   const chosenFor = (outcome: Outcome) => {
     const plate = outcomeInk.plate[outcome]
@@ -555,8 +530,10 @@ function RunPicker({
       color: plate.ink,
       zIndex: 1,
       '& [data-summary], & [data-glyph]': { color: plate.ink },
-      '& [data-branch]': {
-        animation: `${drawLine} 360ms ${motionEasing.decel} both`,
+      '& [data-cell]': {
+        transformBox: 'fill-box',
+        transformOrigin: 'center',
+        animation: `${nodeIn} 200ms ${motionEasing.decel} var(--d) both`,
         [REDUCED_MOTION]: { animation: 'none' },
       },
     }
@@ -629,13 +606,13 @@ function RunPicker({
             />
             {/* The outcome's colour, as a key to the verdict in the terminal;
                 the label beside it carries the meaning. */}
-            <BranchGlyph />
+            <OutcomeGlyph outcome={run.outcome} />
             <Box
               component="span"
               sx={{
                 fontFamily: displayFont,
                 fontWeight: 600,
-                fontSize: '0.9375rem',
+                fontSize: { xs: '0.9375rem', xl: '1.0625rem' },
                 lineHeight: 1.2,
                 letterSpacing: '0.12em',
                 textTransform: 'uppercase',
@@ -648,7 +625,7 @@ function RunPicker({
               data-summary
               sx={{
                 gridColumn: '1 / -1',
-                fontSize: '0.875rem',
+                fontSize: { xs: '0.875rem', xl: '1rem' },
                 lineHeight: 1.45,
                 color: palette.text.secondary,
                 textWrap: 'pretty',
@@ -777,7 +754,7 @@ export default function CompareTerminal() {
 
   return (
     <Section id="how-it-works">
-      <Container maxWidth="lg">
+      <Container maxWidth={false} sx={pageColumn}>
         {/* Intro across the top, then the runs and the terminal as one
             control-and-display unit. On phones everything stacks in reading
             order: intro, runs, terminal, note, replay. From lg the runs take
@@ -786,7 +763,7 @@ export default function CompareTerminal() {
         <Typography
           variant="h2"
           component="h2"
-          sx={{ fontSize: 'clamp(2rem, 1.4rem + 2.6vw, 3.5rem)' }}
+          sx={{ fontSize: 'clamp(2rem, 1.2rem + 2.8vw, 4.5rem)' }}
         >
           See what access changed.
         </Typography>
@@ -795,7 +772,7 @@ export default function CompareTerminal() {
           sx={{
             mt: rhythm.heading,
             maxWidth: '46ch',
-            fontSize: { md: '1.125rem' },
+            fontSize: { md: '1.125rem', xl: '1.25rem' },
             ...secondaryText,
             textWrap: 'pretty',
           }}
@@ -814,7 +791,11 @@ export default function CompareTerminal() {
               xs: '"runs" "terminal" "aside"',
               lg: '"runs terminal" "aside terminal"',
             },
-            gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'minmax(0, 340px) minmax(0, 1fr)' },
+            gridTemplateColumns: {
+              xs: 'minmax(0, 1fr)',
+              lg: 'minmax(0, 340px) minmax(0, 1fr)',
+              xl: 'minmax(0, 400px) minmax(0, 1fr)',
+            },
             gridTemplateRows: { lg: 'auto 1fr' },
             columnGap: 6,
             alignItems: 'start',
@@ -852,7 +833,7 @@ export default function CompareTerminal() {
                         px: { xs: 2, sm: 3 },
                         py: 2.5,
                         fontFamily: MONO_FONT,
-                        fontSize: { xs: '0.8125rem', sm: '0.875rem' },
+                        fontSize: { xs: '0.8125rem', sm: '0.875rem', xl: '1rem' },
                         lineHeight: 1.65,
                         // Wrap rather than scroll sideways, so no part of the
                         // run is ever off-screen.

@@ -198,6 +198,36 @@ export const nodeIn = keyframes`
   }
 `
 
+/**
+ * A part revealed from its left edge, as a run sweeping across it. Clips
+ * rather than moves, so it holds its place the whole time.
+ */
+export const wipeIn = keyframes`
+  from {
+    opacity: 1;
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    opacity: 1;
+    clip-path: inset(0);
+  }
+`
+
+/**
+ * One half of a split square slipping apart from the other, along the
+ * square's diagonal, to rest where it is drawn.
+ */
+export const slipIn = keyframes`
+  from {
+    opacity: 1;
+    transform: translate(-12px, -12px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+`
+
 type Keyframes = typeof slideIn
 
 /**

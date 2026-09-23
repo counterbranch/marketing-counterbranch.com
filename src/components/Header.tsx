@@ -17,6 +17,7 @@ import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined'
 import Logo from './Logo.tsx'
 import ColorModeToggle from './ColorModeToggle.tsx'
 import { links } from '../links.ts'
+import { pageColumn } from '../rhythm.ts'
 import { displayFont } from '../theme.ts'
 import { floodActionSx } from './floodButtons.ts'
 
@@ -68,7 +69,7 @@ export default function Header() {
     >
       {/* Same grid as the hero, so the logo and the headline share a left
           edge at every width. */}
-      <Container maxWidth="lg">
+      <Container maxWidth={false} sx={pageColumn}>
         <Toolbar disableGutters sx={{ gap: 1 }}>
           <Link
             href={links.home}

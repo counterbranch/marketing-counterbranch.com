@@ -5,9 +5,9 @@ import Container from '@mui/material/Container'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 import Section from './Section.tsx'
-import { ForkGraph } from './BranchGraph.tsx'
+import { AccessGrid } from './AccessGrid.tsx'
 import { displayFont } from '../theme.ts'
-import { rhythm } from '../rhythm.ts'
+import { pageColumn, rhythm } from '../rhythm.ts'
 import {
   arrivalSx,
   glyphIn,
@@ -206,7 +206,7 @@ function ImpactBar({ muted = false, children }: { muted?: boolean; children: Rea
         px: 3,
         py: 1.25,
         fontFamily: MONO_FONT,
-        fontSize: '0.8125rem',
+        fontSize: { xs: '0.8125rem', xl: '0.9375rem' },
         lineHeight: 1.5,
         whiteSpace: 'pre-wrap',
         ...(muted && { color: MUTED }),
@@ -226,7 +226,10 @@ function ImpactBar({ muted = false, children }: { muted?: boolean; children: Rea
 function Caption({ children }: { children: ReactNode }) {
   const band = useTheme().vars.palette.bands.navy
   return (
-    <Typography variant="body2" sx={{ mb: 1.5, color: band.inkMuted }}>
+    <Typography
+      variant="body2"
+      sx={{ mb: 1.5, fontSize: { xl: '1rem' }, color: band.inkMuted }}
+    >
       {children}
     </Typography>
   )
@@ -257,7 +260,10 @@ function VersionPane({
   const palette = useTheme().vars.palette
   return (
     <Box sx={{ minWidth: 0, px: 2.5, py: 2.5 }}>
-      <Box component="p" sx={{ ...windowTextSx, fontSize: '0.75rem', color: MUTED }}>
+      <Box
+        component="p"
+        sx={{ ...windowTextSx, fontSize: { xs: '0.75rem', xl: '0.875rem' }, color: MUTED }}
+      >
         {`${side}: ${version}`}
       </Box>
       <Box
@@ -265,7 +271,7 @@ function VersionPane({
         sx={{
           ...windowTextSx,
           mt: 1,
-          fontSize: '0.8125rem',
+          fontSize: { xs: '0.8125rem', xl: '0.9375rem' },
           ...arrivalSx(phase, slideIn, checkDelay),
         }}
       >
@@ -279,7 +285,7 @@ function VersionPane({
           display: 'inline-block',
           px: '0.28em',
           fontFamily: displayFont,
-          fontSize: 'clamp(1.75rem, 1.2rem + 1.4vw, 2.5rem)',
+          fontSize: 'clamp(1.75rem, 1.2rem + 1.4vw, 3rem)',
           fontWeight: 700,
           letterSpacing: '0.07em',
           lineHeight: 1.1,
@@ -358,7 +364,7 @@ export default function DiffVersusRun() {
 
   return (
     <Section id="more-than-a-diff" tone="navy">
-      <Container maxWidth="lg" data-strip="diff-vs-run">
+      <Container maxWidth={false} sx={pageColumn} data-strip="diff-vs-run">
         {/* The claim and the graph that draws it, side by side from lg. */}
         <Box
           sx={{
@@ -373,7 +379,7 @@ export default function DiffVersusRun() {
             <Typography
               variant="h2"
               component="h2"
-              sx={{ fontSize: 'clamp(2rem, 1.4rem + 2.6vw, 3.5rem)' }}
+              sx={{ fontSize: 'clamp(2rem, 1.2rem + 2.8vw, 4.5rem)' }}
             >
               More than a diff.
             </Typography>
@@ -382,7 +388,7 @@ export default function DiffVersusRun() {
               sx={{
                 mt: rhythm.heading,
                 maxWidth: '46ch',
-                fontSize: { md: '1.125rem' },
+                fontSize: { md: '1.125rem', xl: '1.25rem' },
                 color: band.inkMuted,
                 textWrap: 'pretty',
               }}
@@ -393,7 +399,7 @@ export default function DiffVersusRun() {
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: { lg: 'flex-end' } }}>
-            <ForkGraph />
+            <AccessGrid />
           </Box>
         </Box>
 
@@ -419,7 +425,10 @@ export default function DiffVersusRun() {
               fill
               onDark
             >
-              <Box component="pre" sx={{ ...windowTextSx, py: 2.5, fontSize: '0.875rem' }}>
+              <Box
+                component="pre"
+                sx={{ ...windowTextSx, py: 2.5, fontSize: { xs: '0.875rem', xl: '1rem' } }}
+              >
                 <DiffRow>{'  allow {'}</DiffRow>
                 {'\n'}
                 <DiffRow tint={`${palette.secondary.main} 18%`}>
