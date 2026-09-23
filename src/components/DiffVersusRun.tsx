@@ -1,14 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode, Ref } from 'react'
 import Box from '@mui/material/Box'
+import Container from '@mui/material/Container'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
+import Section from './Section.tsx'
+import { ForkGraph } from './BranchGraph.tsx'
 import { displayFont } from '../theme.ts'
 import { rhythm } from '../rhythm.ts'
 import {
   arrivalSx,
   glyphIn,
   motionDuration,
+  motionEasing,
   slideIn,
   stampIn,
   type RunPhase,
@@ -56,21 +60,30 @@ const RUN_MS = SUMMARY_DELAY + motionDuration.base + 60
  * are dark, so the brand cyan and pink read on either. The title bar is
  * decoration; `label` names the window for assistive technology. `fill`
  * makes it take its grid cell's full height, with its content in a column,
- * so windows side by side end on one line.
+ * so windows side by side end on one line. `onDark` is for a window on a
+ * dark band, where the ink ground would merge into the band: it takes a
+ * light hairline and a black shadow instead, and in the dark scheme sits
+ * recessed on the page's near-black. `glow` tints the window's shadow with a
+ * colour, easing between colours as it changes.
  */
 export function MacWindow({
   title,
   label,
   ref,
   fill = false,
+  onDark = false,
+  glow,
   children,
 }: {
   title: string
   label: string
   ref?: Ref<HTMLElement>
   fill?: boolean
+  onDark?: boolean
+  glow?: string
   children: ReactNode
 }) {
+  const glowShadow = glow && `0 30px 70px -34px color-mix(in srgb, ${glow} 80%, transparent)`
   const theme = useTheme()
   const palette = theme.vars.palette
   return (
@@ -92,11 +105,22 @@ export function MacWindow({
         backgroundColor: WINDOW_GROUND,
         color: WINDOW_INK,
         boxShadow: `0 24px 48px -28px color-mix(in srgb, ${palette.hero.plate} 55%, transparent)`,
+        ...(onDark && {
+          borderColor: palette.bands.navy.line,
+          boxShadow: `0 28px 56px -30px color-mix(in srgb, ${palette.common.black} 85%, transparent)`,
+        }),
+        ...(glowShadow && {
+          boxShadow: glowShadow,
+          transition: `box-shadow ${motionDuration.base}ms ${motionEasing.decel}`,
+        }),
+        // One dark-scheme block: applyStyles returns the same selector key each
+        // time, so a second spread would replace the first rather than add to it.
         ...theme.applyStyles('dark', {
-          '--mac-window-ground': palette.background.paper,
+          '--mac-window-ground': onDark ? palette.background.default : palette.background.paper,
           '--mac-window-ink': palette.text.primary,
           borderColor: palette.divider,
-          boxShadow: `0 24px 48px -28px color-mix(in srgb, ${palette.common.black} 80%, transparent)`,
+          boxShadow:
+            glowShadow ?? `0 24px 48px -28px color-mix(in srgb, ${palette.common.black} 80%, transparent)`,
         }),
       }}
     >
@@ -198,11 +222,11 @@ function ImpactBar({ muted = false, children }: { muted?: boolean; children: Rea
   )
 }
 
-/** A small label over a window. */
+/** A small label over a window, in the band's muted ink. */
 function Caption({ children }: { children: ReactNode }) {
-  const palette = useTheme().vars.palette
+  const band = useTheme().vars.palette.bands.navy
   return (
-    <Typography variant="body2" sx={{ mb: 1.5, color: palette.text.secondary }}>
+    <Typography variant="body2" sx={{ mb: 1.5, color: band.inkMuted }}>
       {children}
     </Typography>
   )
@@ -273,8 +297,9 @@ function VersionPane({
 }
 
 /**
- * The second half of "how it works": a code review tool's view of the change
- * beside what Counterbranch runs. The two windows mirror each other and end
+ * The navy band after "how it works": the branch graph that gives the product
+ * its name, then a code review tool's view of the change beside what
+ * Counterbranch runs. The two windows mirror each other and end
  * on the same line, each with an "Access impact" strip along its foot: the
  * diff's says it is not shown; the run's shows the decision that changed.
  * The diff is static; it is what a reviewer already has. The run plays once,
@@ -288,6 +313,7 @@ function VersionPane({
  */
 export default function DiffVersusRun() {
   const palette = useTheme().vars.palette
+  const band = palette.bands.navy
   const runPane = useRef<HTMLElement | null>(null)
   const [runKey, setRunKey] = useState(0)
   const [phase, setPhase] = useState<RunPhase>('idle')
@@ -331,137 +357,151 @@ export default function DiffVersusRun() {
   const verdictSx = { fontWeight: 700, color: palette.secondary.light }
 
   return (
-    <Box
-      data-strip="diff-vs-run"
-      sx={{
-        mt: rhythm.subsection,
-        // A hairline across the grid marks the second part of the band, so
-        // it reads as the same section continuing rather than a new one.
-        pt: rhythm.subsection,
-        borderTop: '1px solid',
-        borderColor: palette.divider,
-      }}
-    >
-      <Typography
-        variant="h3"
-        component="h3"
-        // A clear step under the section's h2 at every width, phones included.
-        sx={{ fontSize: 'clamp(1.5rem, 1.1rem + 1.6vw, 2.5rem)' }}
-      >
-        More than a diff.
-      </Typography>
-      <Typography
-        variant="body1"
-        sx={{
-          mt: rhythm.heading,
-          maxWidth: '58ch',
-          color: palette.text.secondary,
-          textWrap: 'pretty',
-        }}
-      >
-        Counterbranch runs the same permission checks against your before-and-after authorization
-        logic and shows what became allowed or denied. A diff shows what changed in the rules. An
-        executed comparison shows what changed in access.
-      </Typography>
-
-      <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'minmax(0, 2fr) minmax(0, 3fr)' },
-          // One caption row over one window row: from lg both captions share
-          // a line, and both windows stretch to the taller one's foot. Below
-          // lg the run window would be too narrow for its check to sit on
-          // one line, so the two stack.
-          gridTemplateRows: { lg: 'auto 1fr' },
-          gridAutoFlow: { lg: 'column' },
-          columnGap: 4,
-          mt: rhythm.intro,
-        }}
-      >
-        <Caption>What a code review tool sees</Caption>
-        <Box sx={{ minWidth: 0 }}>
-          <MacWindow title="policy.rego — review" label="Policy diff as a review tool shows it" fill>
-            <Box component="pre" sx={{ ...windowTextSx, py: 2.5, fontSize: '0.875rem' }}>
-              <DiffRow>{'  allow {'}</DiffRow>
-              {'\n'}
-              <DiffRow tint={`${palette.secondary.main} 18%`}>
-                {'-   input.user.role == "viewer"'}
-              </DiffRow>
-              {'\n'}
-              <DiffRow tint={`${palette.secondary.main} 18%`}>{'-   input.document.public'}</DiffRow>
-              {'\n'}
-              <DiffRow tint={`${palette.primary.main} 14%`}>
-                {'+   input.user.role == "viewer"'}
-              </DiffRow>
-              {'\n'}
-              <DiffRow>{'  }'}</DiffRow>
-            </Box>
-            <ImpactBar muted>Access impact: not shown</ImpactBar>
-          </MacWindow>
-        </Box>
-
-        <Box sx={{ mt: { xs: 5, lg: 0 } }}>
-          <Caption>What Counterbranch runs</Caption>
-        </Box>
-        <Box ref={runPane} sx={{ minWidth: 0 }}>
-          <MacWindow
-            title="counterbranch — compare"
-            label="The same check run against main and pr-142"
-            fill
-          >
-            <Box
-              key={runKey}
+    <Section id="more-than-a-diff" tone="navy">
+      <Container maxWidth="lg" data-strip="diff-vs-run">
+        {/* The claim and the graph that draws it, side by side from lg. */}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'minmax(0, 5fr) minmax(0, 7fr)' },
+            columnGap: 8,
+            rowGap: rhythm.intro,
+            alignItems: 'center',
+          }}
+        >
+          <Box>
+            <Typography
+              variant="h2"
+              component="h2"
+              sx={{ fontSize: 'clamp(2rem, 1.4rem + 2.6vw, 3.5rem)' }}
+            >
+              More than a diff.
+            </Typography>
+            <Typography
+              variant="body1"
               sx={{
-                flexGrow: 1,
-                display: 'grid',
-                gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'repeat(2, minmax(0, 1fr))' },
-                '& > :nth-of-type(2)': {
-                  borderTop: { xs: PANE_RULE, sm: 'none' },
-                  borderLeft: { sm: PANE_RULE },
-                },
+                mt: rhythm.heading,
+                maxWidth: '46ch',
+                fontSize: { md: '1.125rem' },
+                color: band.inkMuted,
+                textWrap: 'pretty',
               }}
             >
-              <VersionPane
-                phase={phase}
-                side="Before"
-                version="main"
-                checkDelay={MAIN_CHECK_DELAY}
-                decision="DENY"
-                decisionDelay={DENY_DELAY}
-                allowed={false}
-              />
-              <VersionPane
-                phase={phase}
-                side="After"
-                version="pr-142"
-                checkDelay={HEAD_CHECK_DELAY}
-                decision="ALLOW"
-                decisionDelay={ALLOW_DELAY}
-                allowed
-              />
-            </Box>
-            <ImpactBar>
+              Counterbranch runs the same permission checks against your before-and-after
+              authorization logic and shows what became allowed or denied. A diff shows what changed
+              in the rules. An executed comparison shows what changed in access.
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: { lg: 'flex-end' } }}>
+            <ForkGraph />
+          </Box>
+        </Box>
+
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'minmax(0, 2fr) minmax(0, 3fr)' },
+            // One caption row over one window row: from lg both captions share
+            // a line, and both windows stretch to the taller one's foot. Below
+            // lg the run window would be too narrow for its check to sit on
+            // one line, so the two stack.
+            gridTemplateRows: { lg: 'auto 1fr' },
+            gridAutoFlow: { lg: 'column' },
+            columnGap: 4,
+            mt: rhythm.intro,
+          }}
+        >
+          <Caption>What a code review tool sees</Caption>
+          <Box sx={{ minWidth: 0 }}>
+            <MacWindow
+              title="policy.rego — review"
+              label="Policy diff as a review tool shows it"
+              fill
+              onDark
+            >
+              <Box component="pre" sx={{ ...windowTextSx, py: 2.5, fontSize: '0.875rem' }}>
+                <DiffRow>{'  allow {'}</DiffRow>
+                {'\n'}
+                <DiffRow tint={`${palette.secondary.main} 18%`}>
+                  {'-   input.user.role == "viewer"'}
+                </DiffRow>
+                {'\n'}
+                <DiffRow tint={`${palette.secondary.main} 18%`}>{'-   input.document.public'}</DiffRow>
+                {'\n'}
+                <DiffRow tint={`${palette.primary.main} 14%`}>
+                  {'+   input.user.role == "viewer"'}
+                </DiffRow>
+                {'\n'}
+                <DiffRow>{'  }'}</DiffRow>
+              </Box>
+              <ImpactBar muted>Access impact: not shown</ImpactBar>
+            </MacWindow>
+          </Box>
+
+          <Box sx={{ mt: { xs: 5, lg: 0 } }}>
+            <Caption>What Counterbranch runs</Caption>
+          </Box>
+          <Box ref={runPane} sx={{ minWidth: 0 }}>
+            <MacWindow
+              title="counterbranch — compare"
+              label="The same check run against main and pr-142"
+              fill
+              onDark
+            >
               <Box
                 key={runKey}
-                component="span"
-                sx={{ display: 'inline-block', ...arrivalSx(phase, glyphIn, SUMMARY_DELAY) }}
+                sx={{
+                  flexGrow: 1,
+                  display: 'grid',
+                  gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'repeat(2, minmax(0, 1fr))' },
+                  '& > :nth-of-type(2)': {
+                    borderTop: { xs: PANE_RULE, sm: 'none' },
+                    borderLeft: { sm: PANE_RULE },
+                  },
+                }}
               >
-                <Box component="span" sx={{ color: MUTED }}>
-                  {'Access impact: '}
-                </Box>
-                {'1 decision changed   DENY → '}
-                <Box component="span" sx={verdictSx}>
-                  ALLOW
-                </Box>
-                {'   '}
-                <Box component="span" sx={verdictSx}>
-                  unexpected
-                </Box>
+                <VersionPane
+                  phase={phase}
+                  side="Before"
+                  version="main"
+                  checkDelay={MAIN_CHECK_DELAY}
+                  decision="DENY"
+                  decisionDelay={DENY_DELAY}
+                  allowed={false}
+                />
+                <VersionPane
+                  phase={phase}
+                  side="After"
+                  version="pr-142"
+                  checkDelay={HEAD_CHECK_DELAY}
+                  decision="ALLOW"
+                  decisionDelay={ALLOW_DELAY}
+                  allowed
+                />
               </Box>
-            </ImpactBar>
-          </MacWindow>
+              <ImpactBar>
+                <Box
+                  key={runKey}
+                  component="span"
+                  sx={{ display: 'inline-block', ...arrivalSx(phase, glyphIn, SUMMARY_DELAY) }}
+                >
+                  <Box component="span" sx={{ color: MUTED }}>
+                    {'Access impact: '}
+                  </Box>
+                  {'1 decision changed   DENY → '}
+                  <Box component="span" sx={verdictSx}>
+                    ALLOW
+                  </Box>
+                  {'   '}
+                  <Box component="span" sx={verdictSx}>
+                    unexpected
+                  </Box>
+                </Box>
+              </ImpactBar>
+            </MacWindow>
+          </Box>
         </Box>
-      </Box>
-    </Box>
+      </Container>
+    </Section>
   )
 }

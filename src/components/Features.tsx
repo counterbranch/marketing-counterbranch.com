@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import type { ComponentType, ReactNode } from 'react'
 import Box from '@mui/material/Box'
 import Container from '@mui/material/Container'
@@ -6,8 +5,8 @@ import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 import Section from './Section.tsx'
 import { MONO_FONT, MUTED } from './DiffVersusRun.tsx'
-import { useInView } from '../hooks/useInView.ts'
-import { arrivalSx, stampIn, type RunPhase } from '../motion.ts'
+import { useArrivalPhase } from '../hooks/useArrivalPhase.ts'
+import { arrivalSx, motionDuration, stampIn, type RunPhase } from '../motion.ts'
 import { rhythm } from '../rhythm.ts'
 
 /** Share of a specimen that must be on screen before its key line stamps in. */
@@ -15,6 +14,9 @@ const STAMP_THRESHOLD = 0.4
 
 /** Row 3 lands two lines: the change, then the check that did not finish. */
 const SECOND_LINE_DELAY = 150
+
+/** Just after the last key line has stamped in. */
+const STAMP_MS = SECOND_LINE_DELAY + motionDuration.base + 60
 
 const strong = { fontWeight: 700 } as const
 
@@ -209,26 +211,11 @@ const features: Feature[] = [
   },
 ]
 
-/**
- * Where a row's stamp is. The first render is the finished row (idle), so the
- * prerendered HTML and hydration agree and nothing moves without a reason.
- * Only once the observer has reported the specimen off screen is the key line
- * hidden (armed), and it stamps in (playing) when the specimen comes into
- * view. State is adjusted during render, React's pattern for deriving from a
- * previous value, so no extra effect or frame is involved.
- */
-function useStampPhase(inView: boolean): RunPhase {
-  const [armed, setArmed] = useState(false)
-  if (!inView && !armed) setArmed(true)
-  if (!armed) return 'idle'
-  return inView ? 'playing' : 'armed'
-}
-
 function FeatureRow({ feature }: { feature: Feature }) {
   const theme = useTheme()
   const palette = theme.vars.palette
-  const { ref, inView } = useInView<HTMLElement>({ threshold: STAMP_THRESHOLD })
-  const phase = useStampPhase(inView)
+  const band = palette.bands.pink
+  const { ref, phase } = useArrivalPhase<HTMLElement>(STAMP_THRESHOLD, STAMP_MS)
   const { title, body, why, label, Specimen } = feature
 
   return (
@@ -244,8 +231,8 @@ function FeatureRow({ feature }: { feature: Feature }) {
         alignItems: 'start',
         py: rhythm.row,
         borderTop: '1px solid',
-        borderColor: palette.divider,
-        '&:last-of-type': { borderBottom: '1px solid', borderBottomColor: palette.divider },
+        borderColor: band.line,
+        '&:last-of-type': { borderBottom: '1px solid', borderBottomColor: band.line },
       }}
     >
       <Box sx={{ minWidth: 0 }}>
@@ -263,7 +250,7 @@ function FeatureRow({ feature }: { feature: Feature }) {
           sx={{
             mt: rhythm.heading,
             maxWidth: '46ch',
-            color: palette.text.secondary,
+            color: band.inkMuted,
             textWrap: 'pretty',
           }}
         >
@@ -271,7 +258,7 @@ function FeatureRow({ feature }: { feature: Feature }) {
         </Typography>
         <Typography
           variant="body2"
-          sx={{ mt: 2.5, maxWidth: '46ch', color: palette.text.primary, textWrap: 'pretty' }}
+          sx={{ mt: 2.5, maxWidth: '46ch', color: band.ink, textWrap: 'pretty' }}
         >
           <Box component="strong" sx={strong}>
             Why it matters:
@@ -281,7 +268,8 @@ function FeatureRow({ feature }: { feature: Feature }) {
       </Box>
 
       {/* The same ground and ink as the How it works windows, without their
-          chrome: a specimen of output, not a depiction of a window. */}
+          chrome: a specimen of output, not a depiction of a window. On the
+          pink band it casts a shadow in the band's own ink. */}
       <Box
         ref={ref}
         component="figure"
@@ -295,8 +283,9 @@ function FeatureRow({ feature }: { feature: Feature }) {
           borderColor: palette.hero.plate,
           backgroundColor: palette.hero.plate,
           color: palette.hero.plateInk,
+          boxShadow: `0 28px 56px -30px color-mix(in srgb, ${band.ink} 70%, transparent)`,
           ...theme.applyStyles('dark', {
-            borderColor: palette.divider,
+            borderColor: palette.background.paper,
             backgroundColor: palette.background.paper,
             color: palette.text.primary,
           }),
@@ -327,16 +316,18 @@ function FeatureRow({ feature }: { feature: Feature }) {
  * line stamps in the first time it comes into view.
  */
 export default function Features() {
-  const palette = useTheme().vars.palette
+  const band = useTheme().vars.palette.bands.pink
 
   return (
-    <Section id="features" tone="tinted">
+    <Section id="features" tone="pink">
       <Container maxWidth="lg">
         <Box sx={{ mb: rhythm.intro }}>
           <Typography
             variant="h2"
             component="h2"
-            sx={{ fontSize: 'clamp(2rem, 1.4rem + 2.6vw, 3.5rem)' }}
+            // The band's statement, a size up from the other section heads:
+            // on the pink flood it answers the hero's scale.
+            sx={{ maxWidth: '18ch', fontSize: 'clamp(2.25rem, 1.2rem + 4vw, 4.75rem)' }}
           >
             Know what changed about access.
           </Typography>
@@ -346,7 +337,7 @@ export default function Features() {
               mt: rhythm.heading,
               maxWidth: '46ch',
               fontSize: { md: '1.125rem' },
-              color: palette.text.secondary,
+              color: band.inkMuted,
               textWrap: 'pretty',
             }}
           >

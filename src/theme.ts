@@ -31,7 +31,7 @@ const darkSurface = '#1A1A1E'
 const heroInk = '#0B1220'
 const heroInkDark = '#F7F7F8'
 
-// Secondary pink and the near-black that reads on it (5.5:1). White on this
+// Secondary pink and the near-black that reads on it (5.1:1). White on this
 // pink is only 3.8:1, so it is never the pairing.
 const brandPink = '#FF0074'
 const brandPinkInk = '#14061A'
@@ -70,14 +70,76 @@ export interface HeroPalette {
   actionHover: string
 }
 
+/**
+ * A band's own surface and inks, for the sections that sit on a brand colour
+ * rather than the page background.
+ */
+export interface BandPalette {
+  background: string
+  ink: string
+  /** Supporting copy; at least 4.5:1 on the background. */
+  inkMuted: string
+  /** Rules and hairlines inside the band. */
+  line: string
+}
+
 declare module '@mui/material/styles' {
   interface Palette {
     hero: HeroPalette
+    /**
+     * The cyan flood in both schemes: the closing band answers the hero with
+     * the brand's own colour even where the dark hero is near-black.
+     */
+    flood: HeroPalette
+    bands: { navy: BandPalette; pink: BandPalette }
   }
   interface PaletteOptions {
     hero?: HeroPalette
+    flood?: HeroPalette
+    bands?: { navy: BandPalette; pink: BandPalette }
   }
 }
+
+// Ink contrast on the cyan flood: 12.4:1 for ink, 7.8:1 muted, 6.2:1 subtle,
+// 3.7:1 for outlined borders.
+const cyanFlood: HeroPalette = {
+  background: '#00E8FC',
+  // Depth sits low and to the right, balancing the type mass on the left.
+  wash: `radial-gradient(85% 75% at 85% 120%, ${alpha(heroInk, 0.22)} 0%, transparent 60%)`,
+  ink: heroInk,
+  inkMuted: alpha(heroInk, 0.8),
+  inkSubtle: alpha(heroInk, 0.72),
+  line: alpha(heroInk, 0.55),
+  hover: alpha(heroInk, 0.08),
+  // The reel window is ink, like the filled action: black with white text
+  // here, inverted on the dark hero.
+  plate: heroInk,
+  plateInk: '#FFFFFF',
+  action: heroInk,
+  actionInk: '#FFFFFF',
+  actionHover: '#242424',
+}
+
+// The pink band keeps every line of text in the full-strength ink (5.1:1):
+// even a light tint of pink into it drops body copy under 4.5:1, so size and
+// weight carry the hierarchy there instead.
+const pinkBand: BandPalette = {
+  background: brandPink,
+  ink: brandPinkInk,
+  inkMuted: brandPinkInk,
+  line: alpha(brandPinkInk, 0.28),
+}
+
+// The navy band is the logo's shield outline as a surface (light scheme) and
+// the raised paper surface in the neutral dark scheme; light ink reads 14:1
+// and the muted ink 9.5:1 on either.
+const navyInk = '#F7F7F8'
+const navyBand = (background: string): BandPalette => ({
+  background,
+  ink: navyInk,
+  inkMuted: alpha(navyInk, 0.78),
+  line: alpha('#FFFFFF', 0.14),
+})
 
 const theme = createTheme({
   cssVariables: {
@@ -113,25 +175,9 @@ const theme = createTheme({
           secondary: alpha(brandNavy, 0.7),
         },
         divider: alpha(brandNavy, 0.12),
-        // Ink contrast on the cyan flood: 12.4:1 for ink, 7.8:1 muted,
-        // 6.2:1 subtle, 3.7:1 for outlined borders.
-        hero: {
-          background: '#00E8FC',
-          // Depth sits low and to the right, balancing the type mass on the left.
-          wash: `radial-gradient(85% 75% at 85% 120%, ${alpha(heroInk, 0.22)} 0%, transparent 60%)`,
-          ink: heroInk,
-          inkMuted: alpha(heroInk, 0.8),
-          inkSubtle: alpha(heroInk, 0.72),
-          line: alpha(heroInk, 0.55),
-          hover: alpha(heroInk, 0.08),
-          // The reel window is ink, like the filled action: black with white
-          // text here, inverted on the dark hero.
-          plate: heroInk,
-          plateInk: '#FFFFFF',
-          action: heroInk,
-          actionInk: '#FFFFFF',
-          actionHover: '#242424',
-        },
+        hero: cyanFlood,
+        flood: cyanFlood,
+        bands: { navy: navyBand(brandNavy), pink: pinkBand },
       },
     },
     dark: {
@@ -175,6 +221,8 @@ const theme = createTheme({
           actionInk: '#000000',
           actionHover: '#DCDCDC',
         },
+        flood: cyanFlood,
+        bands: { navy: navyBand(darkSurface), pink: pinkBand },
       },
     },
   },

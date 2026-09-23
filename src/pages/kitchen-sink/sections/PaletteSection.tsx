@@ -89,8 +89,8 @@ export default function PaletteSection() {
   const palette = useResolvedPalette()
 
   const alphaTints = [
-    { label: 'primary 6% (Section tone="tinted", light)', hex: alpha(palette.primary.main, 0.06) },
-    { label: 'primary 8% (Section tone="tinted", dark)', hex: alpha(palette.primary.main, 0.08) },
+    { label: 'primary 6% tint', hex: alpha(palette.primary.main, 0.06) },
+    { label: 'primary 8% tint', hex: alpha(palette.primary.main, 0.08) },
     { label: 'primary 14% (feature icon chip)', hex: alpha(palette.primary.main, 0.14) },
     { label: 'primary 50% (card hover border)', hex: alpha(palette.primary.main, 0.5) },
     { label: 'divider', hex: palette.divider },

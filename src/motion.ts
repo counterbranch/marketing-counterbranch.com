@@ -169,6 +169,35 @@ export const slideIn = keyframes`
   }
 `
 
+/**
+ * A line drawn from its start. For an SVG path with `pathLength="1"` and a
+ * stroke-dasharray of 1, so every line draws in the same time whatever its
+ * real length. Ends on the path's own (undashed-looking) state.
+ */
+export const drawLine = keyframes`
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+`
+
+/**
+ * A node in a branch graph appearing in place: from under its size and
+ * unseen, anchored on its own centre.
+ */
+export const nodeIn = keyframes`
+  from {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+`
+
 type Keyframes = typeof slideIn
 
 /**

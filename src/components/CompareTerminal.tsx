@@ -6,13 +6,14 @@ import Container from '@mui/material/Container'
 import Typography from '@mui/material/Typography'
 import { useTheme } from '@mui/material/styles'
 import Section from './Section.tsx'
-import DiffVersusRun, { MacWindow, MONO_FONT, MUTED } from './DiffVersusRun.tsx'
+import { MacWindow, MONO_FONT, MUTED } from './DiffVersusRun.tsx'
 import { displayFont } from '../theme.ts'
 import { rhythm } from '../rhythm.ts'
 import { srOnly } from '../a11y.ts'
 import {
   arrivalSx,
   caretBlink,
+  drawLine,
   caretOut,
   caretTravel,
   glyphIn,
@@ -179,10 +180,14 @@ const EXAMPLE_RUNS: ExampleRun[] = [
 ]
 
 /**
- * Each outcome's colour. `text` is the verdict's ink on the terminal's dark
- * ground, where pink needs the lighter member of its family to read at 4.5:1
- * in both schemes; `swatch` is the full-strength brand colour of the key
- * beside each option, a graphic rather than text.
+ * Each outcome's colour, in every role it plays:
+ * - `text`: the verdict's ink on the terminal's dark ground, where pink needs
+ *   the lighter member of its family to read at 4.5:1 in both schemes;
+ * - `plate`: the chosen option filled with the full-strength colour and set
+ *   in the ink that reads on it (5.1:1 or better on all three);
+ * - `glyph`: the option's branch icon on the page background, the readable
+ *   member of the family in the light scheme (3:1 or better as a graphic);
+ * - `glow`: the terminal's shadow while that run is chosen.
  */
 function useOutcomeInk() {
   const palette = useTheme().vars.palette
@@ -192,12 +197,49 @@ function useOutcomeInk() {
       unchanged: palette.primary.main,
       incomplete: palette.warning.main,
     } satisfies Record<Outcome, string>,
-    swatch: {
+    plate: {
+      changed: { fill: palette.secondary.main, ink: palette.secondary.contrastText },
+      unchanged: { fill: palette.primary.main, ink: palette.primary.contrastText },
+      incomplete: { fill: palette.warning.main, ink: palette.flood.ink },
+    } satisfies Record<Outcome, { fill: string; ink: string }>,
+    glyph: {
+      changed: { light: palette.secondary.dark, dark: palette.secondary.main },
+      unchanged: { light: palette.primary.dark, dark: palette.primary.main },
+      incomplete: { light: palette.warning.dark, dark: palette.warning.main },
+    } satisfies Record<Outcome, { light: string; dark: string }>,
+    glow: {
       changed: palette.secondary.main,
       unchanged: palette.primary.main,
       incomplete: palette.warning.main,
     } satisfies Record<Outcome, string>,
   }
+}
+
+/**
+ * A branch leaving main, as the option's icon: the product's name in 20px.
+ * Authored rather than a glyph, in the option's current colour. The branch
+ * stroke draws in when its option is chosen (see RunPicker).
+ */
+function BranchGlyph() {
+  return (
+    <Box
+      component="svg"
+      data-glyph
+      aria-hidden
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      sx={{ display: 'block', width: 20, height: 20 }}
+    >
+      {/* Two commits on main, and a branch tip joining it between them. */}
+      <path d="M5 6 V14" />
+      <path data-branch d="M15 6 V9 L6 15" pathLength={1} strokeDasharray={1} />
+      <rect x={3} y={2} width={4} height={4} fill="currentColor" stroke="none" />
+      <rect x={3} y={14} width={4} height={4} fill="currentColor" stroke="none" />
+      <rect x={13} y={2} width={4} height={4} fill="currentColor" stroke="none" />
+    </Box>
+  )
 }
 
 /**
@@ -491,7 +533,7 @@ function RunPicker({
 }) {
   const theme = useTheme()
   const palette = theme.vars.palette
-  const swatch = useOutcomeInk().swatch
+  const outcomeInk = useOutcomeInk()
 
   const focusRing = {
     outline: `2px solid ${palette.primary.dark}`,
@@ -502,15 +544,22 @@ function RunPicker({
     }),
   }
 
-  const chosen = {
-    borderColor: palette.hero.plate,
-    backgroundColor: palette.hero.plate,
-    color: palette.hero.plateInk,
-    zIndex: 1,
-    '& [data-summary]': {
-      color: `color-mix(in srgb, ${palette.hero.plateInk} 72%, transparent)`,
-    },
-    '& [data-swatch]': { boxShadow: 'none' },
+  // The chosen option is a plate in its outcome's colour, the same colour
+  // its verdict takes in the terminal; its branch icon draws in as it is
+  // chosen.
+  const chosenFor = (outcome: Outcome) => {
+    const plate = outcomeInk.plate[outcome]
+    return {
+      borderColor: plate.fill,
+      backgroundColor: plate.fill,
+      color: plate.ink,
+      zIndex: 1,
+      '& [data-summary], & [data-glyph]': { color: plate.ink },
+      '& [data-branch]': {
+        animation: `${drawLine} 360ms ${motionEasing.decel} both`,
+        [REDUCED_MOTION]: { animation: 'none' },
+      },
+    }
   }
 
   return (
@@ -556,9 +605,16 @@ function RunPicker({
                 easing: motionEasing.decel,
               }),
               '&:hover': { borderColor: palette.text.primary, zIndex: 2 },
-              '&:has(input:checked)': chosen,
+              '& [data-glyph]': {
+                color: outcomeInk.glyph[run.outcome].light,
+                ...theme.applyStyles('dark', { color: outcomeInk.glyph[run.outcome].dark }),
+              },
+              '&:has(input:checked)': chosenFor(run.outcome),
               '&:has(input:focus-visible)': focusRing,
-              [NO_HAS]: { '&[data-chosen="true"]': chosen, '&:focus-within': focusRing },
+              [NO_HAS]: {
+                '&[data-chosen="true"]': chosenFor(run.outcome),
+                '&:focus-within': focusRing,
+              },
               [REDUCED_MOTION]: { transition: 'none' },
             }}
           >
@@ -571,19 +627,9 @@ function RunPicker({
               onChange={() => onChoose(index)}
               sx={srOnly}
             />
-            {/* The outcome's colour, as a key to the verdict in the terminal.
-                On the light page cyan and pink are a graphic here, not text,
-                and the label beside it carries the meaning. */}
-            <Box
-              aria-hidden
-              data-swatch
-              sx={{
-                width: 10,
-                height: 10,
-                backgroundColor: swatch[run.outcome],
-                boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${palette.text.primary} 25%, transparent)`,
-              }}
-            />
+            {/* The outcome's colour, as a key to the verdict in the terminal;
+                the label beside it carries the meaning. */}
+            <BranchGlyph />
             <Box
               component="span"
               sx={{
@@ -625,8 +671,7 @@ function RunPicker({
  * comments say what the run is for, the command is typed, the prepared checks
  * load and execute against each version, the comparison stamps its verdict,
  * and two more comments say what that means. "Replay run" plays the chosen
- * one again. Under it, DiffVersusRun sets the changed run beside what a code
- * review tool shows of the same change.
+ * one again.
  *
  * The first render is the finished first run, so the prerendered HTML and
  * visitors without JavaScript see its whole transcript, and can still switch
@@ -706,6 +751,7 @@ export default function CompareTerminal() {
   }, [phase, runKey])
 
   const secondaryText = { color: palette.text.secondary }
+  const glow = useOutcomeInk().glow
 
   // The action is outlined in the section's own ink rather than a brand
   // colour, so it never reads as the page's primary action.
@@ -781,7 +827,12 @@ export default function CompareTerminal() {
           </Box>
 
           <Box sx={{ gridArea: 'terminal', minWidth: 0, mt: { xs: 3, lg: 0 } }}>
-            <MacWindow ref={terminal} title="counterbranch — zsh" label="Example compare run">
+            <MacWindow
+              ref={terminal}
+              title="counterbranch — zsh"
+              label="Example compare run"
+              glow={glow[EXAMPLE_RUNS[selected].outcome]}
+            >
               {/* Every run is laid in the same cell, so the tallest one sets
                   the window's height and switching never moves the page.
                   Only the chosen one is visible, or read out. */}
@@ -839,8 +890,6 @@ export default function CompareTerminal() {
             </Button>
           </Box>
         </Box>
-
-        <DiffVersusRun />
       </Container>
     </Section>
   )
