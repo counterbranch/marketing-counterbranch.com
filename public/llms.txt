@@ -6,4 +6,4 @@ Its discover command maps where code decides access (role checks, ownership, mid
 
 ## Results
 
-- [Alpha test results](https://counterbranch.com/#alpha-results): discovery run on 10,000+ open-source repositories, with no model tokens. More than 99% of scans finished: how often a scan ran to the end, not how accurate it was. 200,000+ access decisions mapped: places to look, not problems found. 11 access-control bugs confirmed by hand in 9 projects, by reading the code the map pointed at: not a detection rate, and the projects are not named.
+- [Alpha test results](https://counterbranch.com/#alpha-results): discovery run on 10,000+ open-source repositories, with no model tokens. 200,000+ access decisions mapped: places to look, not problems found. Discovery covers custom auth in application code, and OPA, Cedar and OpenFGA policies with the calls that enforce them. It shows where they are, not whether they are right.

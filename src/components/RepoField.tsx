@@ -127,7 +127,17 @@ const squares = (cells: { col: number; row: number }[]) =>
 const tilePath = (cells: { col: number; row: number }[]) =>
   cells.map(({ col, row }) => `M${col * PITCH} ${row * PITCH}h${CELL}v${CELL}h${-CELL}z`).join('')
 
-function Field({ shape, idBase, label }: { shape: Layout; idBase: string; label: string }) {
+function Field({
+  shape,
+  idBase,
+  label,
+  sitesOnly,
+}: {
+  shape: Layout
+  idBase: string
+  label: string
+  sitesOnly: boolean
+}) {
   const palette = useTheme().vars.palette
   const band = palette.bands.navy
   const width = shape.cols * PITCH
@@ -195,15 +205,17 @@ function Field({ shape, idBase, label }: { shape: Layout; idBase: string; label:
         />
 
         {/* Scans that did not finish: the warning hue, over whatever was there. */}
-        <Box
-          component="path"
-          data-part="unfinished"
-          d={squares(shape.unfinished)}
-          fill={palette.warning.main}
-        />
+        {!sitesOnly && (
+          <Box
+            component="path"
+            data-part="unfinished"
+            d={squares(shape.unfinished)}
+            fill={palette.warning.main}
+          />
+        )}
 
         {/* Repositories with a bug confirmed by hand: pink, ringed in the plate's ink. */}
-        {shape.confirmed.map(({ col, row }, index) => {
+        {!sitesOnly && shape.confirmed.map(({ col, row }, index) => {
           const cx = at(col) + CELL / 2
           const cy = at(row) + CELL / 2
           return (
@@ -266,16 +278,25 @@ function Swatch({ fill, ring }: { fill: string; ring?: string }) {
  */
 export default function RepoField({
   bare = false,
+  sitesOnly = false,
 }: {
   /** Drawn straight onto a dark surface that is already there, such as a terminal, with no plate of its own. */
   bare?: boolean
+  /**
+   * Only the scan's fill: where discovery found access decisions. The
+   * unfinished scans and the confirmed bugs are left out of the field, the
+   * legend and the label.
+   */
+  sitesOnly?: boolean
 } = {}) {
   const palette = useTheme().vars.palette
   const band = palette.bands.navy
   // Pattern ids go into url(#…) references, so only plain characters.
   const idBase = `field${useId().replace(/[^\w-]/g, '')}`
   const { ref, phase } = useArrivalPhase<HTMLElement>(THRESHOLD, TIMING.done + 60)
-  const label = `10,000 squares, one per open-source repository scanned. About half are filled: discovery found access decisions in them. Fewer than 1 in 100 are marked as scans that did not finish. ${field.confirmed} are pink and ringed: the projects where a bug was confirmed by hand.`
+  const label = sitesOnly
+    ? '10,000 squares, one per open-source repository scanned. About half are filled: discovery found access decisions in them.'
+    : `10,000 squares, one per open-source repository scanned. About half are filled: discovery found access decisions in them. Fewer than 1 in 100 are marked as scans that did not finish. ${field.confirmed} are pink and ringed: the projects where a bug was confirmed by hand.`
 
   return (
     <Box
@@ -305,10 +326,10 @@ export default function RepoField({
       }}
     >
       <Box sx={{ display: { xs: 'block', md: 'none' } }}>
-        <Field shape={SQUARE} idBase={`${idBase}-square`} label={label} />
+        <Field shape={SQUARE} idBase={`${idBase}-square`} label={label} sitesOnly={sitesOnly} />
       </Box>
       <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-        <Field shape={WIDE} idBase={`${idBase}-wide`} label={label} />
+        <Field shape={WIDE} idBase={`${idBase}-wide`} label={label} sitesOnly={sitesOnly} />
       </Box>
 
       <Box
@@ -342,12 +363,16 @@ export default function RepoField({
             access decisions found <Box component="span" sx={{ color: band.inkMuted }}>· about half</Box>
           </Key>
           <Key mark={<Swatch fill={band.line} />}>none found</Key>
-          <Key mark={<Swatch fill={palette.warning.main} />}>
-            scan didn’t finish <Box component="span" sx={{ color: band.inkMuted }}>· under 1%</Box>
-          </Key>
-          <Key mark={<Swatch fill={palette.secondary.main} ring={band.ink} />}>
-            bug confirmed by hand <Box component="span" sx={{ color: band.inkMuted }}>· {field.confirmed} projects</Box>
-          </Key>
+          {!sitesOnly && (
+            <>
+              <Key mark={<Swatch fill={palette.warning.main} />}>
+                scan didn’t finish <Box component="span" sx={{ color: band.inkMuted }}>· under 1%</Box>
+              </Key>
+              <Key mark={<Swatch fill={palette.secondary.main} ring={band.ink} />}>
+                bug confirmed by hand <Box component="span" sx={{ color: band.inkMuted }}>· {field.confirmed} projects</Box>
+              </Key>
+            </>
+          )}
         </Box>
         <Box component="p" sx={{ m: 0, mt: 1.5, color: band.inkMuted }}>
           Each square is one repository, 10,000 in all. The shares are measured; where each square sits

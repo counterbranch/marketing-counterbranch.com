@@ -8,23 +8,24 @@ import { campaign } from '../alphaResults.ts'
 import { pageColumn, rhythm } from '../rhythm.ts'
 
 /**
- * The alpha campaign, cut down for the teaser: the landing page's results
- * band (AlphaScan) with each result as its claim and its limit only, and no
- * link to the results page while that page is not built. Every number comes
- * from alphaResults.ts.
+ * The alpha campaign, cut down for the teaser: what discovery mapped and what
+ * it covers, each as its claim and its limit. The teaser leaves out the scan
+ * completion rate and the confirmed bugs, and does not link to the results
+ * page while that page is not built. Every number comes from alphaResults.ts.
+ *
+ * Coverage is the pinned Discovery release's: access checks in application
+ * code, plus OPA, Cedar and OpenFGA policy artifacts and their enforcement
+ * calls, each held by the scanner's pinned test corpus.
  */
 const results = [
-  {
-    claim: `More than ${campaign.scansFinished} of scans finished.`,
-    limit: 'That is how often a scan ran to the end, not how accurate it was.',
-  },
   {
     claim: `${campaign.sites}+ access decisions mapped. No model tokens.`,
     limit: 'A mapped decision is a place to look, not a problem found.',
   },
   {
-    claim: `${campaign.bugs} real access-control bugs, confirmed by hand.`,
-    limit: `We read the code the map pointed at and confirmed each one, in ${campaign.bugProjects} projects. That is not a detection rate. We are not naming the projects before their maintainers have had the chance to fix them.`,
+    claim: 'Covers custom auth, OPA, Cedar and OpenFGA.',
+    limit:
+      'Discovery finds access checks written in application code, and OPA, Cedar and OpenFGA policies with the calls that enforce them. It shows where they are, not whether they are right.',
   },
 ] as const
 
@@ -85,7 +86,7 @@ export default function AlphaTeaser() {
           </Typography>
         </Box>
 
-        <RepoField />
+        <RepoField sitesOnly />
 
         <Box component="ul" role="list" sx={{ listStyle: 'none', m: 0, mt: rhythm.exhibit, p: 0 }}>
           {results.map((result) => (
