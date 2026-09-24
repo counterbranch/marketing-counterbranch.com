@@ -62,11 +62,11 @@ export default defineConfig(({ isSsrBuild }) => ({
     ? {}
     : {
         rollupOptions: {
+          // The teaser builds the landing page only. The alpha test results
+          // page (alpha-test-results/index.html) and kitchen-sink.html stay
+          // in the tree, unbuilt, until they come back.
           input: {
             main: resolve(import.meta.dirname, 'index.html'),
-            // Served as /alpha-test-results/, prerendered like the landing page.
-            alphaResults: resolve(import.meta.dirname, 'alpha-test-results/index.html'),
-            kitchenSink: resolve(import.meta.dirname, 'kitchen-sink.html'),
           },
         },
       },

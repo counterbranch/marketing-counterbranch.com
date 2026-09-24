@@ -19,6 +19,8 @@ export const links = {
   moreThanADiff: onHome('more-than-a-diff'),
   faq: onHome('faq'),
   alphaResults: `${root}alpha-test-results/`,
+  // The teaser's results band, while the results page is not built.
+  alphaResultsSection: onHome('alpha-results'),
   github: 'https://github.com/counterbranch',
   home: root,
   // Where each install path starts.

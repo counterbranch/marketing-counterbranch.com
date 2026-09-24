@@ -1,8 +1,11 @@
 name: Deploy to GitHub Pages
 
 on:
+  # While the pre-launch teaser is live, this branch deploys the site and main
+  # does not. That needs the github-pages environment's deployment branches to
+  # allow this branch and not main (see README).
   push:
-    branches: [main]
+    branches: [feat/soft-launch-teaser]
   workflow_dispatch:
 
 permissions:
@@ -10,8 +13,10 @@ permissions:
   pages: write
   id-token: write
 
+# Its own group, so main's runs, which the environment refuses anyway, never
+# cancel a teaser deploy in progress.
 concurrency:
-  group: pages
+  group: pages-teaser
   cancel-in-progress: true
 
 jobs:

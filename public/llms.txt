@@ -1,19 +1,9 @@
 # Counterbranch
 
-> Counterbranch runs the same access checks against main and a pull request and shows which access decisions changed, what the application returned, and which checks did not finish. It ships as one binary for macOS on Apple silicon and Linux x86_64, with no account, no telemetry and no model calls in the comparison. Free during the alpha.
+> Counterbranch runs the same access checks against main and a pull request and shows which access decisions changed, what the application returned, and which checks did not finish. It ships as one binary for macOS on Apple silicon and Linux x86_64, with no account, no telemetry and no model calls in the comparison. It is in alpha, and install opens with the private alpha at the soft launch.
 
 Its discover command maps where code decides access (role checks, ownership, middleware, feature gates) with a structural scan that makes no model calls. It supports OPA (Rego), Cedar and OpenFGA policy engines, and access rules in application code checked by running both versions of the app in isolated containers.
 
 ## Results
 
-- [Alpha test results](https://counterbranch.com/alpha-test-results/): discovery run on 10,000+ open-source repositories. 99% of scans finished, 200,000+ access decisions mapped, no model tokens, 11 access-control bugs confirmed by hand. Markdown copy: https://counterbranch.com/alpha-test-results.md
-
-## Product
-
-- [How it works](https://counterbranch.com/#how-it-works): the same checks on main and a pull request, and the decisions that changed
-- [Get started](https://counterbranch.com/#get-started): an AGENTS.md setup recipe for coding agents, a GitHub Action, a GitLab CI/CD component, or the CLI
-- [FAQ](https://counterbranch.com/#faq): what it works with, what leaves your machine, where AI comes in, and what alpha means
-
-## Optional
-
-- [Setup recipe for agents](https://github.com/counterbranch/counterbranch/blob/main/AGENTS.md)
+- [Alpha test results](https://counterbranch.com/#alpha-results): discovery run on 10,000+ open-source repositories, with no model tokens. More than 99% of scans finished: how often a scan ran to the end, not how accurate it was. 200,000+ access decisions mapped: places to look, not problems found. 11 access-control bugs confirmed by hand in 9 projects, by reading the code the map pointed at: not a detection rate, and the projects are not named.

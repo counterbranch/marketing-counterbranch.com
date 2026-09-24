@@ -2,14 +2,15 @@ import { renderToString } from 'react-dom/server'
 import { CacheProvider } from '@emotion/react'
 import createEmotionServer from '@emotion/server/create-instance'
 import AppRoot from './AppRoot.tsx'
-import AlphaResultsRoot from './AlphaResultsRoot.tsx'
 import { createEmotionCache } from './emotionCache.ts'
-import { alphaResultsMarkdown, markdownPath } from './pages/alpha-results/content.ts'
 
-/** The pages the build prerenders, by name. scripts/prerender.mjs lists their files. */
+/**
+ * The pages the build prerenders, by name. scripts/prerender.mjs lists their
+ * files. The teaser builds the landing page only; the alpha test results page
+ * (AlphaResultsRoot) comes back here with it.
+ */
 const pages = {
   home: AppRoot,
-  'alpha-results': AlphaResultsRoot,
 } as const
 
 export type PageName = keyof typeof pages
@@ -34,9 +35,9 @@ export function render(page: PageName) {
 
 /**
  * Plain-text copies of pages for agents, written beside the HTML and listed
- * in public/llms.txt: the alpha test results page as Markdown, from the same
- * content as the page.
+ * in public/llms.txt. None while the teaser is up: the alpha test results
+ * page's Markdown copy comes back with the page.
  */
-export function markdownCopies(siteUrl: string) {
-  return [{ file: markdownPath, text: alphaResultsMarkdown(siteUrl) }]
+export function markdownCopies(_siteUrl: string): { file: string; text: string }[] {
+  return []
 }

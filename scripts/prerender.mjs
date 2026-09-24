@@ -12,10 +12,7 @@ const ssrDir = `${root}dist-ssr`
 const mount = '<div id="root"></div>'
 
 // Page names match `pages` in src/entry-server.tsx.
-const pages = [
-  { name: 'home', file: 'dist/index.html' },
-  { name: 'alpha-results', file: 'dist/alpha-test-results/index.html' },
-]
+const pages = [{ name: 'home', file: 'dist/index.html' }]
 
 const { render, markdownCopies } = await import(pathToFileURL(`${ssrDir}/entry-server.js`).href)
 const kb = (text) => (Buffer.byteLength(text) / 1024).toFixed(1)

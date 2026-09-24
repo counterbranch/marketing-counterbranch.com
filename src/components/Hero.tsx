@@ -178,25 +178,35 @@ export default function Hero() {
               spacing={2}
               sx={{ width: { xs: '100%', sm: 'auto' }, ...heroStageSx(2) }}
             >
+              {/* Install stays switched off until the private alpha opens. A
+                  real disabled button, so it is announced as unavailable, on
+                  a faint ink tint that keeps the label readable. */}
               <Button
                 variant="contained"
                 color="inherit"
                 size="large"
-                component="a"
-                href={links.getStarted}
-                sx={floodActionSx(hero)}
+                disabled
+                sx={[
+                  floodActionSx(hero),
+                  {
+                    '&.Mui-disabled': {
+                      backgroundColor: hero.hover,
+                      color: hero.inkMuted,
+                    },
+                  },
+                ]}
               >
-                Get started free
+                Private Alpha Soon
               </Button>
               <Button
                 variant="outlined"
                 color="inherit"
                 size="large"
                 component="a"
-                href={links.howItWorks}
+                href={links.alphaResultsSection}
                 sx={floodOutlineSx(hero)}
               >
-                See how it works
+                See the alpha results
               </Button>
             </Stack>
           </Stack>
