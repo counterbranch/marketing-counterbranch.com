@@ -412,8 +412,9 @@ export default function ReviewVersusRun() {
 
   // A link to #review-<slug> (the footer's use cases) lands on that slug's
   // anchor below, and this opens its example, on arrival and on later hash
-  // changes. The browser does the scrolling, except on arrival at a page
-  // rendered in the browser, where the anchor did not exist yet.
+  // changes. The browser does the scrolling, except on arrival when the
+  // anchor is not there yet: the dev server renders the page fresh in the
+  // browser, while a production build's prerendered HTML already has it.
   useEffect(() => {
     const open = (arriving: boolean) => {
       const match = /^#review-([a-z-]+)$/.exec(window.location.hash)

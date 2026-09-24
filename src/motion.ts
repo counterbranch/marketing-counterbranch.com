@@ -324,7 +324,7 @@ export const play = (frames: Keyframes | string, ms: number, delay: number | str
 
 /**
  * Staged entrance for hero content. `index` selects the stagger delay
- * (headline = 0, description = 1, buttons = 2, footnote = 3, aside = 4).
+ * (headline = 0, description = 1, buttons = 2, anything after = 3).
  * Animates opacity + transform only.
  */
 export function heroStageSx(index: number): SxProps<Theme> {

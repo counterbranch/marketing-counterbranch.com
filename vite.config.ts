@@ -67,8 +67,6 @@ export default defineConfig(({ isSsrBuild }) => ({
             // Served as /alpha-test-results/, prerendered like the landing page.
             alphaResults: resolve(import.meta.dirname, 'alpha-test-results/index.html'),
             kitchenSink: resolve(import.meta.dirname, 'kitchen-sink.html'),
-            // A second opening, for comparing with the page as shipped.
-            variant: resolve(import.meta.dirname, 'variant.html'),
           },
         },
       },

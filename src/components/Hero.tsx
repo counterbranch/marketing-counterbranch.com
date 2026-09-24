@@ -5,7 +5,6 @@ import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
-import type { ReactNode } from 'react'
 import SlotWord from './SlotWord.tsx'
 import HeroShield from './HeroShield.tsx'
 import ReelFrame from './ReelFrame.tsx'
@@ -33,25 +32,16 @@ const HEADLINE_FOR_SCREEN_READERS =
  * reel window grows to the right from a fixed start instead of re-centring
  * on every roll.
  */
-export default function Hero({
-  aside,
-}: {
-  /**
-   * Something to show beside the headline from lg, such as a live run. The
-   * page as shipped has none; a variant page uses it to put the product in
-   * the first screen.
-   */
-  aside?: ReactNode
-} = {}) {
+export default function Hero() {
   const theme = useTheme()
   // Cyan with dark ink in the light scheme, near-black with light ink in the
   // dark one. Every colour below is a CSS variable, so the switch is instant.
   const hero = theme.vars.palette.hero
   const headlineTracking = theme.typography.h1.letterSpacing
-  // The shield shows from lg on the page as shipped. On the server and the
-  // first client render this is false, so the reel keeps its own timing
-  // until the media query answers, long before its first roll is due.
-  const withShield = useMediaQuery(theme.breakpoints.up('lg')) && !aside
+  // The shield shows from lg. On the server and the first client render
+  // this is false, so the reel keeps its own timing until the media query
+  // answers, long before its first roll is due.
+  const withShield = useMediaQuery(theme.breakpoints.up('lg'))
 
   return (
     <Box
@@ -97,15 +87,8 @@ export default function Hero({
         sx={[
           pageColumn,
           { position: 'relative', zIndex: 1 },
-          Boolean(aside) && {
-            display: 'grid',
-            gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'repeat(2, minmax(0, 1fr))' },
-            columnGap: { lg: 8, xl: 12 },
-            rowGap: 8,
-            alignItems: 'center',
-          },
-          // As shipped: from lg the shield on the left and the poster beside it.
-          !aside && {
+          // From lg the shield on the left and the poster beside it.
+          {
             display: { lg: 'grid' },
             // The poster's column is sized so "Access changes in your" holds
             // one line at the headline's lg size (see the h1 below).
@@ -117,7 +100,7 @@ export default function Hero({
       >
         <Stack
           spacing={rhythm.display}
-          sx={{ alignItems: 'flex-start', minWidth: 0, ...(!aside && { gridColumn: { lg: 2 }, gridRow: { lg: 1 } }) }}
+          sx={{ alignItems: 'flex-start', minWidth: 0, gridColumn: { lg: 2 }, gridRow: { lg: 1 } }}
         >
           <ReelFrame sx={heroStageSx(0)}>
             <Typography
@@ -127,14 +110,10 @@ export default function Hero({
                 // shares the screen with the shield, so it takes its size from
                 // its own column: "Access changes in your" is 12.37em wide in
                 // the display face, and must hold one line.
-                fontSize: aside
-                  ? 'clamp(2.5rem, 1.2rem + 3.2vw, 4.5rem)'
-                  : { xs: 'clamp(2.5rem, 1.2rem + 4.8vw, 6rem)', lg: 'clamp(3rem, 0.8rem + 3.4vw, 5rem)' },
-                ...(!aside && {
-                  '@supports (width: 1cqi)': {
-                    [theme.breakpoints.up('lg')]: { fontSize: 'min(5rem, 100cqi / 12.6)' },
-                  },
-                }),
+                fontSize: { xs: 'clamp(2.5rem, 1.2rem + 4.8vw, 6rem)', lg: 'clamp(3rem, 0.8rem + 3.4vw, 5rem)' },
+                '@supports (width: 1cqi)': {
+                  [theme.breakpoints.up('lg')]: { fontSize: 'min(5rem, 100cqi / 12.6)' },
+                },
               }}
             >
               <Box component="span" sx={srOnly}>
@@ -224,22 +203,19 @@ export default function Hero({
         </Stack>
         {/* The figure: to the left of the copy from lg, and first in the eye
             there, but after the headline in the document. */}
-        {!aside && (
-          <Box
-            sx={{
-              display: { xs: 'none', lg: 'block' },
-              gridColumn: 1,
-              gridRow: 1,
-              minWidth: 0,
-              width: '100%',
-              maxWidth: 620,
-              justifySelf: 'start',
-            }}
-          >
-            <HeroShield />
-          </Box>
-        )}
-        {aside && <Box sx={{ minWidth: 0, ...heroStageSx(4) }}>{aside}</Box>}
+        <Box
+          sx={{
+            display: { xs: 'none', lg: 'block' },
+            gridColumn: 1,
+            gridRow: 1,
+            minWidth: 0,
+            width: '100%',
+            maxWidth: 620,
+            justifySelf: 'start',
+          }}
+        >
+          <HeroShield />
+        </Box>
       </Container>
 
       {/* The hero's lower edge: the scroll cue, centred on the screen. */}

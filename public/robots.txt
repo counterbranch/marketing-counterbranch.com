@@ -2,6 +2,5 @@
 User-agent: *
 Allow: /
 Disallow: /kitchen-sink.html
-Disallow: /variant.html
 
 Sitemap: https://counterbranch.com/sitemap.xml
