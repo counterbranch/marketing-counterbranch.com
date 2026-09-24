@@ -45,6 +45,12 @@ interface SlotWordProps {
    * this.
    */
   windowMs?: number
+  /**
+   * The earliest the first roll may happen, in ms on the page's clock
+   * (performance.now()). For a page whose entrance should finish before the
+   * reel starts moving.
+   */
+  firstRollAt?: number
 }
 
 /**
@@ -80,6 +86,7 @@ export default function SlotWord({
   tracking = '0',
   dwell = reelDwell,
   windowMs = motionDuration.reelWindow,
+  firstRollAt,
 }: SlotWordProps) {
   const prefersReducedMotion = usePrefersReducedMotion()
   const frame = useReelFrame()
@@ -143,15 +150,19 @@ export default function SlotWord({
     onScreen &&
     tabVisible
 
-  // Rest, then roll one word.
+  // Rest, then roll one word. The first roll also waits for `firstRollAt` on
+  // the page's clock, so a page can finish its own entrance first; later
+  // rolls, and a first roll after that point, wait the dwell alone.
   useEffect(() => {
     if (!running || atLoopCopy) return
+    const wait =
+      index === 0 && firstRollAt !== undefined ? Math.max(dwell, firstRollAt - performance.now()) : dwell
     const timer = window.setTimeout(() => {
       setAnimated(true)
       setIndex((current) => current + 1)
-    }, dwell)
+    }, wait)
     return () => window.clearTimeout(timer)
-  }, [running, atLoopCopy, index, dwell])
+  }, [running, atLoopCopy, index, dwell, firstRollAt])
 
   // After rolling onto the copy of the first word, jump to the real one
   // without transitions. Timed rather than tied to `transitionend`, which a

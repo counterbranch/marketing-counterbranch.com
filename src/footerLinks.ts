@@ -1,4 +1,4 @@
-import { links } from './links.ts'
+import { links, onHome } from './links.ts'
 
 /**
  * The footer's directory, one group per column. To add a page (a use case,
@@ -33,22 +33,23 @@ export const footerGroups: FooterGroup[] = [
     // dedicated page replaces it.
     heading: 'Use cases',
     links: [
-      { label: 'Custom auth', href: '#review-custom-auth' },
-      { label: 'OPA and Rego', href: '#review-opa' },
-      { label: 'Cedar', href: '#review-cedar' },
-      { label: 'OpenFGA', href: '#review-openfga' },
+      { label: 'Custom auth', href: onHome('review-custom-auth') },
+      { label: 'OPA and Rego', href: onHome('review-opa') },
+      { label: 'Cedar', href: onHome('review-cedar') },
+      { label: 'OpenFGA', href: onHome('review-openfga') },
     ],
   },
   {
     heading: 'Compare',
     links: [
       { label: 'vs code review', href: links.moreThanADiff },
-      { label: 'vs policy tests', href: '#review-opa' },
+      { label: 'vs policy tests', href: onHome('review-opa') },
     ],
   },
   {
     heading: 'Resources',
     links: [
+      { label: 'Alpha test results', href: links.alphaResults },
       { label: 'Setup recipe for agents', href: links.agentsRecipe, external: true },
       { label: 'GitHub', href: links.github, external: true },
     ],

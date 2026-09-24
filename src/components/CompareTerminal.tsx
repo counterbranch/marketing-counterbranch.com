@@ -14,6 +14,7 @@ import { srOnly } from '../a11y.ts'
 import {
   arrivalSx,
   caretBlink,
+  caretBlinkCycles,
   nodeIn,
   caretOut,
   caretTravel,
@@ -72,7 +73,7 @@ const RUN_MS = CURSOR_DELAY + motionDuration.base + 60
  * The cursor blinks for under five seconds and then rests on, so the page
  * never carries a blink that runs on unattended (WCAG 2.2.2).
  */
-const BLINK_CYCLES = 4
+const BLINK_CYCLES = caretBlinkCycles
 
 const REDUCED_MOTION = '@media (prefers-reduced-motion: reduce)'
 

@@ -10,8 +10,8 @@ import {
   drawLine,
   glyphIn,
   lineIn,
-  motionEasing,
   nodeIn,
+  play,
   stampIn,
   sweepAcross,
   wipeIn,
@@ -236,9 +236,6 @@ function Figure({
   )
 }
 
-/** One part's entrance: `delay` in ms, or a CSS value such as a variable. */
-const play = (frames: string, ms: number, delay: number | string, easing: string = motionEasing.decel) =>
-  `${frames} ${ms}ms ${easing} ${typeof delay === 'number' ? `${delay}ms` : delay} both`
 
 /** A per-element delay, read by a part's animation as `var(--d)`. */
 const delayVar = (ms: number) => ({ '--d': `${ms}ms` }) as CSSProperties

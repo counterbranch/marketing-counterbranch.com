@@ -57,6 +57,35 @@ export const reelDwellPhrase = 4000
 /** Delay between successive hero entrance stages, in ms. */
 export const motionStagger = 80
 
+/**
+ * The hero's one entrance, in ms from first paint, in three beats. The poster
+ * settles (heroStageSx). From lg the shield builds a row at a time, a run
+ * scans across it, the one decision that changed flips pink and its callout
+ * lands. Then the scene holds still long enough to read, and only after that
+ * does the headline's reel start rolling and the scroll cue appear, so no two
+ * things ask for the eye at once. Below lg there is no shield and the reel
+ * keeps its own start.
+ */
+export const heroSequence = {
+  /** The shield's first row, as the headline finishes settling. */
+  shield: 300,
+  /** Between rows. */
+  rowStep: 35,
+  /** The scan starts once the last row is in, and crosses in this long. */
+  scan: 900,
+  scanMs: 600,
+  /** Just after the scan has passed the changed square. */
+  flip: 1400,
+  leader: 1560,
+  plate: 1680,
+  /** The callout has landed and nothing in the hero is moving. */
+  settled: 1950,
+  /** The reel's first roll, after a hold of a little over a second. */
+  reel: 3150,
+  /** The scroll cue, once the reel has made its first roll. */
+  cue: 3700,
+} as const
+
 const reduceMotion = '@media (prefers-reduced-motion: reduce)'
 
 /**
@@ -103,6 +132,13 @@ export const caretTravel = keyframes`
     transform: translateX(100%);
   }
 `
+
+/**
+ * How many times a resting cursor blinks before it stays on: under five
+ * seconds at motionDuration.blink, so no blink runs on unattended
+ * (WCAG 2.2.2).
+ */
+export const caretBlinkCycles = 4
 
 /**
  * Takes a caret away once its line is entered. Run with `forwards` fill, so
@@ -202,6 +238,19 @@ export const nodeIn = keyframes`
 `
 
 /**
+ * A bar growing from its left end to its measured length. Scales rather than
+ * resizes, so the row around it never reflows.
+ */
+export const barGrow = keyframes`
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+`
+
+/**
  * A part revealed from its left edge, as a run sweeping across it. Clips
  * rather than moves, so it holds its place the whole time.
  */
@@ -267,8 +316,15 @@ export function arrivalSx(phase: RunPhase, frames: Keyframes, delay: number) {
 }
 
 /**
+ * One part of a figure arriving: `ms` long, starting `delay` in (ms, or a CSS
+ * value such as a variable), held at its first frame until then.
+ */
+export const play = (frames: Keyframes | string, ms: number, delay: number | string, easing: string = motionEasing.decel) =>
+  `${frames} ${ms}ms ${easing} ${typeof delay === 'number' ? `${delay}ms` : delay} both`
+
+/**
  * Staged entrance for hero content. `index` selects the stagger delay
- * (headline = 0, description = 1, buttons = 2, footnote = 3).
+ * (headline = 0, description = 1, buttons = 2, anything after = 3).
  * Animates opacity + transform only.
  */
 export function heroStageSx(index: number): SxProps<Theme> {

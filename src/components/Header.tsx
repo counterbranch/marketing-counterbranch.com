@@ -81,8 +81,7 @@ export default function Header() {
             <Logo />
           </Link>
           {/* The release status, beside the name it qualifies. Left out on
-              the narrowest phones, where it would push the menu off screen;
-              the hero's free line says it too. */}
+              the narrowest phones, where it would push the menu off screen. */}
           <Box
             component="span"
             sx={(theme) => ({

@@ -4,13 +4,15 @@ import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import { useTheme } from '@mui/material/styles'
+import useMediaQuery from '@mui/material/useMediaQuery'
 import SlotWord from './SlotWord.tsx'
+import HeroShield from './HeroShield.tsx'
 import ReelFrame from './ReelFrame.tsx'
 import { REEL_CONTROL_ROOM } from './reelFrameContext.ts'
 import { floodActionSx, floodOutlineSx } from './floodButtons.ts'
 import { srOnly } from '../a11y.ts'
 import { pageColumn, rhythm } from '../rhythm.ts'
-import { heroStageSx, motionDuration, motionEasing } from '../motion.ts'
+import { heroSequence, heroStageSx, motionDuration, motionEasing } from '../motion.ts'
 import { links } from '../links.ts'
 import { REEL_WORDS } from '../reel.ts'
 
@@ -36,6 +38,10 @@ export default function Hero() {
   // dark one. Every colour below is a CSS variable, so the switch is instant.
   const hero = theme.vars.palette.hero
   const headlineTracking = theme.typography.h1.letterSpacing
+  // The shield shows from lg. On the server and the first client render
+  // this is false, so the reel keeps its own timing until the media query
+  // answers, long before its first roll is due.
+  const withShield = useMediaQuery(theme.breakpoints.up('lg'))
 
   return (
     <Box
@@ -76,56 +82,80 @@ export default function Hero() {
           background: hero.wash,
         }}
       />
-      <Container maxWidth={false} sx={[pageColumn, { position: 'relative', zIndex: 1 }]}>
-        <Stack spacing={{ xs: 5, md: 6 }} sx={{ alignItems: 'flex-start' }}>
-          <Stack spacing={rhythm.display} sx={{ alignItems: 'flex-start', alignSelf: 'stretch' }}>
-            <ReelFrame sx={heroStageSx(0)}>
-              <Typography
-                variant="h1"
-                sx={{
-                  // Grows with the screen to the display cap, where "Access changes
-                  // in your" still fits the widest column on one line, so wide
-                  // screens get two lines plus the reel instead of stranding "in
-                  // your" on its own.
-                  fontSize: 'clamp(2.5rem, 1.2rem + 4.8vw, 6rem)',
-                }}
-              >
-                <Box component="span" sx={srOnly}>
-                  {HEADLINE_FOR_SCREEN_READERS}
+      <Container
+        maxWidth={false}
+        sx={[
+          pageColumn,
+          { position: 'relative', zIndex: 1 },
+          // From lg the shield on the left and the poster beside it.
+          {
+            display: { lg: 'grid' },
+            // The poster's column is sized so "Access changes in your" holds
+            // one line at the headline's lg size (see the h1 below).
+            gridTemplateColumns: { lg: 'minmax(0, 9fr) minmax(0, 15fr)' },
+            columnGap: { lg: 8, xl: 12 },
+            alignItems: 'center',
+          },
+        ]}
+      >
+        <Stack
+          spacing={rhythm.display}
+          sx={{ alignItems: 'flex-start', minWidth: 0, gridColumn: { lg: 2 }, gridRow: { lg: 1 } }}
+        >
+          <ReelFrame sx={heroStageSx(0)}>
+            <Typography
+              variant="h1"
+              sx={{
+                // Grows with the screen to the display cap. From lg the poster
+                // shares the screen with the shield, so it takes its size from
+                // its own column: "Access changes in your" is 12.37em wide in
+                // the display face, and must hold one line.
+                fontSize: { xs: 'clamp(2.5rem, 1.2rem + 4.8vw, 6rem)', lg: 'clamp(3rem, 0.8rem + 3.4vw, 5rem)' },
+                '@supports (width: 1cqi)': {
+                  [theme.breakpoints.up('lg')]: { fontSize: 'min(5rem, 100cqi / 12.6)' },
+                },
+              }}
+            >
+              <Box component="span" sx={srOnly}>
+                {HEADLINE_FOR_SCREEN_READERS}
+              </Box>
+              <Box component="span" aria-hidden sx={{ display: 'block' }}>
+                Catch unintended access changes in your
+                {/* The reel gets its own line so a long word never reflows
+                    the sentence above it. On narrow screens the line
+                    scales down so the longest word and the pause control
+                    still fit: with the tracking in px, the longest word and
+                    its full stop reach about 11.8em on the smallest phones. */}
+                <Box
+                  component="span"
+                  sx={{
+                    display: 'flex',
+                    mt: '0.16em',
+                    fontSize: 'min(1em, 7.5vw)',
+                    '@supports (width: 1cqi)': {
+                      fontSize: `min(1em, (100cqi - ${REEL_CONTROL_ROOM}px) / 11.8)`,
+                    },
+                  }}
+                >
+                  <SlotWord
+                    words={REEL_WORDS}
+                    // With the shield beside it, the reel waits for the
+                    // shield's entrance and a moment's hold before rolling.
+                    firstRollAt={withShield ? heroSequence.reel : undefined}
+                    plate={hero.plate}
+                    ink={hero.plateInk}
+                    suffix="."
+                    tracking={
+                      typeof headlineTracking === 'number'
+                        ? `${headlineTracking}px`
+                        : headlineTracking
+                    }
+                  />
                 </Box>
-                <Box component="span" aria-hidden sx={{ display: 'block' }}>
-                  Catch unintended access changes in your
-                  {/* The reel gets its own line so a long word never reflows
-                      the sentence above it. On narrow screens the line
-                      scales down so the longest word and the pause control
-                      still fit: with the tracking in px, the longest word and
-                      its full stop reach about 11.8em on the smallest phones. */}
-                  <Box
-                    component="span"
-                    sx={{
-                      display: 'flex',
-                      mt: '0.16em',
-                      fontSize: 'min(1em, 7.5vw)',
-                      '@supports (width: 1cqi)': {
-                        fontSize: `min(1em, (100cqi - ${REEL_CONTROL_ROOM}px) / 11.8)`,
-                      },
-                    }}
-                  >
-                    <SlotWord
-                      words={REEL_WORDS}
-                      plate={hero.plate}
-                      ink={hero.plateInk}
-                      suffix="."
-                      tracking={
-                        typeof headlineTracking === 'number'
-                          ? `${headlineTracking}px`
-                          : headlineTracking
-                      }
-                    />
-                  </Box>
-                </Box>
-              </Typography>
-            </ReelFrame>
+              </Box>
+            </Typography>
+          </ReelFrame>
+          <Stack spacing={{ xs: 5, md: 6 }} sx={{ alignItems: 'flex-start', minWidth: 0 }}>
             <Typography
               variant="body1"
               sx={{
@@ -137,12 +167,12 @@ export default function Hero() {
                 ...heroStageSx(1),
               }}
             >
-              See what your change does to access. Counterbranch runs the same permission checks
-              against your before-and-after authorization logic and shows what became allowed or
-              denied.
+              <Box component="strong" sx={{ display: 'block', mb: 0.5, fontWeight: 700, color: hero.ink }}>
+                Better to meet us in code review than in a post-mortem.
+              </Box>
+              Counterbranch runs in your existing workflows to compare authorization behavior. Runs
+              across custom authorization logic, OPA, Cedar, and OpenFGA.
             </Typography>
-          </Stack>
-          <Stack spacing={2.5} sx={{ alignItems: 'flex-start', width: { xs: '100%', sm: 'auto' } }}>
             <Stack
               direction={{ xs: 'column', sm: 'row' }}
               spacing={2}
@@ -169,24 +199,23 @@ export default function Hero() {
                 See how it works
               </Button>
             </Stack>
-            {/* The offer, read as a sentence in the page's body face rather
-                than as fine print; the closing band repeats it the same way. */}
-            <Typography
-              component="p"
-              sx={{
-                maxWidth: 560,
-                fontWeight: 500,
-                fontSize: { xs: '0.9375rem', md: '1rem' },
-                lineHeight: 1.55,
-                textWrap: 'pretty',
-                color: hero.ink,
-                ...heroStageSx(3),
-              }}
-            >
-              Free alpha release. Runs on your laptop or CI runner, with no account, no telemetry and no AI in the check.
-            </Typography>
           </Stack>
         </Stack>
+        {/* The figure: to the left of the copy from lg, and first in the eye
+            there, but after the headline in the document. */}
+        <Box
+          sx={{
+            display: { xs: 'none', lg: 'block' },
+            gridColumn: 1,
+            gridRow: 1,
+            minWidth: 0,
+            width: '100%',
+            maxWidth: 620,
+            justifySelf: 'start',
+          }}
+        >
+          <HeroShield />
+        </Box>
       </Container>
 
       {/* The hero's lower edge: the scroll cue, centred on the screen. */}
@@ -224,7 +253,9 @@ export default function Hero() {
               inset: '0 0 auto',
               height: 20,
               backgroundColor: hero.ink,
-              animation: `heroScrollCue ${motionDuration.cue}ms ${motionEasing.inOut} infinite`,
+              // Only once the entrance is over and the reel has rolled, so it
+              // never competes with either; hidden until then.
+              animation: `heroScrollCue ${motionDuration.cue}ms ${motionEasing.inOut} ${heroSequence.cue}ms infinite both`,
             },
             // The runner fades in at the top, travels the track, rests at
             // the foot, and fades out there, so it points down for most of

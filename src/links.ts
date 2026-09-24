@@ -1,15 +1,24 @@
-// The page is the whole site during the alpha: sections of it, plus the
-// install destinations, which are provisional until they are published. The
-// home link starts from the site's own root, which is a subpath while it is
-// served from github.io (see BASE_PATH in vite.config.ts).
+// The site during the alpha: the landing page and its sections, the alpha
+// test results page, and the install destinations, which are provisional
+// until they are published. Every link starts from the site's own root, which
+// is a subpath while it is served from github.io (see BASE_PATH in
+// vite.config.ts).
 const root = import.meta.env.BASE_URL
+
+/**
+ * A section of the landing page. Rooted rather than a bare `#id`, so the same
+ * link works from every page; on the landing page itself the document does not
+ * change, so the browser only scrolls.
+ */
+export const onHome = (id: string) => `${root}#${id}`
 
 export const links = {
   // Every "Get started free" button leads to the install section.
-  getStarted: '#get-started',
-  howItWorks: '#how-it-works',
-  moreThanADiff: '#more-than-a-diff',
-  faq: '#faq',
+  getStarted: onHome('get-started'),
+  howItWorks: onHome('how-it-works'),
+  moreThanADiff: onHome('more-than-a-diff'),
+  faq: onHome('faq'),
+  alphaResults: `${root}alpha-test-results/`,
   github: 'https://github.com/counterbranch',
   home: root,
   // Where each install path starts.
