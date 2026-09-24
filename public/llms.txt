@@ -4,6 +4,10 @@
 
 Its discover command maps where code decides access (role checks, ownership, middleware, feature gates) with a structural scan that makes no model calls. It supports OPA (Rego), Cedar and OpenFGA policy engines, and access rules in application code checked by running both versions of the app in isolated containers.
 
+## Product
+
+- [How it works](https://counterbranch.com/#features): the same access checks on both revisions, what the app returned for each, and which checks could not finish, reported as incomplete rather than passed.
+
 ## Results
 
 - [Alpha test results](https://counterbranch.com/#alpha-results): discovery run on 10,000+ open-source repositories, with no model tokens. 200,000+ access decisions mapped: places to look, not problems found. Discovery covers custom auth in application code, and OPA, Cedar and OpenFGA policies with the calls that enforce them. It shows where they are, not whether they are right.

@@ -203,10 +203,10 @@ export default function Hero() {
                 color="inherit"
                 size="large"
                 component="a"
-                href={links.alphaResultsSection}
+                href={links.features}
                 sx={floodOutlineSx(hero)}
               >
-                See the alpha results
+                See how it works
               </Button>
             </Stack>
           </Stack>
