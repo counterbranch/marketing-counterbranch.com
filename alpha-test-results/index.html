@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      // Applies the visitor's stored or system color scheme before first paint,
+      // so the page never flashes light-then-dark (or vice versa) on load.
+      // Mirrors the storage keys and attribute MUI's ThemeProvider manages at
+      // runtime (see cssVariables.colorSchemeSelector in src/theme.ts).
+      ;(function () {
+        try {
+          var mode = localStorage.getItem('mui-mode') || 'system'
+          var light = localStorage.getItem('mui-color-scheme-light') || 'light'
+          var dark = localStorage.getItem('mui-color-scheme-dark') || 'dark'
+          var scheme =
+            mode === 'dark'
+              ? dark
+              : mode === 'light'
+                ? light
+                : window.matchMedia('(prefers-color-scheme: dark)').matches
+                  ? dark
+                  : light
+          document.documentElement.setAttribute('data-mui-color-scheme', scheme)
+        } catch (e) {}
+      })()
+    </script>
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="How Counterbranch’s discovery scan did across 10,000+ open-source repositories in its alpha: what it mapped, how fast it ran, the bugs we confirmed by hand, and what the numbers do not show." />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#00E8FC" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0A0A0C" />
+    <link rel="canonical" href="https://counterbranch.com/alpha-test-results/" />
+    <link rel="alternate" type="text/markdown" href="https://counterbranch.com/alpha-test-results.md" title="Alpha test results as Markdown" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Counterbranch" />
+    <meta property="og:title" content="Alpha test results — Counterbranch" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="article:published_time" content="2026-09-24" />
+    <meta property="og:description" content="How Counterbranch’s discovery scan did across 10,000+ open-source repositories in its alpha: what it mapped, how fast it ran, the bugs we confirmed by hand, and what the numbers do not show." />
+    <meta property="og:url" content="https://counterbranch.com/alpha-test-results/" />
+    <meta property="og:image" content="https://counterbranch.com/og-image.png" />
+    <meta name="twitter:title" content="Alpha test results — Counterbranch" />
+    <meta name="twitter:description" content="How Counterbranch’s discovery scan did across 10,000+ open-source repositories in its alpha: what it mapped, how fast it ran, the bugs we confirmed by hand, and what the numbers do not show." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://counterbranch.com/og-image.png" />
+    <title>Alpha test results — Counterbranch</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/alpha-results.tsx"></script>
+  </body>
+</html>

@@ -56,13 +56,16 @@ export default defineConfig(({ isSsrBuild }) => ({
     preloadFonts([/oswald-latin-wght-normal-[\w-]+\.woff2$/, /inter-latin-wght-normal-[\w-]+\.woff2$/]),
   ],
   // Only the client build has the HTML pages. The SSR build that feeds
-  // scripts/prerender.mjs takes its single entry from the command line.
+  // scripts/prerender.mjs takes its single entry from the command line and
+  // renders every prerendered page from it.
   build: isSsrBuild
     ? {}
     : {
         rollupOptions: {
           input: {
             main: resolve(import.meta.dirname, 'index.html'),
+            // Served as /alpha-test-results/, prerendered like the landing page.
+            alphaResults: resolve(import.meta.dirname, 'alpha-test-results/index.html'),
             kitchenSink: resolve(import.meta.dirname, 'kitchen-sink.html'),
             // A second opening, for comparing with the page as shipped.
             variant: resolve(import.meta.dirname, 'variant.html'),
