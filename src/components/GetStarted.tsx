@@ -16,6 +16,7 @@ import { links } from '../links.ts'
 import { displayFont } from '../theme.ts'
 import { lineIn, motionDuration, motionEasing, reelDwellPhrase } from '../motion.ts'
 import { pageColumn, rhythm } from '../rhythm.ts'
+import { capture } from '../posthog.ts'
 
 const REDUCED_MOTION = '@media (prefers-reduced-motion: reduce)'
 
@@ -165,12 +166,14 @@ function CopyButton({
   copied,
   text,
   target,
+  installationPath,
 }: {
   label: string
   /** What the live region says once it is copied, e.g. "Prompt copied". */
   copied: string
   text: string
   target: () => HTMLElement | null
+  installationPath: string
 }) {
   const { status, copy } = useCopy(text, target)
   const announcement = {
@@ -180,7 +183,15 @@ function CopyButton({
   }[status]
   return (
     <>
-      <Button variant="contained" size="large" onClick={copy} sx={{ minHeight: 48 }}>
+      <Button
+        variant="contained"
+        size="large"
+        onClick={() => {
+          capture('setup_instructions_copy_requested', { installation_path: installationPath })
+          void copy()
+        }}
+        sx={{ minHeight: 48 }}
+      >
         {status === 'copied' ? 'Copied' : status === 'selected' ? 'Selected' : label}
       </Button>
       <Box component="span" role="status" sx={srOnly}>
@@ -215,7 +226,13 @@ const INSTALL_PATHS: readonly InstallPath[] = [
     body: 'Paste this into Claude Code, Cursor, Codex or any coding agent. It follows the recipe in our AGENTS.md: it installs the CLI, drafts the checks for your app for you to approve, and adds the check to CI. Your agent, your key: we never see your code.',
     actions: (preRef) => (
       <>
-        <CopyButton label="Copy prompt" copied="Prompt copied" text={AGENT_PROMPT} target={() => preRef.current} />
+        <CopyButton
+          label="Copy prompt"
+          copied="Prompt copied"
+          text={AGENT_PROMPT}
+          target={() => preRef.current}
+          installationPath="agent"
+        />
         <Button variant="outlined" size="large" component="a" href={links.agentsRecipe} sx={{ minHeight: 48 }}>
           Read AGENTS.md
         </Button>
@@ -248,7 +265,13 @@ const INSTALL_PATHS: readonly InstallPath[] = [
     body: 'Paste two steps into a pull request workflow: a checkout with full history, then the Action. It reports the outcome on every pull request and blocks nothing, so you can watch it for a week first. Add the last step when a changed decision should block the merge.',
     actions: (preRef) => (
       <>
-        <CopyButton label="Copy YAML" copied="YAML copied" text={GITHUB_STEPS} target={() => preRef.current} />
+        <CopyButton
+          label="Copy YAML"
+          copied="YAML copied"
+          text={GITHUB_STEPS}
+          target={() => preRef.current}
+          installationPath="github"
+        />
         <Button variant="outlined" size="large" component="a" href={links.githubAction} sx={{ minHeight: 48 }}>
           View on Marketplace
         </Button>
@@ -277,7 +300,13 @@ const INSTALL_PATHS: readonly InstallPath[] = [
     body: 'Include the Counterbranch component from the GitLab CI/CD Catalog in your .gitlab-ci.yml, and merge requests from branches in your project run the comparison. By default only a complete, clean result passes.',
     actions: (preRef) => (
       <>
-        <CopyButton label="Copy YAML" copied="YAML copied" text={GITLAB_INCLUDE} target={() => preRef.current} />
+        <CopyButton
+          label="Copy YAML"
+          copied="YAML copied"
+          text={GITLAB_INCLUDE}
+          target={() => preRef.current}
+          installationPath="gitlab"
+        />
         <Button variant="outlined" size="large" component="a" href={links.gitlabCatalog} sx={{ minHeight: 48 }}>
           View in the catalog
         </Button>
@@ -302,6 +331,7 @@ const INSTALL_PATHS: readonly InstallPath[] = [
           copied="Commands copied"
           text={CLI_COMMANDS.join('\n')}
           target={() => preRef.current}
+          installationPath="manual"
         />
         <Button variant="outlined" size="large" component="a" href={links.faq} sx={{ minHeight: 48 }}>
           Read the FAQ
@@ -423,6 +453,9 @@ export default function GetStarted() {
   // The first panel is simply there; later ones arrive when chosen.
   const [switched, setSwitched] = useState(false)
   const choose = (index: number) => {
+    if (index !== selected) {
+      capture('installation_path_selected', { installation_path: paths[index].key })
+    }
     setSelected(index)
     setSwitched(true)
   }
