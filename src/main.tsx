@@ -7,6 +7,7 @@ import '@fontsource/anton/latin.css'
 import './index.css'
 import AppRoot from './AppRoot.tsx'
 import { createEmotionCache } from './emotionCache.ts'
+import { startAnalytics } from './posthog.ts'
 
 const container = document.getElementById('root')!
 const app = (
@@ -24,3 +25,6 @@ if (container.hasChildNodes()) {
 } else {
   createRoot(container).render(app)
 }
+
+// After the render call, so hydration never waits for the analytics chunk.
+startAnalytics()
