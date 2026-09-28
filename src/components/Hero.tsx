@@ -6,7 +6,7 @@ import Button from '@mui/material/Button'
 import { useTheme } from '@mui/material/styles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import SlotWord from './SlotWord.tsx'
-import HeroShield from './HeroShield.tsx'
+import HeroFilm from './HeroFilm.tsx'
 import ReelFrame from './ReelFrame.tsx'
 import { REEL_CONTROL_ROOM } from './reelFrameContext.ts'
 import { floodActionSx, floodOutlineSx } from './floodButtons.ts'
@@ -38,10 +38,10 @@ export default function Hero() {
   // dark one. Every colour below is a CSS variable, so the switch is instant.
   const hero = theme.vars.palette.hero
   const headlineTracking = theme.typography.h1.letterSpacing
-  // The shield shows from lg. On the server and the first client render
-  // this is false, so the reel keeps its own timing until the media query
-  // answers, long before its first roll is due.
-  const withShield = useMediaQuery(theme.breakpoints.up('lg'))
+  // The film sits beside the poster from lg. On the server and the first
+  // client render this is false, so the reel keeps its own timing until the
+  // media query answers, long before its first roll is due.
+  const besideFilm = useMediaQuery(theme.breakpoints.up('lg'))
 
   return (
     <Box
@@ -87,12 +87,12 @@ export default function Hero() {
         sx={[
           pageColumn,
           { position: 'relative', zIndex: 1 },
-          // From lg the shield on the left and the poster beside it.
+          // From lg the poster on the left and the film beside it.
           {
             display: { lg: 'grid' },
             // The poster's column is sized so "Access changes in your" holds
             // one line at the headline's lg size (see the h1 below).
-            gridTemplateColumns: { lg: 'minmax(0, 9fr) minmax(0, 15fr)' },
+            gridTemplateColumns: { lg: 'minmax(0, 15fr) minmax(0, 9fr)' },
             columnGap: { lg: 8, xl: 12 },
             alignItems: 'center',
           },
@@ -100,14 +100,14 @@ export default function Hero() {
       >
         <Stack
           spacing={rhythm.display}
-          sx={{ alignItems: 'flex-start', minWidth: 0, gridColumn: { lg: 2 }, gridRow: { lg: 1 } }}
+          sx={{ alignItems: 'flex-start', minWidth: 0, gridColumn: { lg: 1 }, gridRow: { lg: 1 } }}
         >
           <ReelFrame sx={heroStageSx(0)}>
             <Typography
               variant="h1"
               sx={{
                 // Grows with the screen to the display cap. From lg the poster
-                // shares the screen with the shield, so it takes its size from
+                // shares the screen with the film, so it takes its size from
                 // its own column: "Access changes in your" is 12.37em wide in
                 // the display face, and must hold one line.
                 fontSize: { xs: 'clamp(2.5rem, 1.2rem + 4.8vw, 6rem)', lg: 'clamp(3rem, 0.8rem + 3.4vw, 5rem)' },
@@ -139,9 +139,9 @@ export default function Hero() {
                 >
                   <SlotWord
                     words={REEL_WORDS}
-                    // With the shield beside it, the reel waits for the
-                    // shield's entrance and a moment's hold before rolling.
-                    firstRollAt={withShield ? heroSequence.reel : undefined}
+                    // With the film beside it, the reel waits for the
+                    // film's entrance and a moment's hold before rolling.
+                    firstRollAt={besideFilm ? heroSequence.reel : undefined}
                     plate={hero.plate}
                     ink={hero.plateInk}
                     suffix="."
@@ -211,20 +211,20 @@ export default function Hero() {
             </Stack>
           </Stack>
         </Stack>
-        {/* The figure: to the left of the copy from lg, and first in the eye
-            there, but after the headline in the document. */}
+        {/* The film: to the right of the copy from lg and under the buttons
+            below it, so it is read after the headline everywhere. */}
         <Box
           sx={{
-            display: { xs: 'none', lg: 'block' },
-            gridColumn: 1,
-            gridRow: 1,
+            gridColumn: { lg: 2 },
+            gridRow: { lg: 1 },
             minWidth: 0,
             width: '100%',
-            maxWidth: 620,
-            justifySelf: 'start',
+            maxWidth: { xs: 720, lg: 620 },
+            justifySelf: { xs: 'start', lg: 'end' },
+            mt: { xs: 8, md: 10, lg: 0 },
           }}
         >
-          <HeroShield />
+          <HeroFilm />
         </Box>
       </Container>
 
