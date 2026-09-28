@@ -59,31 +59,21 @@ export const motionStagger = 80
 
 /**
  * The hero's one entrance, in ms from first paint, in three beats. The poster
- * settles (heroStageSx). From lg the shield builds a row at a time, a run
- * scans across it, the one decision that changed flips pink and its callout
- * lands. Then the scene holds still long enough to read, and only after that
- * does the headline's reel start rolling and the scroll cue appear, so no two
- * things ask for the eye at once. Below lg there is no shield and the reel
- * keeps its own start.
+ * settles (heroStageSx). The film's frame opens out from its centre as its
+ * still settles inside it. Then the scene holds still long enough to read,
+ * and only after that does the headline's reel start rolling and the scroll
+ * cue appear, so no two things ask for the eye at once. Below lg the film
+ * sits under the buttons and the reel keeps its own start.
  */
 export const heroSequence = {
-  /** The shield's first row, as the headline finishes settling. */
-  shield: 300,
-  /** Between rows. */
-  rowStep: 35,
-  /** The scan starts once the last row is in, and crosses in this long. */
-  scan: 900,
-  scanMs: 600,
-  /** Just after the scan has passed the changed square. */
-  flip: 1400,
-  leader: 1560,
-  plate: 1680,
-  /** The callout has landed and nothing in the hero is moving. */
-  settled: 1950,
-  /** The reel's first roll, after a hold of a little over a second. */
-  reel: 3150,
+  /** The film's frame starts opening, as the headline finishes settling. */
+  film: 300,
+  /** How long the frame takes to open. */
+  filmMs: 900,
+  /** The reel's first roll, after a hold of about a second. */
+  reel: 2250,
   /** The scroll cue, once the reel has made its first roll. */
-  cue: 3700,
+  cue: 2800,
 } as const
 
 const reduceMotion = '@media (prefers-reduced-motion: reduce)'
