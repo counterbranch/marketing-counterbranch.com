@@ -14,11 +14,14 @@ import { motionDuration, motionEasing } from './motion.ts'
 //   the only colour in it comes from the brand itself.
 // Everything else (tints, borders, secondary text) is derived from these
 // three colors via `alpha()` — no other hues are introduced.
-// Heading face. Swap this single constant to change the display type across
-// the whole site: 'Oswald Variable' (a weight range) or 'Anton' (one very
-// heavy weight). Both are imported in the entry files.
-export const displayFont = "'Oswald Variable', 'Anton', sans-serif"
-const bodyFont = "'Inter Variable', sans-serif"
+// Heading face. Swap the first family to change the display type across the
+// whole site: 'Oswald Variable' (a weight range) or 'Anton' (one very heavy
+// weight). Both are imported in the entry files. The fallbacks after it are
+// local Arial faces sized to Oswald (see fonts.css), so re-measure them if
+// the face changes. No second web font in either stack: while the first one
+// loads, the browser would fetch and paint the second.
+export const displayFont = "'Oswald Variable', 'Oswald Fallback Narrow', 'Oswald Fallback', sans-serif"
+const bodyFont = "'Inter Variable', 'Inter Fallback', sans-serif"
 
 const brandNavy = '#14203C'
 
