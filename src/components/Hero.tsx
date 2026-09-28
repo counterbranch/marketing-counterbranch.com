@@ -9,11 +9,10 @@ import SlotWord from './SlotWord.tsx'
 import HeroFilm from './HeroFilm.tsx'
 import ReelFrame from './ReelFrame.tsx'
 import { REEL_CONTROL_ROOM } from './reelFrameContext.ts'
-import { floodActionSx, floodOutlineSx } from './floodButtons.ts'
+import { floodActionSx } from './floodButtons.ts'
 import { srOnly } from '../a11y.ts'
 import { pageColumn, rhythm } from '../rhythm.ts'
 import { heroSequence, heroStageSx, motionDuration, motionEasing } from '../motion.ts'
-import { links } from '../links.ts'
 import { REEL_WORDS } from '../reel.ts'
 
 /**
@@ -197,16 +196,6 @@ export default function Hero() {
                 ]}
               >
                 Private Alpha Soon
-              </Button>
-              <Button
-                variant="outlined"
-                color="inherit"
-                size="large"
-                component="a"
-                href={links.features}
-                sx={floodOutlineSx(hero)}
-              >
-                See how it works
               </Button>
             </Stack>
           </Stack>
