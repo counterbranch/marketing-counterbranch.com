@@ -166,9 +166,6 @@ export default function Hero() {
                 ...heroStageSx(1),
               }}
             >
-              <Box component="strong" sx={{ display: 'block', mb: 0.5, fontWeight: 700, color: hero.ink }}>
-                Better to meet us in code review than in a post-mortem.
-              </Box>
               Counterbranch runs in your existing workflows to compare authorization behavior. Runs
               across custom authorization logic, OPA, Cedar, and OpenFGA.
             </Typography>
